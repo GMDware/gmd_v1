@@ -1,26 +1,221 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* ── GMDware Flagship Dark Palette (Black • Blue • White) ── */
+  --background: #05080f;
+  --foreground: #f0f4f8;
+
+  /* Base Obsidian Spectrum */
+  --gmd-bg-void: #020408;
+  --gmd-bg-obsidian: #05080f;
+  --gmd-bg-panel: #080d18;
+  --gmd-bg-surface: #0e1526;
+  --gmd-bg-elevated: #152038;
+
+  /* Backward Compatibility Surfaces */
+  --surface-1: #080d18;
+  --surface-2: #0e1526;
+  --surface-3: #152038;
+  --surface-elevated: #1d2b4a;
+
+  /* Core Blue Spectrum */
+  --gmd-blue-cobalt: #0066ff;
+  --gmd-blue-electric: #00d2ff;
+  --gmd-blue-deep: #003399;
+  --gmd-blue-glow: rgba(0, 102, 255, 0.18);
+  --gmd-blue-glow-cyan: rgba(0, 210, 255, 0.22);
+
+  /* Legacy Accent Aliases for Admin */
+  --accent-cyan: #00d2ff;
+  --accent-blue: #0066ff;
+  --accent-emerald: #10b981;
+  --accent-amber: #f59e0b;
+  --accent-rose: #f43f5e;
+
+  /* Text & Neutral Spectrum */
+  --gmd-text-pure: #ffffff;
+  --gmd-text-primary: #e2e8f0;
+  --gmd-text-secondary: #94a3b8;
+  --gmd-text-muted: #64748b;
+  --gmd-text-dim: #475569;
+
+  --text-muted: #94a3b8;
+  --text-dim: #64748b;
+
+  /* Hairline Borders & Structural Grids */
+  --gmd-border-hairline: rgba(255, 255, 255, 0.07);
+  --gmd-border-structural: rgba(255, 255, 255, 0.14);
+  --gmd-border-active: rgba(0, 102, 255, 0.6);
+  --gmd-border-cyan: rgba(0, 210, 255, 0.6);
+
+  --border-subtle: rgba(255, 255, 255, 0.07);
+  --border-muted: rgba(255, 255, 255, 0.14);
+  --border-active: rgba(0, 102, 255, 0.6);
+
+  /* System Status Flags */
+  --status-operational: #10b981;
+  --status-standby: #f59e0b;
+  --status-alert: #f43f5e;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  --color-gmd-void: var(--gmd-bg-void);
+  --color-gmd-obsidian: var(--gmd-bg-obsidian);
+  --color-gmd-panel: var(--gmd-bg-panel);
+  --color-gmd-surface: var(--gmd-bg-surface);
+  --color-gmd-elevated: var(--gmd-bg-elevated);
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-surface-1: var(--surface-1);
+  --color-surface-2: var(--surface-2);
+  --color-surface-3: var(--surface-3);
+  --color-surface-elevated: var(--surface-elevated);
+
+  --color-gmd-cobalt: var(--gmd-blue-cobalt);
+  --color-gmd-cyan: var(--gmd-blue-electric);
+  --color-gmd-blue-deep: var(--gmd-blue-deep);
+
+  --color-accent-cyan: var(--accent-cyan);
+  --color-accent-blue: var(--accent-blue);
+  --color-accent-emerald: var(--accent-emerald);
+  --color-accent-amber: var(--accent-amber);
+  --color-accent-rose: var(--accent-rose);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--gmd-bg-obsidian);
+  color: var(--gmd-text-primary);
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  overflow-x: hidden;
+  selection-background-color: var(--gmd-blue-cobalt);
+  selection-color: #ffffff;
 }
+
+::selection {
+  background: var(--gmd-blue-cobalt);
+  color: #ffffff;
+}
+
+/* ── Custom Architectural Scrollbar ── */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--gmd-bg-void);
+}
+
+::-webkit-scrollbar-thumb {
+  background: #152038;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--gmd-blue-cobalt);
+}
+
+/* ── Precision Architectural Panels ── */
+.gmd-panel {
+  background: var(--gmd-bg-panel);
+  border: 1px solid var(--gmd-border-hairline);
+  transition: border-color 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.gmd-panel-hover:hover {
+  border-color: var(--gmd-border-structural);
+  box-shadow: 0 12px 30px -10px rgba(0, 102, 255, 0.08);
+}
+
+.gmd-panel-active {
+  border-color: var(--gmd-border-active);
+  box-shadow: 0 0 25px -5px rgba(0, 102, 255, 0.15);
+}
+
+/* ── Typography Gradients (Strictly Black/Blue/White) ── */
+.text-gradient-white {
+  background: linear-gradient(180deg, #ffffff 0%, #cbd5e1 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.text-gradient-blue {
+  background: linear-gradient(135deg, #ffffff 20%, #00d2ff 70%, #0066ff 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.text-gradient-subtle {
+  background: linear-gradient(180deg, #e2e8f0 0%, #94a3b8 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* ── Architectural Coordinate Grids & Hairlines ── */
+.blueprint-grid {
+  background-image: 
+    linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+.blueprint-grid-dense {
+  background-image: 
+    linear-gradient(to right, rgba(0, 102, 255, 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(0, 102, 255, 0.04) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+/* Precision Crosshairs */
+.crosshair-corner {
+  position: relative;
+}
+
+.crosshair-corner::before,
+.crosshair-corner::after {
+  content: "+";
+  position: absolute;
+  font-family: var(--font-mono, monospace);
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.25);
+  line-height: 1;
+  pointer-events: none;
+}
+
+.crosshair-corner::before {
+  top: -6px;
+  left: -5px;
+}
+
+.crosshair-corner::after {
+  bottom: -6px;
+  right: -5px;
+}
+
+/* Ambient Subtle Blue Glow */
+.glow-cobalt {
+  box-shadow: 0 0 50px -10px var(--gmd-blue-glow);
+}
+
+.glow-cyan {
+  box-shadow: 0 0 50px -10px var(--gmd-blue-glow-cyan);
+}
+
+/* ── Accessibility: High-Contrast Focus Visible & Reduced Motion ── */
+:focus-visible {
+  outline: 2px solid var(--gmd-blue-electric);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+

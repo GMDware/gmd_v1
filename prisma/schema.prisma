@@ -1,0 +1,551 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// ---------------------------------------------------------------------------
+// 1. ENUMS
+// ---------------------------------------------------------------------------
+
+enum PublicationStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum ContactStatus {
+  NEW
+  READ
+  IN_PROGRESS
+  CONTACTED
+  ARCHIVED
+}
+
+// ---------------------------------------------------------------------------
+// 2. AUTHENTICATION & ACCESS CONTROL (RBAC)
+// ---------------------------------------------------------------------------
+
+model AdminUser {
+  id            String         @id @default(uuid())
+  email         String         @unique
+  passwordHash  String
+  name          String
+  avatarUrl     String?
+  isActive      Boolean        @default(true)
+  lastLoginAt   DateTime?
+  roles         UserRole[]
+  auditLogs     AuditLog[]
+  authoredPosts Insight[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  deletedAt     DateTime?
+
+  @@map("admin_users")
+  @@index([email])
+}
+
+model Role {
+  id          String           @id @default(uuid())
+  name        String           @unique // "Administrator", "Editor", "Viewer"
+  description String?
+  users       UserRole[]
+  permissions RolePermission[]
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  @@map("roles")
+}
+
+model Permission {
+  id          String           @id @default(uuid())
+  action      String           @unique // e.g. "projects.read", "projects.create", "team.update"
+  description String?
+  roles       RolePermission[]
+  createdAt   DateTime         @default(now())
+
+  @@map("permissions")
+}
+
+model UserRole {
+  userId    String
+  roleId    String
+  user      AdminUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role      Role      @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  createdAt DateTime  @default(now())
+
+  @@id([userId, roleId])
+  @@map("user_roles")
+}
+
+model RolePermission {
+  roleId       String
+  permissionId String
+  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@id([roleId, permissionId])
+  @@map("role_permissions")
+}
+
+model AuditLog {
+  id        String     @id @default(uuid())
+  userId    String?
+  user      AdminUser? @relation(fields: [userId], references: [id], onDelete: SetNull)
+  action    String     // CREATE, UPDATE, DELETE, PUBLISH, ARCHIVE, REORDER
+  entity    String     // Project, TeamMember, Service, etc.
+  entityId  String
+  metadata  Json?      // Serialized diff or details
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime   @default(now())
+
+  @@map("audit_logs")
+  @@index([entity, entityId])
+  @@index([createdAt])
+}
+
+// ---------------------------------------------------------------------------
+// 3. LEADERSHIP & TEAM
+// ---------------------------------------------------------------------------
+
+model Department {
+  id          String       @id @default(uuid())
+  name        String       @unique
+  slug        String       @unique
+  order       Int          @default(0)
+  members     TeamMember[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  @@map("departments")
+}
+
+model TeamRole {
+  id          String       @id @default(uuid())
+  title       String       @unique
+  department  String?
+  members     TeamMember[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  @@map("team_roles")
+}
+
+model TeamMember {
+  id            String             @id @default(uuid())
+  name          String
+  displayName   String
+  isFounder     Boolean            @default(false)
+  founderTitle  String?            // e.g. "Co-Founder & Chief Technology Officer"
+  roleId        String
+  role          TeamRole           @relation(fields: [roleId], references: [id])
+  departmentId  String
+  department    Department         @relation(fields: [departmentId], references: [id])
+  shortBio      String             @db.Text
+  fullBio       String?            @db.Text
+  imageId       String?
+  image         MediaAsset?        @relation("TeamMemberAvatar", fields: [imageId], references: [id])
+  skills        String[]           // Array of technical capabilities
+  githubUrl     String?
+  linkedinUrl   String?
+  websiteUrl    String?
+  email         String?
+  showEmail     Boolean            @default(false)
+  isFeatured    Boolean            @default(false)
+  displayOrder  Int                @default(0)
+  isActive      Boolean            @default(true)
+  socialLinks   TeamMemberSocial[]
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+  deletedAt     DateTime?
+
+  @@map("team_members")
+  @@index([isFounder, displayOrder])
+  @@index([isActive])
+}
+
+model TeamMemberSocial {
+  id           String     @id @default(uuid())
+  teamMemberId String
+  teamMember   TeamMember @relation(fields: [teamMemberId], references: [id], onDelete: Cascade)
+  platform     String     // X, GitHub, LinkedIn, Dribbble
+  url          String
+  iconName     String?
+
+  @@map("team_member_socials")
+  @@index([teamMemberId])
+}
+
+// ---------------------------------------------------------------------------
+// 4. TECHNOLOGIES & SERVICES
+// ---------------------------------------------------------------------------
+
+model Technology {
+  id           String              @id @default(uuid())
+  name         String              @unique
+  slug         String              @unique
+  category     String              // Frontend, Backend, Cloud, AI, Systems
+  logoUrl      String?             // URL or media reference
+  description  String?
+  url          String?             // Official technology documentation URL
+  projects     ProjectTechnology[]
+  services     ServiceTechnology[]
+  isFeatured   Boolean             @default(false)
+  isActive     Boolean             @default(true)
+  displayOrder Int                 @default(0)
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+
+  @@map("technologies")
+}
+
+model Service {
+  id              String              @id @default(uuid())
+  title           String
+  slug            String              @unique
+  summary         String              @db.Text
+  content         String              @db.Text
+  iconName        String?             // Lucide icon name or visual reference
+  heroImageId     String?
+  heroImage       MediaAsset?         @relation("ServiceHero", fields: [heroImageId], references: [id])
+  status          PublicationStatus   @default(PUBLISHED)
+  displayOrder    Int                 @default(0)
+  isFeatured      Boolean             @default(false)
+  isActive        Boolean             @default(true)
+  seoTitle        String?
+  seoDescription  String?             @db.Text
+  features        ServiceFeature[]
+  technologies    ServiceTechnology[]
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+  deletedAt       DateTime?
+
+  @@map("services")
+  @@index([slug])
+  @@index([status])
+}
+
+model ServiceFeature {
+  id           String   @id @default(uuid())
+  serviceId    String
+  service      Service  @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  title        String
+  description  String   @db.Text
+  displayOrder Int      @default(0)
+
+  @@map("service_features")
+  @@index([serviceId])
+}
+
+model ServiceTechnology {
+  serviceId    String
+  technologyId String
+  service      Service    @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  technology   Technology @relation(fields: [technologyId], references: [id], onDelete: Cascade)
+
+  @@id([serviceId, technologyId])
+  @@map("service_technologies")
+}
+
+// ---------------------------------------------------------------------------
+// 5. PORTFOLIO & CASE STUDIES
+// ---------------------------------------------------------------------------
+
+model ProjectCategory {
+  id        String    @id @default(uuid())
+  name      String    @unique
+  slug      String    @unique
+  order     Int       @default(0)
+  projects  Project[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@map("project_categories")
+}
+
+model Project {
+  id               String               @id @default(uuid())
+  title            String
+  slug             String               @unique
+  shortDescription String               @db.Text
+  fullDescription  String               @db.Text
+  categoryId       String
+  category         ProjectCategory      @relation(fields: [categoryId], references: [id])
+  clientName       String?              // Demo / confidential placeholder
+  clientVisibility Boolean              @default(false)
+  projectType      String               // Enterprise Web Platform, Cloud Infrastructure, etc.
+  heroImageId      String?
+  heroImage        MediaAsset?          @relation("ProjectHero", fields: [heroImageId], references: [id])
+  gallery          ProjectGalleryItem[]
+  
+  // Structured Case Study Dimensions
+  challenge        String?              @db.Text
+  strategy         String?              @db.Text
+  designApproach   String?              @db.Text // UX / UI strategy
+  architecture     String?              @db.Text
+  development      String?              @db.Text
+  infrastructure   String?              @db.Text
+  results          String?              @db.Text
+
+  // SEO Metadata
+  seoTitle         String?
+  seoDescription   String?              @db.Text
+  seoKeywords      String[]             @default([])
+
+  technologies     ProjectTechnology[]
+  caseStudy        CaseStudy?
+  isFeatured       Boolean              @default(false)
+  status           PublicationStatus    @default(DRAFT)
+  displayOrder     Int                  @default(0)
+  createdAt        DateTime             @default(now())
+  updatedAt        DateTime             @updatedAt
+  deletedAt        DateTime?
+
+  @@map("projects")
+  @@index([slug])
+  @@index([status, isFeatured])
+}
+
+model ProjectTechnology {
+  projectId    String
+  technologyId String
+  project      Project    @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  technology   Technology @relation(fields: [technologyId], references: [id], onDelete: Cascade)
+
+  @@id([projectId, technologyId])
+  @@map("project_technologies")
+}
+
+model ProjectGalleryItem {
+  id           String     @id @default(uuid())
+  projectId    String
+  project      Project    @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  mediaAssetId String
+  mediaAsset   MediaAsset @relation(fields: [mediaAssetId], references: [id], onDelete: Cascade)
+  caption      String?
+  displayOrder Int        @default(0)
+
+  @@map("project_gallery_items")
+  @@index([projectId])
+}
+
+model CaseStudy {
+  id          String            @id @default(uuid())
+  projectId   String            @unique
+  project     Project           @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  summary     String            @db.Text
+  metrics     Json?             // Quantifiable impact statistics (demo placeholders)
+  testimonial Json?             // Structured quote (demo placeholder)
+  publishedAt DateTime?
+  status      PublicationStatus @default(DRAFT)
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  @@map("case_studies")
+}
+
+// ---------------------------------------------------------------------------
+// 6. PROCESS, VALUES, INSIGHTS & FAQS
+// ---------------------------------------------------------------------------
+
+model ProcessStep {
+  id           String   @id @default(uuid())
+  stepNumber   Int      @unique
+  title        String
+  phase        String   // Discovery, Architecture, Engineering, Deployment, Scale
+  description  String   @db.Text
+  deliverables String[] // Array of tangible deliverables
+  iconName     String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("process_steps")
+}
+
+model CompanyValue {
+  id           String   @id @default(uuid())
+  title        String
+  summary      String   @db.Text
+  displayOrder Int      @default(0)
+  iconName     String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("company_values")
+}
+
+model InsightCategory {
+  id        String    @id @default(uuid())
+  name      String    @unique
+  slug      String    @unique
+  insights  Insight[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@map("insight_categories")
+}
+
+model Insight {
+  id           String            @id @default(uuid())
+  title        String
+  slug         String            @unique
+  summary      String            @db.Text
+  content      String            @db.Text
+  categoryId   String
+  category     InsightCategory   @relation(fields: [categoryId], references: [id])
+  authorId     String
+  author       AdminUser         @relation(fields: [authorId], references: [id])
+  coverImageId String?
+  coverImage   MediaAsset?       @relation("InsightCover", fields: [coverImageId], references: [id])
+  readTimeMin  Int               @default(5)
+  tags         String[]
+  status       PublicationStatus @default(DRAFT)
+  isFeatured   Boolean           @default(false)
+  publishedAt  DateTime?
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+  deletedAt    DateTime?
+
+  @@map("insights")
+  @@index([slug])
+  @@index([status, publishedAt])
+}
+
+model FAQ {
+  id           String   @id @default(uuid())
+  question     String
+  answer       String   @db.Text
+  category     String   // General, Engineering, Engagement, Security
+  displayOrder Int      @default(0)
+  isPublished  Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("faqs")
+  @@index([category, isPublished])
+}
+
+// ---------------------------------------------------------------------------
+// 7. MEDIA ASSETS & STORAGE MANAGEMENT
+// ---------------------------------------------------------------------------
+
+model MediaAsset {
+  id             String               @id @default(uuid())
+  fileName       String
+  originalName   String
+  mimeType       String
+  sizeBytes      Int
+  width          Int?
+  height         Int?
+  storageKey     String               @unique // File path or S3 key
+  storageUrl     String
+  provider       String               @default("local") // local, s3, r2, cloudinary
+  altText        String?
+  caption        String?
+  blurDataUrl    String?              @db.Text
+  projectHeroes  Project[]            @relation("ProjectHero")
+  serviceHeroes  Service[]            @relation("ServiceHero")
+  teamAvatars    TeamMember[]         @relation("TeamMemberAvatar")
+  insightCovers  Insight[]            @relation("InsightCover")
+  galleryItems   ProjectGalleryItem[]
+  createdAt      DateTime             @default(now())
+  updatedAt      DateTime             @updatedAt
+  deletedAt      DateTime?
+
+  @@map("media_assets")
+  @@index([provider])
+}
+
+// ---------------------------------------------------------------------------
+// 8. INBOUND INQUIRIES & CONTACT
+// ---------------------------------------------------------------------------
+
+model ContactSubmission {
+  id          String        @id @default(uuid())
+  fullName    String
+  email       String
+  phone       String?
+  companyName String?
+  projectType String?
+  budgetRange String?
+  timeline    String?
+  message     String        @db.Text
+  status      ContactStatus @default(NEW)
+  ipAddress   String?
+  userAgent   String?
+  notes       String?       @db.Text
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@map("contact_submissions")
+  @@index([status, createdAt])
+}
+
+// ---------------------------------------------------------------------------
+// 9. SITE SETTINGS, NAVIGATION & GLOBAL SEO
+// ---------------------------------------------------------------------------
+
+model SiteSetting {
+  id          String   @id @default(uuid())
+  key         String   @unique // e.g. "brand_name", "contact_email", "mission", "vision"
+  value       String   @db.Text
+  type        String   @default("string") // string, json, boolean, number
+  group       String   @default("general") // general, company, branding, contact
+  description String?
+  updatedAt   DateTime @updatedAt
+
+  @@map("site_settings")
+}
+
+model SocialLink {
+  id           String   @id @default(uuid())
+  platform     String   // GitHub, LinkedIn, X, Discord
+  url          String
+  displayOrder Int      @default(0)
+  isEnabled    Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("social_links")
+}
+
+model NavigationItem {
+  id           String           @id @default(uuid())
+  label        String
+  path         String
+  location     String           @default("header") // header, footer, mobile
+  parentId     String?
+  parent       NavigationItem?  @relation("NavHierarchy", fields: [parentId], references: [id], onDelete: Cascade)
+  children     NavigationItem[] @relation("NavHierarchy")
+  displayOrder Int              @default(0)
+  isExternal   Boolean          @default(false)
+  isEnabled    Boolean          @default(true)
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+
+  @@map("navigation_items")
+  @@index([location, displayOrder])
+}
+
+model SEOSetting {
+  id             String   @id @default(uuid())
+  routePath      String   @unique // e.g. "/", "/services", "/projects"
+  title          String
+  description    String   @db.Text
+  keywords       String[]
+  ogTitle        String?
+  ogDescription  String?  @db.Text
+  ogImageUrl     String?
+  twitterCard    String   @default("summary_large_image")
+  canonicalUrl   String?
+  noIndex        Boolean  @default(false)
+  schemaJsonLd   Json?
+  updatedAt      DateTime @updatedAt
+
+  @@map("seo_settings")
+  @@index([routePath])
+}
