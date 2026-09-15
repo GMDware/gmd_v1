@@ -49,6 +49,54 @@ export async function POST(request: NextRequest) {
       ipAddress: clientIp,
       userAgent: request.headers.get('user-agent') || undefined,
     });
+     console.log('Target Webhook URL:', process.env.N8N_WEBHOOK_URL);
+    // Server-side n8n webhook dispatch (non-blocking for client success)
+    const webhookUrl = process.env.N8N_WEBHOOK_URL?.trim();
+    if (webhookUrl) {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+      try {
+        const webhookHeaders: Record<string, string> = {
+          'Content-Type': 'application/json',
+        };
+
+        const webhookSecret = process.env.N8N_WEBHOOK_SECRET?.trim();
+        if (webhookSecret) {
+          webhookHeaders['X-GMDware-Webhook-Secret'] = webhookSecret;
+        }
+
+        const webhookRes = await fetch(webhookUrl, {
+          method: 'POST',
+          headers: webhookHeaders,
+          body: JSON.stringify({
+            fullName: validationResult.data.fullName,
+            email: validationResult.data.email,
+            phone: validationResult.data.phone,
+            companyName: validationResult.data.companyName,
+            projectType: validationResult.data.projectType,
+            budgetRange: validationResult.data.budgetRange,
+            timeline: validationResult.data.timeline,
+            message: validationResult.data.message,
+            intakeRoute: validationResult.data.intakeRoute,
+            routingTag: validationResult.data.routingTag,
+          }),
+          signal: controller.signal,
+        });
+
+        if (!webhookRes.ok) {
+          console.error(`[n8n Webhook] Dispatch returned non-2xx status: ${webhookRes.status} ${webhookRes.statusText}`);
+        }
+      } catch (webhookErr: any) {
+        if (webhookErr?.name === 'AbortError') {
+          console.error('[n8n Webhook] Dispatch timed out after 5000ms');
+        } else {
+          console.error('[n8n Webhook] Dispatch error:', webhookErr?.message || 'Unknown network error');
+        }
+      } finally {
+        clearTimeout(timeoutId);
+      }
+    }
 
     const responseMessage = isDiscoveryRoute
       ? 'Your inquiry has been received and routed for a scoped architectural discovery call. Our engineering leadership will follow up via email.'
@@ -79,3 +127,4 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+console.log('Target Webhook URL:', process.env.N8N_WEBHOOK_URL);
