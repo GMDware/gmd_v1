@@ -13,7 +13,7 @@ export interface MediaAssetResult {
   originalName: string;
   storageKey: string;
   storageUrl: string;
-  provider: 'local' | 's3' | 'r2' | 'cloudinary';
+  provider: 'local' | 's3' | 'r2' | 'cloudinary' | 'database';
   mimeType: string;
   sizeBytes: number;
   width?: number;

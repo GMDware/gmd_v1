@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { Upload, Image as ImageIcon, Check, X, Search, Loader2 } from 'lucide-react';
+import { Upload, Image as ImageIcon, Check, X, Search, Loader2, Link as LinkIcon } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 
 export interface MediaAsset {
@@ -37,6 +37,8 @@ export const MediaPickerModal: React.FC<MediaPickerModalProps> = ({
   const [search, setSearch] = useState('');
   const [selectedAsset, setSelectedAsset] = useState<MediaAsset | null>(null);
   const [errorMessage, setErrorMessage] = useState('');
+  const [urlInput, setUrlInput] = useState('');
+  const [showUrlInput, setShowUrlInput] = useState(false);
   const [storageStatus, setStorageStatus] = useState<{
     uploadsEnabled: boolean;
     provider?: string;
@@ -110,14 +112,46 @@ export const MediaPickerModal: React.FC<MediaPickerModalProps> = ({
     }
   };
 
+  const handleUrlAdd = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!urlInput.trim()) return;
+
+    setUploading(true);
+    setErrorMessage('');
+
+    try {
+      const res = await fetch('/api/v1/media/upload', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: urlInput.trim() }),
+      });
+
+      const json = await res.json();
+      if (json.success && json.data) {
+        const added = normalizeAsset(json.data);
+        setAssets((prev) => [added, ...prev]);
+        setSelectedAsset(added);
+        setUrlInput('');
+        setShowUrlInput(false);
+      } else {
+        const errorMsg =
+          json.error?.message || (typeof json.error === 'string' ? json.error : 'Failed to import image from URL');
+        setErrorMessage(errorMsg);
+      }
+    } catch {
+      setErrorMessage('Network error importing image from URL');
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     if (!storageStatus.uploadsEnabled) {
       setErrorMessage(
-        storageStatus.message ||
-          'Media uploads are temporarily disabled because persistent Cloudflare R2 storage is not yet configured for this deployment.'
+        storageStatus.message || 'Media uploads are temporarily paused.'
       );
       if (e.target) e.target.value = '';
       return;
@@ -190,7 +224,7 @@ export const MediaPickerModal: React.FC<MediaPickerModalProps> = ({
               <ImageIcon className="w-5 h-5 text-[#00F2FE]" />
               <span>Select Media Asset</span>
             </h3>
-            <p className="text-xs text-slate-400">Choose from media catalog or upload an image (max 10MB).</p>
+            <p className="text-xs text-slate-400">Choose from media catalog, upload a file, or import from URL (max 10MB).</p>
           </div>
 
           <button
@@ -216,38 +250,60 @@ export const MediaPickerModal: React.FC<MediaPickerModalProps> = ({
             />
           </div>
 
-          <label
-            className={
-              storageStatus.uploadsEnabled
-                ? 'cursor-pointer'
-                : 'cursor-not-allowed opacity-60'
-            }
-            title={
-              !storageStatus.uploadsEnabled
-                ? storageStatus.message || 'Media uploads are disabled until Cloudflare R2 is configured.'
-                : undefined
-            }
-          >
-            <input
-              type="file"
-              accept="image/jpeg,image/png,image/webp,image/svg+xml,image/avif"
-              onChange={handleFileUpload}
-              disabled={uploading || !storageStatus.uploadsEnabled}
-              className="hidden"
-            />
+          <div className="flex items-center gap-2">
+            <label className="cursor-pointer">
+              <input
+                type="file"
+                accept="image/jpeg,image/png,image/webp,image/svg+xml,image/avif"
+                onChange={handleFileUpload}
+                disabled={uploading}
+                className="hidden"
+              />
+              <Button
+                type="button"
+                variant="secondary"
+                size="sm"
+                isLoading={uploading}
+                leftIcon={<Upload className="w-3.5 h-3.5" />}
+                className="pointer-events-none"
+              >
+                Upload File
+              </Button>
+            </label>
+
             <Button
               type="button"
-              variant="secondary"
+              variant={showUrlInput ? 'secondary' : 'ghost'}
               size="sm"
-              isLoading={uploading}
-              disabled={!storageStatus.uploadsEnabled}
-              leftIcon={<Upload className="w-3.5 h-3.5" />}
-              className="w-full sm:w-auto pointer-events-none"
+              onClick={() => setShowUrlInput(!showUrlInput)}
+              leftIcon={<LinkIcon className="w-3.5 h-3.5" />}
+              className="text-slate-300 hover:text-white"
             >
-              {storageStatus.uploadsEnabled ? 'Upload Asset' : 'Uploads Paused'}
+              Paste URL
             </Button>
-          </label>
+          </div>
         </div>
+
+        {/* URL Input Bar */}
+        {showUrlInput && (
+          <form onSubmit={handleUrlAdd} className="flex items-center gap-2 p-3 bg-[#05070B] border border-white/10 rounded-xl animate-in fade-in">
+            <input
+              type="url"
+              placeholder="Paste public image URL (https://... or data:...)"
+              value={urlInput}
+              onChange={(e) => setUrlInput(e.target.value)}
+              className="flex-1 px-3 py-1.5 bg-[#0A0E17] border border-white/10 rounded-lg text-xs text-white placeholder-slate-500 focus:outline-none focus:border-[#00F2FE]"
+              required
+              autoFocus
+            />
+            <Button type="submit" size="sm" variant="primary" isLoading={uploading}>
+              Import Image
+            </Button>
+            <Button type="button" size="sm" variant="ghost" onClick={() => setShowUrlInput(false)}>
+              Cancel
+            </Button>
+          </form>
+        )}
 
         {errorMessage && (
           <div className="p-3 bg-[#1C0A0E] border border-[#F43F5E]/30 rounded-lg text-xs text-[#F43F5E]">

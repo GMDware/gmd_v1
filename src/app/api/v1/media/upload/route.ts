@@ -10,14 +10,63 @@ export async function POST(req: NextRequest) {
       return auth.response!;
     }
 
+    const contentType = req.headers.get('content-type') || '';
+
+    // 1. JSON payload with URL
+    if (contentType.includes('application/json')) {
+      const jsonBody = await req.json();
+      const imageUrl = jsonBody.url || jsonBody.imageUrl;
+      if (!imageUrl || typeof imageUrl !== 'string') {
+        return errorResponse('VALIDATION_ERROR', 'A valid image URL is required', 400);
+      }
+
+      const asset = await MediaService.createFromUrl({
+        url: imageUrl,
+        altText: jsonBody.altText,
+        caption: jsonBody.caption,
+        userId: auth.session.userId,
+      });
+
+      return successResponse(
+        {
+          ...asset,
+          url: asset.storageUrl,
+          size: asset.sizeBytes,
+          filename: asset.fileName,
+        },
+        201
+      );
+    }
+
+    // 2. FormData (File or URL)
     const formData = await req.formData();
     const file = formData.get('file') as File | null;
+    const imageUrl = (formData.get('url') || formData.get('imageUrl')) as string | null;
     const altText = formData.get('altText') as string | null;
     const caption = formData.get('caption') as string | null;
     const folder = formData.get('folder') as string | null;
 
+    if (imageUrl && !file) {
+      const asset = await MediaService.createFromUrl({
+        url: imageUrl,
+        altText: altText || undefined,
+        caption: caption || undefined,
+        userId: auth.session.userId,
+      });
+
+      return successResponse(
+        {
+          ...asset,
+          url: asset.storageUrl,
+          size: asset.sizeBytes,
+          filename: asset.fileName,
+        },
+        201
+      );
+    }
+
     if (!file) {
-      return errorResponse('VALIDATION_ERROR', 'A file upload is required', 400);
+      return errorResponse('VALIDATION_ERROR', 'A file upload or image URL is required', 400);
     }
 
     const arrayBuffer = await file.arrayBuffer();

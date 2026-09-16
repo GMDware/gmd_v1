@@ -1,6 +1,7 @@
 import { StorageProvider } from './types';
 import { LocalStorageProvider } from './local-provider';
 import { R2StorageProvider } from './r2-provider';
+import { DatabaseStorageProvider } from './database-provider';
 import { DisabledStorageProvider } from './disabled-provider';
 
 let cachedStorageProvider: StorageProvider | null = null;
@@ -23,7 +24,6 @@ export function isR2Configured(): boolean {
  */
 export function isStorageUploadEnabled(): boolean {
   const provider = (process.env.STORAGE_PROVIDER || '').toLowerCase();
-  const isVercel = process.env.VERCEL === '1';
 
   if (provider === 'none' || provider === 'disabled') {
     return false;
@@ -33,15 +33,7 @@ export function isStorageUploadEnabled(): boolean {
     return isR2Configured();
   }
 
-  if (provider === 'local') {
-    // Local filesystem upload is permitted in standard local development,
-    // but blocked on Vercel to prevent silent writes to ephemeral disk.
-    return !isVercel;
-  }
-
-  // Default fallback: if R2 is configured, allow it; if local dev and not Vercel, allow local; otherwise false.
-  if (isR2Configured()) return true;
-  return !isVercel && process.env.NODE_ENV !== 'production';
+  return true;
 }
 
 /**
@@ -71,7 +63,7 @@ export function getStorageStatus(): {
       uploadsEnabled: false,
       isPersistent: false,
       message:
-        'Cloudflare R2 is configured as the active provider, but required R2 credentials are not set. Uploads are temporarily disabled.',
+        'Cloudflare R2 is configured as the active provider, but required R2 credentials are not set.',
     };
   }
 
@@ -84,13 +76,13 @@ export function getStorageStatus(): {
     };
   }
 
-  if (isVercel) {
+  if (isVercel || providerType === 'database') {
     return {
-      provider: 'unconfigured',
-      uploadsEnabled: false,
-      isPersistent: false,
+      provider: 'database',
+      uploadsEnabled: true,
+      isPersistent: true,
       message:
-        'Persistent cloud storage (Cloudflare R2) is not yet configured for this Vercel deployment. Uploads are paused to prevent ephemeral data loss.',
+        'Using database media storage. Connect Cloudflare R2 credentials anytime for S3-compatible cloud storage.',
     };
   }
 
@@ -120,11 +112,9 @@ export function getStorageProvider(): StorageProvider {
     }
 
     console.warn(
-      '[Storage] STORAGE_PROVIDER is set to R2/S3, but R2 environment variables are missing. Using DisabledStorageProvider.'
+      '[Storage] STORAGE_PROVIDER is set to R2/S3, but R2 environment variables are missing. Using DatabaseStorageProvider as resilient fallback.'
     );
-    cachedStorageProvider = new DisabledStorageProvider(
-      'Cloudflare R2 credentials (R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, R2_BUCKET_NAME, R2_PUBLIC_URL) are not configured. Uploads are disabled.'
-    );
+    cachedStorageProvider = new DatabaseStorageProvider();
     return cachedStorageProvider;
   }
 
@@ -134,34 +124,38 @@ export function getStorageProvider(): StorageProvider {
     return cachedStorageProvider;
   }
 
-  // 3. Vercel environment without R2 credentials:
-  // MUST NOT use local filesystem on Vercel as persistent storage (Requirement 7 & 15).
+  // 3. Database explicitly requested
+  if (providerType === 'database') {
+    cachedStorageProvider = new DatabaseStorageProvider();
+    return cachedStorageProvider;
+  }
+
+  // 4. Vercel environment:
+  // If R2 credentials are provided, use R2.
+  // Otherwise, use DatabaseStorageProvider (zero-config, Data-URI persisted directly in PostgreSQL).
   if (isVercel) {
     if (isR2Configured()) {
       cachedStorageProvider = new R2StorageProvider();
       return cachedStorageProvider;
     }
 
-    cachedStorageProvider = new DisabledStorageProvider(
-      'Persistent media storage is not yet configured on this Vercel deployment. Cloudflare R2 can be activated later by configuring the R2 environment variables.'
-    );
+    cachedStorageProvider = new DatabaseStorageProvider();
     return cachedStorageProvider;
   }
 
-  // 4. Standard local development machine
+  // 5. Standard local development machine
   if (providerType === 'local' || process.env.NODE_ENV !== 'production') {
     cachedStorageProvider = new LocalStorageProvider();
     return cachedStorageProvider;
   }
 
-  // 5. Default production fallback when no R2 credentials provided
-  cachedStorageProvider = new DisabledStorageProvider(
-    'No persistent storage provider configured for production. Configure Cloudflare R2 to enable uploads.'
-  );
+  // 6. Default production fallback
+  cachedStorageProvider = new DatabaseStorageProvider();
   return cachedStorageProvider;
 }
 
 export * from './types';
 export * from './local-provider';
 export * from './r2-provider';
+export * from './database-provider';
 export * from './disabled-provider';

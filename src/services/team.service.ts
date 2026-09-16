@@ -220,35 +220,93 @@ export class TeamService {
   }
 
   /**
-   * List all departments
+   * List all departments (auto-provisions defaults if empty)
    */
   static async listDepartments() {
-    return prisma.department.findMany({
+    let depts = await prisma.department.findMany({
       orderBy: { order: 'asc' },
       include: { members: { where: { deletedAt: null, isActive: true } } },
     });
+
+    if (depts.length === 0) {
+      const defaultDepts = [
+        { name: 'Engineering', slug: 'engineering', order: 1 },
+        { name: 'Systems Architecture', slug: 'systems-architecture', order: 2 },
+        { name: 'Design & Product Systems', slug: 'design-systems', order: 3 },
+        { name: 'Executive Leadership', slug: 'leadership', order: 4 },
+      ];
+
+      for (const d of defaultDepts) {
+        await prisma.department.upsert({
+          where: { slug: d.slug },
+          update: {},
+          create: d,
+        });
+      }
+
+      depts = await prisma.department.findMany({
+        orderBy: { order: 'asc' },
+        include: { members: { where: { deletedAt: null, isActive: true } } },
+      });
+    }
+
+    return depts;
   }
 
   /**
    * Create department
    */
-  static async createDepartment(data: { name: string; slug: string; order?: number }) {
-    return prisma.department.create({ data });
+  static async createDepartment(data: { name: string; slug?: string; order?: number }) {
+    const slug = data.slug || data.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+    return prisma.department.upsert({
+      where: { slug },
+      update: { name: data.name },
+      create: { name: data.name, slug, order: data.order || 0 },
+    });
   }
 
   /**
-   * List team roles
+   * List team roles (auto-provisions defaults if empty)
    */
   static async listRoles() {
-    return prisma.teamRole.findMany({
+    let roles = await prisma.teamRole.findMany({
       orderBy: { title: 'asc' },
     });
+
+    if (roles.length === 0) {
+      const defaultRoles = [
+        'Chief Architect',
+        'Senior Software Engineer',
+        'Principal Systems Architect',
+        'Lead Product Designer',
+        'Infrastructure Engineer',
+        'Founding Architect',
+      ];
+
+      for (let i = 0; i < defaultRoles.length; i++) {
+        await prisma.teamRole.upsert({
+          where: { title: defaultRoles[i] },
+          update: {},
+          create: { title: defaultRoles[i] },
+        });
+      }
+
+      roles = await prisma.teamRole.findMany({
+        orderBy: { title: 'asc' },
+      });
+    }
+
+    return roles;
   }
 
   /**
    * Create team role
    */
   static async createRole(data: { title: string; department?: string }) {
-    return prisma.teamRole.create({ data });
+    return prisma.teamRole.upsert({
+      where: { title: data.title.trim() },
+      update: {},
+      create: { title: data.title.trim(), department: data.department },
+    });
   }
 }

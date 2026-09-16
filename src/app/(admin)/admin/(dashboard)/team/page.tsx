@@ -82,6 +82,18 @@ export default function AdminTeamPage() {
   const [skillInput, setSkillInput] = useState('');
   const [saving, setSaving] = useState(false);
 
+  // Inline creation state
+  const [newDeptInput, setNewDeptInput] = useState('');
+  const [showAddDept, setShowAddDept] = useState(false);
+  const [creatingDept, setCreatingDept] = useState(false);
+
+  const [newRoleInput, setNewRoleInput] = useState('');
+  const [showAddRole, setShowAddRole] = useState(false);
+  const [creatingRole, setCreatingRole] = useState(false);
+
+  const [avatarUrlInput, setAvatarUrlInput] = useState('');
+  const [applyingAvatarUrl, setApplyingAvatarUrl] = useState(false);
+
   // Media Picker
   const [mediaPickerOpen, setMediaPickerOpen] = useState(false);
 
@@ -99,26 +111,37 @@ export default function AdminTeamPage() {
   const loadData = async () => {
     setLoading(true);
     try {
-      const [teamRes, deptRes] = await Promise.all([
+      const [teamRes, deptRes, rolesRes] = await Promise.all([
         fetch('/api/v1/team'),
         fetch('/api/v1/departments'),
+        fetch('/api/v1/team/roles'),
       ]);
 
       const teamJson = await teamRes.json();
       const deptJson = await deptRes.json();
+      const rolesJson = await rolesRes.json();
 
       if (teamJson.success && teamJson.data) {
         setMembers(teamJson.data || []);
-        // Extract roles
+      }
+
+      let loadedDepts: Department[] = [];
+      if (deptJson.success && Array.isArray(deptJson.data) && deptJson.data.length > 0) {
+        loadedDepts = deptJson.data;
+        setDepartments(loadedDepts);
+      }
+
+      let loadedRoles: TeamRole[] = [];
+      if (rolesJson.success && Array.isArray(rolesJson.data) && rolesJson.data.length > 0) {
+        loadedRoles = rolesJson.data;
+        setRoles(loadedRoles);
+      } else if (teamJson.success && teamJson.data) {
         const roleMap = new Map<string, TeamRole>();
         (teamJson.data || []).forEach((m: TeamMember) => {
           if (m.role) roleMap.set(m.role.id, m.role);
         });
-        setRoles(Array.from(roleMap.values()));
-      }
-
-      if (deptJson.success && deptJson.data) {
-        setDepartments(deptJson.data || []);
+        loadedRoles = Array.from(roleMap.values());
+        setRoles(loadedRoles);
       }
     } catch {
       error('Failed to load team directory');
@@ -127,14 +150,108 @@ export default function AdminTeamPage() {
     }
   };
 
+  const handleCreateDepartment = async () => {
+    if (!newDeptInput.trim()) return;
+    setCreatingDept(true);
+    try {
+      const res = await fetch('/api/v1/departments', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: newDeptInput.trim() }),
+      });
+      const json = await res.json();
+      if (json.success && json.data) {
+        const createdDept = json.data;
+        setDepartments((prev) => [...prev, createdDept]);
+        setEditingMember((prev) => (prev ? { ...prev, departmentId: createdDept.id } : null));
+        setNewDeptInput('');
+        setShowAddDept(false);
+        success(`Department "${createdDept.name}" created`);
+      } else {
+        error(json.error || 'Failed to create department');
+      }
+    } catch {
+      error('Error creating department');
+    } finally {
+      setCreatingDept(false);
+    }
+  };
+
+  const handleCreateRole = async () => {
+    if (!newRoleInput.trim()) return;
+    setCreatingRole(true);
+    try {
+      const res = await fetch('/api/v1/team/roles', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title: newRoleInput.trim() }),
+      });
+      const json = await res.json();
+      if (json.success && json.data) {
+        const createdRole = json.data;
+        setRoles((prev) => [...prev, createdRole]);
+        setEditingMember((prev) => (prev ? { ...prev, roleId: createdRole.id } : null));
+        setNewRoleInput('');
+        setShowAddRole(false);
+        success(`Role "${createdRole.title}" created`);
+      } else {
+        error(json.error || 'Failed to create role');
+      }
+    } catch {
+      error('Error creating role');
+    } finally {
+      setCreatingRole(false);
+    }
+  };
+
+  const handleApplyAvatarUrl = async () => {
+    if (!avatarUrlInput.trim()) return;
+    setApplyingAvatarUrl(true);
+    try {
+      const res = await fetch('/api/v1/media/upload', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: avatarUrlInput.trim() }),
+      });
+      const json = await res.json();
+      if (json.success && json.data) {
+        const asset = json.data;
+        setEditingMember((prev) =>
+          prev
+            ? {
+                ...prev,
+                imageId: asset.id,
+                image: {
+                  id: asset.id,
+                  url: asset.url || asset.storageUrl,
+                  originalName: asset.originalName || asset.fileName || 'Avatar Photo',
+                },
+              }
+            : null
+        );
+        setAvatarUrlInput('');
+        success('Avatar photo loaded successfully');
+      } else {
+        error(json.error?.message || 'Failed to load avatar from URL');
+      }
+    } catch {
+      error('Error loading avatar from URL');
+    } finally {
+      setApplyingAvatarUrl(false);
+    }
+  };
+
   const handleNewMember = () => {
+    const defaultDeptId = departments[0]?.id || '';
+    const defaultRoleId = roles[0]?.id || '';
+
     setEditingMember({
       name: '',
       displayName: '',
       isFounder: currentTab === 'founders',
       founderTitle: '',
-      departmentId: departments[0]?.id || '',
-      roleId: roles[0]?.id || '',
+      departmentId: defaultDeptId,
+      roleId: defaultRoleId,
       shortBio: '',
       fullBio: '',
       imageId: null,
@@ -149,11 +266,21 @@ export default function AdminTeamPage() {
       displayOrder: members.length + 1,
       isActive: true,
     });
+    setNewDeptInput('');
+    setShowAddDept(false);
+    setNewRoleInput('');
+    setShowAddRole(false);
+    setAvatarUrlInput('');
     setEditorOpen(true);
   };
 
   const handleEditMember = (member: TeamMember) => {
     setEditingMember({ ...member });
+    setNewDeptInput('');
+    setShowAddDept(false);
+    setNewRoleInput('');
+    setShowAddRole(false);
+    setAvatarUrlInput('');
     setEditorOpen(true);
   };
 
@@ -161,8 +288,28 @@ export default function AdminTeamPage() {
     e.preventDefault();
     if (!editingMember) return;
 
-    if (!editingMember.name || !editingMember.displayName || !editingMember.departmentId || !editingMember.roleId) {
-      error('Please complete mandatory fields: Name, Display Name, Department, and Role');
+    if (!editingMember.name?.trim() || !editingMember.displayName?.trim()) {
+      error('Please enter Full Legal Name and Public Display Name');
+      return;
+    }
+
+    let finalDeptId = editingMember.departmentId;
+    if (!finalDeptId && departments.length > 0) {
+      finalDeptId = departments[0].id;
+    }
+
+    let finalRoleId = editingMember.roleId;
+    if (!finalRoleId && roles.length > 0) {
+      finalRoleId = roles[0].id;
+    }
+
+    if (!finalDeptId) {
+      error('Please select or create a Department');
+      return;
+    }
+
+    if (!finalRoleId) {
+      error('Please select or create a Role / Title');
       return;
     }
 
@@ -173,12 +320,12 @@ export default function AdminTeamPage() {
       const method = isNew ? 'POST' : 'PUT';
 
       const payload = {
-        name: editingMember.name,
-        displayName: editingMember.displayName,
+        name: editingMember.name.trim(),
+        displayName: editingMember.displayName.trim(),
         isFounder: editingMember.isFounder ?? false,
         founderTitle: editingMember.founderTitle || null,
-        departmentId: editingMember.departmentId,
-        roleId: editingMember.roleId,
+        departmentId: finalDeptId,
+        roleId: finalRoleId,
         shortBio: editingMember.shortBio || '',
         fullBio: editingMember.fullBio || null,
         imageId: editingMember.imageId || null,
@@ -201,7 +348,7 @@ export default function AdminTeamPage() {
 
       const json = await res.json();
       if (json.success) {
-        success(isNew ? 'Team member added' : 'Team profile updated');
+        success(isNew ? 'Team member added successfully' : 'Team profile updated successfully');
         setEditorOpen(false);
         setEditingMember(null);
         await loadData();
@@ -584,7 +731,42 @@ export default function AdminTeamPage() {
               {/* Department & Role */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <label className="text-xs font-mono text-slate-300">Department</label>
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-mono text-slate-300">
+                      Department <span className="text-[#F43F5E]">*</span>
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => setShowAddDept(!showAddDept)}
+                      className="text-[11px] font-mono text-[#00F2FE] hover:underline flex items-center gap-1"
+                    >
+                      <Plus className="w-3 h-3" /> {showAddDept ? 'Cancel' : 'Add New'}
+                    </button>
+                  </div>
+
+                  {showAddDept && (
+                    <div className="flex items-center gap-1.5 p-2 bg-[#06090F] border border-[#00F2FE]/30 rounded-lg">
+                      <input
+                        type="text"
+                        value={newDeptInput}
+                        onChange={(e) => setNewDeptInput(e.target.value)}
+                        placeholder="Department name..."
+                        className="flex-1 px-2.5 py-1 bg-[#0A0E17] border border-white/10 rounded text-xs text-white placeholder-slate-500 focus:outline-none focus:border-[#00F2FE]"
+                        autoFocus
+                      />
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="primary"
+                        isLoading={creatingDept}
+                        onClick={handleCreateDepartment}
+                        className="text-xs px-2.5 py-1"
+                      >
+                        Save
+                      </Button>
+                    </div>
+                  )}
+
                   <select
                     value={editingMember.departmentId || ''}
                     onChange={(e) =>
@@ -592,16 +774,55 @@ export default function AdminTeamPage() {
                     }
                     className="w-full px-3.5 py-2 bg-[#05070B] border border-white/10 rounded-lg text-xs text-slate-300 focus:outline-none focus:border-[#00F2FE]"
                   >
-                    {departments.map((dept) => (
-                      <option key={dept.id} value={dept.id}>
-                        {dept.name}
-                      </option>
-                    ))}
+                    {departments.length === 0 ? (
+                      <option value="">No departments available — click "Add New" above</option>
+                    ) : (
+                      departments.map((dept) => (
+                        <option key={dept.id} value={dept.id}>
+                          {dept.name}
+                        </option>
+                      ))
+                    )}
                   </select>
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-xs font-mono text-slate-300">Role / Title</label>
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-mono text-slate-300">
+                      Role / Title <span className="text-[#F43F5E]">*</span>
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => setShowAddRole(!showAddRole)}
+                      className="text-[11px] font-mono text-[#00F2FE] hover:underline flex items-center gap-1"
+                    >
+                      <Plus className="w-3 h-3" /> {showAddRole ? 'Cancel' : 'Add New'}
+                    </button>
+                  </div>
+
+                  {showAddRole && (
+                    <div className="flex items-center gap-1.5 p-2 bg-[#06090F] border border-[#00F2FE]/30 rounded-lg">
+                      <input
+                        type="text"
+                        value={newRoleInput}
+                        onChange={(e) => setNewRoleInput(e.target.value)}
+                        placeholder="Role title (e.g. Lead Architect)..."
+                        className="flex-1 px-2.5 py-1 bg-[#0A0E17] border border-white/10 rounded text-xs text-white placeholder-slate-500 focus:outline-none focus:border-[#00F2FE]"
+                        autoFocus
+                      />
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="primary"
+                        isLoading={creatingRole}
+                        onClick={handleCreateRole}
+                        className="text-xs px-2.5 py-1"
+                      >
+                        Save
+                      </Button>
+                    </div>
+                  )}
+
                   <select
                     value={editingMember.roleId || ''}
                     onChange={(e) =>
@@ -609,11 +830,15 @@ export default function AdminTeamPage() {
                     }
                     className="w-full px-3.5 py-2 bg-[#05070B] border border-white/10 rounded-lg text-xs text-slate-300 focus:outline-none focus:border-[#00F2FE]"
                   >
-                    {roles.map((role) => (
-                      <option key={role.id} value={role.id}>
-                        {role.title}
-                      </option>
-                    ))}
+                    {roles.length === 0 ? (
+                      <option value="">No roles available — click "Add New" above</option>
+                    ) : (
+                      roles.map((role) => (
+                        <option key={role.id} value={role.id}>
+                          {role.title}
+                        </option>
+                      ))
+                    )}
                   </select>
                 </div>
               </div>
@@ -676,48 +901,74 @@ export default function AdminTeamPage() {
               {/* Avatar / Profile Photo */}
               <div className="space-y-2 pt-2">
                 <label className="text-xs font-mono text-slate-300 block">Avatar Photo</label>
-                <div className="flex items-center gap-3 p-3 rounded-xl bg-[#05070B] border border-white/10">
-                  <div className="w-12 h-12 rounded-lg bg-[#0A0E17] border border-white/10 overflow-hidden shrink-0 flex items-center justify-center">
-                    {(editingMember.image?.url || (editingMember.image as any)?.storageUrl) ? (
-                      <img
-                        src={editingMember.image?.url || (editingMember.image as any)?.storageUrl}
-                        alt="Avatar"
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <ImageIcon className="w-5 h-5 text-slate-600" />
-                    )}
-                  </div>
-
-                  <div className="flex-1 min-w-0">
-                    <span className="text-xs text-slate-400 block truncate">
-                      {editingMember.image?.originalName ||
-                        (editingMember.image as any)?.fileName ||
-                        (editingMember.imageId ? 'Selected photo' : 'No image selected')}
-                    </span>
-                    <div className="flex items-center gap-2 mt-1">
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant="secondary"
-                        onClick={() => setMediaPickerOpen(true)}
-                      >
-                        Select Photo
-                      </Button>
-                      {editingMember.imageId && (
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setEditingMember((prev) =>
-                              prev ? { ...prev, imageId: null, image: null } : null
-                            )
-                          }
-                          className="px-2.5 py-1 text-xs text-slate-400 hover:text-[#F43F5E] transition-colors"
-                        >
-                          Remove Photo
-                        </button>
+                <div className="p-3.5 rounded-xl bg-[#05070B] border border-white/10 space-y-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-14 h-14 rounded-lg bg-[#0A0E17] border border-white/10 overflow-hidden shrink-0 flex items-center justify-center">
+                      {(editingMember.image?.url || (editingMember.image as any)?.storageUrl) ? (
+                        <img
+                          src={editingMember.image?.url || (editingMember.image as any)?.storageUrl}
+                          alt="Avatar"
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <ImageIcon className="w-6 h-6 text-slate-600" />
                       )}
                     </div>
+
+                    <div className="flex-1 min-w-0">
+                      <span className="text-xs text-white font-medium block truncate">
+                        {editingMember.image?.originalName ||
+                          (editingMember.image as any)?.fileName ||
+                          (editingMember.imageId ? 'Selected photo' : 'No image selected')}
+                      </span>
+                      <span className="text-[11px] text-slate-400 block mt-0.5">
+                        Upload an image or paste a direct public image link
+                      </span>
+                      <div className="flex items-center gap-2 mt-2">
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="secondary"
+                          onClick={() => setMediaPickerOpen(true)}
+                        >
+                          Select / Upload Photo
+                        </Button>
+                        {editingMember.imageId && (
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setEditingMember((prev) =>
+                                prev ? { ...prev, imageId: null, image: null } : null
+                              )
+                            }
+                            className="px-2.5 py-1 text-xs text-slate-400 hover:text-[#F43F5E] transition-colors"
+                          >
+                            Remove Photo
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Direct Image URL input */}
+                  <div className="pt-2.5 border-t border-white/5 flex items-center gap-2">
+                    <input
+                      type="url"
+                      placeholder="Or paste direct image URL (https://... or data:...)"
+                      value={avatarUrlInput}
+                      onChange={(e) => setAvatarUrlInput(e.target.value)}
+                      className="flex-1 px-3 py-1.5 bg-[#0A0E17] border border-white/10 rounded-lg text-xs text-white placeholder-slate-500 focus:outline-none focus:border-[#00F2FE]"
+                    />
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="primary"
+                      isLoading={applyingAvatarUrl}
+                      onClick={handleApplyAvatarUrl}
+                      disabled={!avatarUrlInput.trim()}
+                    >
+                      Apply URL
+                    </Button>
                   </div>
                 </div>
               </div>

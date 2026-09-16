@@ -1,3 +1,4 @@
+import crypto from 'crypto';
 import prisma from '@/lib/db/prisma';
 import { getStorageProvider } from '@/lib/media';
 import { AuthService } from './auth.service';
@@ -224,4 +225,78 @@ export class MediaService {
 
     return updated;
   }
+
+  /**
+   * Create media asset from direct image URL (download & persist or direct link)
+   */
+  static async createFromUrl(params: {
+    url: string;
+    altText?: string;
+    caption?: string;
+    userId?: string;
+  }) {
+    const cleanUrl = params.url.trim();
+    if (!cleanUrl) {
+      throw new Error('Image URL is required');
+    }
+
+    // Try downloading and optimizing into active storage provider
+    try {
+      const res = await fetch(cleanUrl, {
+        headers: { 'User-Agent': 'Mozilla/5.0 GMDware-Bot/1.0' },
+        signal: AbortSignal.timeout(6000),
+      });
+
+      if (res.ok) {
+        const arrayBuf = await res.arrayBuffer();
+        const buffer = Buffer.from(arrayBuf);
+        const contentType = (res.headers.get('content-type') || 'image/jpeg').split(';')[0].trim().toLowerCase();
+        const pathname = new URL(cleanUrl).pathname;
+        const rawFileName = pathname.split('/').pop() || 'image.jpg';
+        const ext = rawFileName.includes('.') ? '' : (contentType === 'image/png' ? '.png' : contentType === 'image/webp' ? '.webp' : '.jpg');
+        const fileName = `${rawFileName}${ext}`;
+
+        return await this.upload({
+          fileName,
+          mimeType: contentType.startsWith('image/') ? contentType : 'image/jpeg',
+          buffer,
+          altText: params.altText,
+          caption: params.caption,
+          userId: params.userId,
+        });
+      }
+    } catch (fetchErr) {
+      console.warn('[MediaService] Could not fetch remote image buffer, saving direct link:', fetchErr);
+    }
+
+    // Fallback: save direct reference in database
+    const urlObj = new URL(cleanUrl);
+    const rawFileName = urlObj.pathname.split('/').pop() || 'linked-image.jpg';
+    const asset = await prisma.mediaAsset.create({
+      data: {
+        fileName: rawFileName,
+        originalName: rawFileName,
+        mimeType: 'image/jpeg',
+        sizeBytes: 0,
+        storageKey: `url/${crypto.randomUUID()}`,
+        storageUrl: cleanUrl,
+        provider: 'external',
+        altText: params.altText,
+        caption: params.caption,
+      },
+    });
+
+    if (params.userId) {
+      await AuthService.logAudit({
+        userId: params.userId,
+        action: 'UPLOAD_MEDIA',
+        entity: 'MediaAsset',
+        entityId: asset.id,
+        metadata: { url: cleanUrl },
+      });
+    }
+
+    return asset;
+  }
 }
+
