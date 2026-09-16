@@ -101,20 +101,6 @@ export const Header: React.FC<HeaderProps> = ({ navItems = [], brandName = 'GMDw
             >
               <GMDwareLogo size="md" variant="full" />
             </Link>
-
-            {/* Faint Divider */}
-            <div className="hidden sm:block h-5 w-[1px] bg-white/10" />
-
-            {/* Minimalistic Status Beacon: CORE: ONLINE */}
-            <div className="hidden sm:flex items-center gap-2 select-none">
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500 shadow-[0_0_8px_#10B981]" />
-              </span>
-              <span className="text-xs font-mono text-slate-400 tracking-wider font-medium">
-                CORE: ONLINE
-              </span>
-            </div>
           </div>
 
           {/* ── Center Column: Clean Navigation Links (space-x-8, no border pill container) ── */}

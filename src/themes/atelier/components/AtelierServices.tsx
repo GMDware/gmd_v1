@@ -32,6 +32,7 @@ export const AtelierServices: React.FC<AtelierServicesProps> = ({
         'Responsive mobile-first layouts',
         'Search engine & speed optimization',
       ],
+      technologies: ['Next.js', 'React', 'TypeScript', 'Tailwind CSS'],
     },
     {
       id: 'web-platforms',
@@ -46,6 +47,7 @@ export const AtelierServices: React.FC<AtelierServicesProps> = ({
         'Secure authentication & role control',
         'Custom third-party API integrations',
       ],
+      technologies: ['React', 'Node.js', 'PostgreSQL', 'TypeScript'],
     },
     {
       id: 'product-design',
@@ -60,6 +62,7 @@ export const AtelierServices: React.FC<AtelierServicesProps> = ({
         'Interactive clickable prototypes',
         'Scalable component design systems',
       ],
+      technologies: ['Design Systems', 'Interactive Prototypes', 'Workflow Mapping'],
     },
     {
       id: 'technical-direction',
@@ -74,10 +77,37 @@ export const AtelierServices: React.FC<AtelierServicesProps> = ({
         'Codebase audits & speed tuning',
         'Cloud infrastructure & deployment',
       ],
+      technologies: ['Docker', 'PostgreSQL', 'Cloud Infrastructure', 'CI/CD'],
     },
   ];
 
-  const items = defaultServices;
+  const items = (services && services.length > 0)
+    ? services.map((s, idx) => {
+        const defaultAccents = ['blue', 'indigo', 'orange', 'emerald', 'blue', 'indigo'];
+        const feats = Array.isArray(s.features)
+          ? s.features.map((f: any) => (typeof f === 'string' ? f : f.title || f.name))
+          : [
+              'Domain-Driven Architecture',
+              'End-to-End Type Safety',
+              'Automated Testing & Delivery',
+            ];
+
+        const techs = Array.isArray(s.technologies)
+          ? s.technologies.map((t: any) => t.technology?.name || t.name || String(t)).filter(Boolean)
+          : [];
+
+        return {
+          id: s.id || s.slug || idx,
+          num: String(idx + 1).padStart(2, '0'),
+          title: s.title || (s as any).name,
+          category: s.category || (idx % 2 === 0 ? 'Full-Stack Software' : 'Digital Architecture'),
+          summary: s.summary || (s as any).description || (s as any).content || '',
+          accent: defaultAccents[idx % defaultAccents.length],
+          features: feats,
+          technologies: techs,
+        };
+      })
+    : defaultServices;
 
   const getAccentColor = (accent: string) => {
     switch (accent) {
@@ -103,7 +133,7 @@ export const AtelierServices: React.FC<AtelierServicesProps> = ({
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-14 border-b border-slate-200">
         <div className="space-y-3 max-w-2xl">
           <div className="text-xs font-semibold text-blue-600 uppercase tracking-wide">
-            Services & Disciplines
+            Services &amp; Disciplines
           </div>
 
           <h2 className="text-2xl sm:text-4xl font-bold tracking-tight text-slate-900 font-sans">
@@ -178,18 +208,38 @@ export const AtelierServices: React.FC<AtelierServicesProps> = ({
                 </p>
               </div>
 
-              <div className="pt-4 border-t border-slate-100 space-y-3">
-                <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wide block">
-                  Core Disciplines
-                </span>
-                <ul className="space-y-2 text-xs text-slate-700">
-                  {service.features.map((feat: string, fIdx: number) => (
-                    <li key={fIdx} className="flex items-center gap-2 group-hover:translate-x-1 transition-transform">
-                      <span className="w-1.5 h-1.5 rounded-full bg-blue-600 shrink-0" />
-                      <span>{feat}</span>
-                    </li>
-                  ))}
-                </ul>
+              <div className="pt-4 border-t border-slate-100 space-y-4">
+                <div className="space-y-2">
+                  <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wide block">
+                    Core Disciplines
+                  </span>
+                  <ul className="space-y-2 text-xs text-slate-700">
+                    {service.features.map((feat: string, fIdx: number) => (
+                      <li key={fIdx} className="flex items-center gap-2 group-hover:translate-x-1 transition-transform">
+                        <span className="w-1.5 h-1.5 rounded-full bg-blue-600 shrink-0" />
+                        <span>{feat}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                {service.technologies && service.technologies.length > 0 && (
+                  <div className="pt-3 border-t border-slate-100 space-y-2">
+                    <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wide block font-mono">
+                      Tech Stack
+                    </span>
+                    <div className="flex flex-wrap gap-1.5">
+                      {service.technologies.map((tName: string, tIdx: number) => (
+                        <span
+                          key={tIdx}
+                          className="px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 text-[11px] font-mono font-medium"
+                        >
+                          {tName}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             </motion.div>
           );
