@@ -22,6 +22,7 @@ import {
   ImageIcon,
   Settings,
   Clock,
+  Bell,
 } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
@@ -145,6 +146,41 @@ export default async function AdminDashboardPage() {
           </Link>
         </div>
       </div>
+
+      {/* New Inbound Inquiries Alert Banner */}
+      {unreadInquiries > 0 && (
+        <div className="relative overflow-hidden rounded-2xl border border-amber-500/40 bg-gradient-to-r from-amber-500/15 via-[#0A0E17]/90 to-amber-500/5 p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-[0_0_25px_rgba(245,158,11,0.12)] animate-in fade-in slide-in-from-top-2 duration-300">
+          <div className="flex items-center gap-4">
+            <div className="relative w-11 h-11 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center shrink-0 text-amber-300 shadow-[0_0_12px_rgba(245,158,11,0.25)]">
+              <Bell className="w-5 h-5" />
+              <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-amber-400 animate-ping" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h2 className="text-sm font-bold text-white font-mono tracking-tight">
+                  New Inbound Inquiries Alert
+                </h2>
+                <span className="px-2 py-0.5 text-[10px] font-mono font-bold rounded-full bg-amber-500/25 text-amber-300 border border-amber-500/40 shadow-[0_0_8px_rgba(245,158,11,0.2)]">
+                  {unreadInquiries} New Lead{unreadInquiries === 1 ? '' : 's'}
+                </span>
+              </div>
+              <p className="text-xs text-slate-300 mt-1">
+                You have <span className="text-white font-semibold">{unreadInquiries} pending client inquiries</span> submitted through the contact form awaiting review and response.
+              </p>
+            </div>
+          </div>
+
+          <Link href="/admin/inquiries" className="shrink-0">
+            <Button
+              size="sm"
+              variant="primary"
+              className="bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-400 hover:to-amber-300 text-black font-bold border-none shadow-[0_0_15px_rgba(245,158,11,0.3)] transition-all"
+            >
+              Open Inquiries Inbox ({unreadInquiries}) →
+            </Button>
+          </Link>
+        </div>
+      )}
 
       {/* Primary Analytics Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
