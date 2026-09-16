@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
       ipAddress: clientIp,
       userAgent: request.headers.get('user-agent') || undefined,
     });
-     console.log('Target Webhook URL:', process.env.N8N_WEBHOOK_URL);
+
     // Server-side n8n webhook dispatch (non-blocking for client success)
     const webhookUrl = process.env.N8N_WEBHOOK_URL?.trim();
     if (webhookUrl) {
@@ -127,4 +127,3 @@ export async function POST(request: NextRequest) {
     );
   }
 }
-console.log('Target Webhook URL:', process.env.N8N_WEBHOOK_URL);

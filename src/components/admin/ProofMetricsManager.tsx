@@ -34,6 +34,7 @@ export const ProofMetricsManager: React.FC = () => {
     clients: '+15',
     inquiries: '100%',
     uptime: '99.9%',
+    visitors: '12,480+',
   });
 
   useEffect(() => {

@@ -12,6 +12,10 @@ import { NexusHeader } from '@/themes/nexus/components/NexusHeader';
 import { NexusFooter } from '@/themes/nexus/components/NexusFooter';
 import { AtelierHeader } from '@/themes/atelier/components/AtelierHeader';
 import { AtelierFooter } from '@/themes/atelier/components/AtelierFooter';
+import { AtelierPageTransition } from '@/themes/atelier/components/AtelierPageTransition';
+
+import { headers } from 'next/headers';
+import { MetricsService } from '@/services/metrics.service';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -21,6 +25,16 @@ export default async function PublicLayout({
 }: {
   children: React.ReactNode;
 }) {
+  // Concurrency-safe anonymous visitor session tracking
+  try {
+    const headerStore = await headers();
+    if (headerStore.get('x-new-visitor-session') === '1') {
+      MetricsService.recordVisitorSession(headerStore.get('user-agent')).catch(() => {});
+    }
+  } catch {
+    // Graceful fallback
+  }
+
   const [navItems, settings, socialLinks, themeState] = await Promise.all([
     DataStore.getNavigation('header'),
     DataStore.getSettings(),
@@ -91,10 +105,10 @@ export default async function PublicLayout({
           <NexusFooter settings={settings} socialLinks={socialLinks} />
         </div>
       ) : themeId === 'atelier' ? (
-        <div data-theme="atelier" className={`flex min-h-screen flex-col bg-[#0A0A0A] text-[#F5F2EB] selection:bg-[#F5F2EB] selection:text-black overflow-x-hidden ${isPreview ? 'pt-10' : ''}`}>
+        <div data-theme="atelier" className={`flex min-h-screen flex-col bg-[#FBFBFA] text-[#0B0F19] selection:bg-[#2563EB] selection:text-white overflow-x-hidden ${isPreview ? 'pt-10' : ''}`}>
           <AtelierHeader navItems={navItems} brandName={settings.brand_name} />
-          <main id="main-content" className="flex-1 pt-20 focus:outline-none" tabIndex={-1}>
-            {children}
+          <main id="main-content" className="flex-1 pt-16 focus:outline-none" tabIndex={-1}>
+            <AtelierPageTransition>{children}</AtelierPageTransition>
           </main>
           <AtelierFooter settings={settings} socialLinks={socialLinks} />
         </div>

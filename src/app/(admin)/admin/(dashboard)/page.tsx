@@ -68,11 +68,10 @@ export default async function AdminDashboardPage() {
       recentLogs = rl;
       brandName = st.find((s) => s.key === 'brand_name')?.value || 'GMDware';
     } catch {
-      // Fall through to baseline seed metrics
+      // Fall through to baseline seed metrics if database queries fail
     }
-  }
-
-  if (totalProjects === 0 && totalServices === 0) {
+  } else {
+    // Only fall back to seed data if database is completely unreachable
     totalProjects = INITIAL_SEED_DATA.projects.length;
     publishedProjects = INITIAL_SEED_DATA.projects.length;
     totalTeam = INITIAL_SEED_DATA.teamMembers.length;

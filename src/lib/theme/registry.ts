@@ -32,15 +32,15 @@ export const THEME_METADATA_REGISTRY: Record<ThemeId, ThemeMetadata> = {
   atelier: {
     id: 'atelier',
     name: 'GMDware ATELIER',
-    version: '1.0.0',
-    tagline: 'Editorial / Minimal / Premium',
-    concept: 'A digital product atelier: quiet luxury, oversized typography, asymmetric whitespace, and craft with intent.',
+    version: '2.0.0',
+    tagline: 'Modern / Editorial / Thoughtful',
+    concept: 'Modern creative software studio: light-forward editorial design, clear typography, and thoughtful digital products.',
     studioPhilosophy:
-      'Crafted like a luxury architectural monograph where typography is the primary instrument, eliminating telemetry HUDs in favor of editorial dignity.',
-    paletteDescription: 'Obsidian Black (#0A0A0A), Warm White (#F5F2EB), Raw Titanium (#D1D5DB), Fine Hairlines',
-    previewBg: '#0A0A0A',
-    previewAccent: '#F5F2EB',
-    tags: ['Editorial', 'Quiet Luxury', 'Typography-Driven', 'Monograph'],
+      'Designed as a modern creative software studio combining clean typography, generous whitespace, and focused presentation of digital products.',
+    paletteDescription: 'Clean Paper (#FFFFFF / #FBFBFA), Slate Ink (#0F172A), Restrained Cobalt (#2563EB)',
+    previewBg: '#FBFBFA',
+    previewAccent: '#2563EB',
+    tags: ['Editorial', 'Software Studio', 'Digital Products', 'Modern'],
   },
 };
 

@@ -11,6 +11,7 @@ export * from './tokens';
 export * from './motion';
 export * from './components/AtelierHeader';
 export * from './components/AtelierHero';
+export * from './components/AtelierStats';
 export * from './components/AtelierHome';
 export * from './components/AtelierWork';
 export * from './components/AtelierCaseStudy';

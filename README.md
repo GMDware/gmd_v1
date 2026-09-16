@@ -84,6 +84,8 @@ Copy `.env.example` to `.env.production` and configure the following variables:
 | `STORAGE_PUBLIC_BASE_URL` | Public prefix for media files | `/uploads` |
 | `RATE_LIMIT_MAX_REQUESTS` | Maximum requests per sliding window | `120` |
 | `RATE_LIMIT_WINDOW_MS` | Sliding window duration in milliseconds | `60000` |
+| `N8N_WEBHOOK_URL` | Target n8n webhook endpoint for event dispatch | `https://n8n.yourdomain.com/webhook/...` |
+| `N8N_WEBHOOK_SECRET` | Secret token for authenticating webhook requests | High-entropy random secret |
 
 ### Public (Safe for Client Bundles)
 

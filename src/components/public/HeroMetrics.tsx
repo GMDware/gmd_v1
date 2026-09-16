@@ -169,7 +169,7 @@ export const HeroMetrics: React.FC<HeroMetricsProps> = ({ initialMetrics }) => {
     };
   }, []);
 
-  const visibleMetrics = metrics.filter((m) => m.isVisible);
+  const visibleMetrics = metrics.filter((m) => m.isVisible && m.key !== 'visitors');
 
   if (visibleMetrics.length === 0) {
     return null;

@@ -1,7 +1,8 @@
 'use client';
 
 import React from 'react';
-import { Check } from 'lucide-react';
+import Link from 'next/link';
+import { ArrowRight } from 'lucide-react';
 
 interface AtelierProcessProps {
   steps?: any[];
@@ -15,33 +16,35 @@ export const AtelierProcess: React.FC<AtelierProcessProps> = ({
   const defaultStages = [
     {
       num: '01',
-      title: 'Discover & Hypothesize',
-      summary: 'Rigorous domain deconstruction and mathematical boundary mapping before writing code.',
-      deliverables: ['Domain Bounded Context', 'Latency Budgets', 'Data Topology Blueprint'],
+      title: 'Discovery & Scope',
+      phase: 'Week 1–2',
+      summary:
+        'We understand your business objectives, map user journeys, outline technical constraints, and agree on clear deliverables before writing any code.',
+      deliverables: ['Product specification', 'User workflow diagrams', 'Technical roadmap'],
     },
     {
       num: '02',
-      title: 'Strategize & Specify',
-      summary: 'Authoring architectural blueprints, schema contracts, and distributed state boundaries.',
-      deliverables: ['System Architecture Document', 'Data Migration Blueprint', 'Threat Assessment'],
+      title: 'Design & Prototyping',
+      phase: 'Week 2–4',
+      summary:
+        'We design intuitive interfaces and clickable prototypes so you can experience the product early, give feedback, and align team stakeholders.',
+      deliverables: ['Interface designs', 'Clickable prototype', 'Design system'],
     },
     {
       num: '03',
-      title: 'Design with Intent',
-      summary: 'Creating ergonomic user experiences with quiet visual dignity and disciplined motion.',
-      deliverables: ['Design Token Architecture', 'Component Library', 'Interactive Prototypes'],
+      title: 'Full-Stack Engineering',
+      phase: 'Week 4–10',
+      summary:
+        'We build your product using modern, proven frameworks. We implement clean database models, reliable APIs, and maintainable frontends with regular sprint reviews.',
+      deliverables: ['Production-ready codebase', 'API integration', 'Staging preview environments'],
     },
     {
       num: '04',
-      title: 'Build & Prove',
-      summary: 'Crafting high-concurrency engines with end-to-end type safety and deterministic guarantees.',
-      deliverables: ['Clean Production Code', 'Comprehensive Test Harness', 'Zero Cascade Failures'],
-    },
-    {
-      num: '05',
-      title: 'Deliver & Steward',
-      summary: 'Zero-downtime cutovers, real-time observability telemetry, and long-term architectural care.',
-      deliverables: ['Automated CI/CD', 'Telemetry Dashboard', 'Architectural Documentation'],
+      title: 'Launch & Ongoing Support',
+      phase: 'Week 10+',
+      summary:
+        'We execute a smooth release, monitor platform performance, hand over complete documentation, and provide ongoing technical improvements as you grow.',
+      deliverables: ['Production deployment', 'Technical documentation', 'Ongoing maintenance'],
     },
   ];
 
@@ -49,66 +52,90 @@ export const AtelierProcess: React.FC<AtelierProcessProps> = ({
     steps.length > 0
       ? steps.map((s, idx) => ({
           num: `0${s.stepNumber || idx + 1}`,
-          title: s.phase || s.title,
-          summary: s.description || 'Structured engineering milestone.',
-          deliverables: s.deliverables || ['Architectural Deliverable', 'Verified Milestone'],
+          title: s.title || s.phase,
+          phase: s.phase || `Phase ${idx + 1}`,
+          summary: s.description || 'Structured project milestone with clear deliverables.',
+          deliverables: Array.isArray(s.deliverables)
+            ? s.deliverables
+            : ['Milestone Review', 'Working Deliverable'],
         }))
       : defaultStages;
 
   return (
-    <section className={`relative bg-[#0A0A0A] text-[#F5F2EB] ${isStandalone ? 'pt-32 pb-24' : 'py-24 border-b border-white/[0.08]'}`}>
-      <div className="max-w-6xl mx-auto px-6 sm:px-12 space-y-16">
-        {/* Section Header */}
-        <div className="max-w-2xl space-y-3">
-          <span className="text-xs font-mono uppercase tracking-[0.2em] text-stone-400 block">
-            DELIVERY SEQUENCE // 2026
-          </span>
-          <h2 className="text-3xl sm:text-5xl font-normal font-serif text-[#F5F2EB]">
-            A Disciplined Delivery Protocol
+    <section
+      className={`px-6 max-w-6xl mx-auto w-full ${
+        isStandalone ? 'pt-8 pb-24' : 'py-20 border-t border-slate-200'
+      }`}
+      aria-label="Studio Working Process"
+    >
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-12 border-b border-slate-200">
+        <div className="space-y-3 max-w-2xl">
+          <div className="text-xs font-semibold text-slate-500 uppercase tracking-wide">
+            How We Work
+          </div>
+
+          <h2 className="text-2xl sm:text-4xl font-bold tracking-tight text-slate-900 font-sans">
+            A clear, collaborative process from idea to launch.
           </h2>
-          <p className="text-sm text-stone-400 leading-relaxed font-sans font-light">
-            We reject chaotic agile theater in favor of structured architectural progression, explicit deliverables, and continuous proof.
+
+          <p className="text-base text-slate-600 font-sans leading-relaxed">
+            We operate with transparency, frequent communication, and short feedback loops to deliver dependable software on schedule.
           </p>
         </div>
 
-        {/* Monograph Sequence Stack */}
-        <div className="space-y-16">
-          {stages.map((stage, idx) => (
-            <div
-              key={idx}
-              className="grid grid-cols-1 md:grid-cols-12 gap-8 pt-10 border-t border-white/[0.08] items-start"
-            >
-              <div className="md:col-span-2">
-                <span className="text-3xl sm:text-4xl font-serif text-stone-500 font-light block">
-                  {stage.num}
-                </span>
-              </div>
+        {!isStandalone && (
+          <Link
+            href="/process"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-slate-300 hover:border-slate-900 bg-white/50 hover:bg-slate-900 text-slate-800 hover:text-white font-medium text-xs transition-all duration-200 shadow-sm group active:scale-[0.98] shrink-0"
+          >
+            <span>Learn more about our approach</span>
+            <ArrowRight className="w-3.5 h-3.5 text-slate-500 group-hover:text-white group-hover:translate-x-1 transition-transform" />
+          </Link>
+        )}
+      </div>
 
-              <div className="md:col-span-5 space-y-3">
-                <h3 className="text-xl sm:text-2xl font-serif text-[#F5F2EB]">
-                  {stage.title}
-                </h3>
-                <p className="text-sm text-stone-400 font-sans leading-relaxed font-light">
-                  {stage.summary}
-                </p>
-              </div>
-
-              <div className="md:col-span-5 space-y-2 pt-1">
-                <span className="text-[11px] font-mono uppercase tracking-widest text-stone-500 block mb-2">
-                  VERIFIED DELIVERABLES
-                </span>
-                <div className="space-y-2">
-                  {stage.deliverables.map((item: string, dIdx: number) => (
-                    <div key={dIdx} className="flex items-center gap-2 text-xs font-mono text-stone-300">
-                      <span className="w-1 h-1 rounded-full bg-[#F5F2EB]" />
-                      <span>{item}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
+      {/* Process Stages List */}
+      <div className="divide-y divide-slate-200">
+        {stages.map((stage, idx) => (
+          <div
+            key={idx}
+            className="py-10 grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-10 items-start"
+          >
+            {/* Step Number & Title (4 Cols) */}
+            <div className="md:col-span-4 space-y-1">
+              <span className="text-xs font-normal text-slate-400">
+                {stage.num}
+              </span>
+              <h3 className="text-xl font-bold text-slate-900 tracking-tight">
+                {stage.title}
+              </h3>
+              <span className="text-xs text-blue-600 font-medium block pt-0.5">
+                {stage.phase}
+              </span>
             </div>
-          ))}
-        </div>
+
+            {/* Description (5 Cols) */}
+            <div className="md:col-span-5 text-sm text-slate-600 leading-relaxed">
+              <p>{stage.summary}</p>
+            </div>
+
+            {/* Deliverables (3 Cols) */}
+            <div className="md:col-span-3">
+              <span className="text-xs font-medium text-slate-400 block pb-1">
+                Key deliverables
+              </span>
+              <ul className="space-y-1 text-xs text-slate-600">
+                {stage.deliverables.map((item: string, dIdx: number) => (
+                  <li key={dIdx} className="flex items-start gap-2">
+                    <span className="text-slate-300 select-none">•</span>
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        ))}
       </div>
     </section>
   );

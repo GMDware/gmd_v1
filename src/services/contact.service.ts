@@ -2,12 +2,14 @@ import prisma from '@/lib/db/prisma';
 import { ContactStatus } from '@prisma/client';
 import { isDatabaseReachable } from '@/lib/db/data-store';
 import { AuthService } from './auth.service';
+import { EmailService } from './email.service';
 
 const fallbackSubmissions: any[] = [];
 
 export class ContactService {
   /**
    * Submit an inbound contact inquiry (Public endpoint)
+   * Dispatches to BOTH database (Admin Dashboard) and Email Notification (gmdware@gmail.com)
    */
   static async submit(data: {
     fullName: string;
@@ -33,9 +35,11 @@ export class ContactService {
       ? '[Pipeline Route: Scoped Discovery Call] Prioritized for exploratory architectural discovery session (MVP / Flexible Scope).'
       : undefined;
 
+    let submissionRecord: any = null;
+
     if (await isDatabaseReachable()) {
       try {
-        return await prisma.contactSubmission.create({
+        submissionRecord = await prisma.contactSubmission.create({
           data: {
             fullName: data.fullName.trim(),
             email: data.email.toLowerCase().trim(),
@@ -51,30 +55,51 @@ export class ContactService {
             notes: initialNotes,
           },
         });
-      } catch {
-        // Fall through to in-memory fallback if write fails
+      } catch (dbErr) {
+        console.error('[ContactService] Prisma write error, using fallback:', dbErr);
       }
     }
 
-    const submission = {
-      id: `sub-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
-      fullName: data.fullName.trim(),
-      email: data.email.toLowerCase().trim(),
-      phone: data.phone?.trim() || null,
-      companyName: data.companyName?.trim(),
-      projectType: data.projectType?.trim(),
-      budgetRange: data.budgetRange?.trim(),
-      timeline: data.timeline?.trim(),
-      message: data.message.trim(),
-      ipAddress: data.ipAddress,
-      userAgent: data.userAgent,
-      status: 'NEW' as ContactStatus,
-      notes: initialNotes,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-    fallbackSubmissions.unshift(submission);
-    return submission;
+    if (!submissionRecord) {
+      submissionRecord = {
+        id: `sub-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+        fullName: data.fullName.trim(),
+        email: data.email.toLowerCase().trim(),
+        phone: data.phone?.trim() || null,
+        companyName: data.companyName?.trim(),
+        projectType: data.projectType?.trim(),
+        budgetRange: data.budgetRange?.trim(),
+        timeline: data.timeline?.trim(),
+        message: data.message.trim(),
+        ipAddress: data.ipAddress,
+        userAgent: data.userAgent,
+        status: 'NEW' as ContactStatus,
+        notes: initialNotes,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+      fallbackSubmissions.unshift(submissionRecord);
+    }
+
+    // ── Dispatch Email Notification to gmdware@gmail.com (Both Dashboard & Email) ──
+    EmailService.sendInquiryNotification({
+      id: submissionRecord.id,
+      fullName: submissionRecord.fullName,
+      email: submissionRecord.email,
+      phone: submissionRecord.phone,
+      companyName: submissionRecord.companyName,
+      projectType: submissionRecord.projectType,
+      budgetRange: submissionRecord.budgetRange,
+      timeline: submissionRecord.timeline,
+      message: submissionRecord.message,
+      createdAt: submissionRecord.createdAt,
+      ipAddress: submissionRecord.ipAddress,
+      userAgent: submissionRecord.userAgent,
+    }).catch((emailErr) => {
+      console.error('[ContactService] Background email transmission notice:', emailErr?.message || emailErr);
+    });
+
+    return submissionRecord;
   }
 
   /**

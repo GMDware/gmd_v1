@@ -40,7 +40,7 @@ export default async function AboutPage({
   }
 
   if (themeId === 'atelier') {
-    return <AtelierAbout teamMembers={teamMembers} values={values} isStandalone={true} />;
+    return <AtelierAbout teamMembers={teamMembers} settings={settings} isStandalone={true} />;
   }
 
   const founders = teamMembers.filter((m: any) => m.isFounder);

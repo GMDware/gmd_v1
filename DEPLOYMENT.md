@@ -18,6 +18,7 @@ Before routing public traffic to the production instance, verify each item:
 - [ ] **AUTH_SECRET Generated**: High-entropy secret (min 32 bytes) generated via `openssl rand -base64 32`.
 - [ ] **Admin Credentials Configured Securely**: `ADMIN_EMAIL` and `ADMIN_PASSWORD` provisioned via environment or database without hardcoded fallbacks.
 - [ ] **Canonical URL Configured**: `NEXT_PUBLIC_SITE_URL` matches the exact production domain (e.g. `https://gmdware.com`).
+- [ ] **n8n Webhook Configured (Optional)**: `N8N_WEBHOOK_URL` and `N8N_WEBHOOK_SECRET` set if routing leads to n8n automation.
 - [ ] **No Secrets Committed**: Git repository scanned to ensure no `.env` files, private keys, or credentials are tracked.
 
 ### Database & State
@@ -77,6 +78,8 @@ STORAGE_LOCAL_PATH="./public/uploads"
 STORAGE_PUBLIC_BASE_URL="/uploads"
 RATE_LIMIT_MAX_REQUESTS="120"
 RATE_LIMIT_WINDOW_MS="60000"
+N8N_WEBHOOK_URL="https://n8n.yourdomain.com/webhook/<YOUR_WEBHOOK_PATH>"
+N8N_WEBHOOK_SECRET="<SECURE_WEBHOOK_SECRET>"
 ```
 
 ### Step 3: Install Dependencies

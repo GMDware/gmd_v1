@@ -8,7 +8,7 @@ export const dynamic = 'force-dynamic';
 
 const metricItemSchema = z.object({
   id: z.string().min(1),
-  key: z.enum(['projects', 'clients', 'inquiries', 'uptime']),
+  key: z.enum(['projects', 'clients', 'inquiries', 'uptime', 'visitors']),
   mode: z.enum(['manual', 'auto']),
   manualValue: z.string().min(1),
   autoQueryKey: z.string().optional(),

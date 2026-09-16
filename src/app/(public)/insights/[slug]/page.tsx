@@ -74,14 +74,6 @@ export default async function InsightDetailPage({ params, searchParams }: Insigh
     notFound();
   }
 
-  if (themeId === 'nexus') {
-    return <NexusInsightArticle insight={article} />;
-  }
-
-  if (themeId === 'atelier') {
-    return <AtelierInsightArticle insight={article} />;
-  }
-
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://gmdware.com';
   const coverUrl = (article as any).coverImage?.url;
   const authorName = (article as any).author?.name || 'GMDware Engineering Leadership';
@@ -112,6 +104,24 @@ export default async function InsightDetailPage({ params, searchParams }: Insigh
       '@id': `${siteUrl}/insights/${slug}`,
     },
   };
+
+  if (themeId === 'nexus') {
+    return (
+      <>
+        <JsonLd data={jsonLd} />
+        <NexusInsightArticle insight={article} />
+      </>
+    );
+  }
+
+  if (themeId === 'atelier') {
+    return (
+      <>
+        <JsonLd data={jsonLd} />
+        <AtelierInsightArticle insight={article} />
+      </>
+    );
+  }
 
   return (
     <div className="py-16 space-y-20 bg-[#05080F]">

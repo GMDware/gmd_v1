@@ -118,18 +118,38 @@ export default async function HomePage({
     );
   }
 
-  // Render Theme 03: ATELIER (Editorial / Minimal / Premium / Craft)
+  // Render Theme 03: KINETIC (Architectural / Light Monograph / Digital Craft)
   if (themeId === 'atelier') {
+    const allProjects = await DataStore.getProjects();
+    const formattedAllProjects = (allProjects && allProjects.length > 0 ? allProjects : featuredProjects).map((p: any) => ({
+      id: p.id,
+      title: p.title,
+      slug: p.slug,
+      shortDescription: p.shortDescription,
+      fullDescription: p.fullDescription,
+      clientName: p.clientName,
+      projectType: p.projectType,
+      heroImageUrl: p.heroImage?.url || p.heroImageUrl,
+      challenge: p.challenge,
+      strategy: p.strategy,
+      architecture: p.architecture,
+      results: p.results,
+      technologies: p.technologies?.map((t: any) => ({ name: t.technology?.name || t.name })) || [],
+      isFeatured: p.isFeatured,
+      category: p.category,
+    }));
+
     return (
       <AtelierHome
         settings={settings}
-        featuredProjects={formattedProjects}
+        featuredProjects={formattedAllProjects}
         services={services}
         processSteps={processSteps}
         values={values}
         technologies={technologies}
         teamMembers={formattedMembers}
         faqs={faqs}
+        proofMetrics={proofMetrics}
       />
     );
   }

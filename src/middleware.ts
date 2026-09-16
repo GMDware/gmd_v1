@@ -72,11 +72,27 @@ export async function middleware(request: NextRequest) {
     requestHeaders.set('x-theme-preview', themeQuery);
   }
 
+  // 2b. Anonymous Visitor Session Deduplication (Rolling 24 Hours)
+  const isPublicPage = !pathname.startsWith('/api') && !pathname.startsWith('/admin') && !pathname.includes('.');
+  const hasVisitorCookie = Boolean(request.cookies.get('gmd_vid'));
+  if (isPublicPage && !hasVisitorCookie) {
+    requestHeaders.set('x-new-visitor-session', '1');
+  }
+
   const response = NextResponse.next({
     request: {
       headers: requestHeaders,
     },
   });
+
+  if (isPublicPage && !hasVisitorCookie) {
+    response.cookies.set('gmd_vid', crypto.randomUUID(), {
+      maxAge: 86400,
+      path: '/',
+      sameSite: 'lax',
+      httpOnly: true,
+    });
+  }
 
   if (apiRateLimit) {
     response.headers.set('X-RateLimit-Limit', '120');
