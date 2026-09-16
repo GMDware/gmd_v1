@@ -128,7 +128,7 @@ export class ProjectService {
     displayOrder?: number;
     technologyIds?: string[];
     caseStudy?: {
-      summary: string;
+      summary?: string;
       metrics?: any;
       testimonial?: any;
     } | null;
@@ -140,7 +140,10 @@ export class ProjectService {
       throw new Error(`A project with slug "${data.slug}" already exists`);
     }
 
-    const { technologyIds, caseStudy, userId, ...projectData } = data;
+    const { technologyIds, caseStudy, userId, uxApproach, uiApproach, ...projectData } = data as any;
+    if (projectData.heroImageId === '') {
+      projectData.heroImageId = null;
+    }
 
     const project = await prisma.project.create({
       data: {
@@ -148,13 +151,13 @@ export class ProjectService {
         status: data.status || 'DRAFT',
         technologies: technologyIds?.length
           ? {
-              create: technologyIds.map((techId) => ({ technologyId: techId })),
+              create: (technologyIds as string[]).map((techId: string) => ({ technologyId: techId })),
             }
           : undefined,
         caseStudy: caseStudy
           ? {
               create: {
-                summary: caseStudy.summary,
+                summary: caseStudy.summary || '',
                 metrics: caseStudy.metrics,
                 testimonial: caseStudy.testimonial,
                 status: data.status || 'DRAFT',
@@ -212,7 +215,7 @@ export class ProjectService {
       displayOrder: number;
       technologyIds: string[];
       caseStudy: {
-        summary: string;
+        summary?: string;
         metrics?: any;
         testimonial?: any;
       } | null;
@@ -231,14 +234,17 @@ export class ProjectService {
       }
     }
 
-    const { technologyIds, caseStudy, userId, ...updateData } = data;
+    const { technologyIds, caseStudy, userId, uxApproach, uiApproach, ...updateData } = data as any;
+    if (updateData.heroImageId === '') {
+      updateData.heroImageId = null;
+    }
 
     // Handle technology relation re-linking if technologyIds provided
     if (technologyIds !== undefined) {
       await prisma.projectTechnology.deleteMany({ where: { projectId: id } });
       if (technologyIds.length > 0) {
         await prisma.projectTechnology.createMany({
-          data: technologyIds.map((tId) => ({ projectId: id, technologyId: tId })),
+          data: (technologyIds as string[]).map((tId: string) => ({ projectId: id, technologyId: tId })),
         });
       }
     }
@@ -249,13 +255,13 @@ export class ProjectService {
         where: { projectId: id },
         create: {
           projectId: id,
-          summary: caseStudy.summary,
+          summary: caseStudy.summary || '',
           metrics: caseStudy.metrics,
           testimonial: caseStudy.testimonial,
           status: data.status || existing.status,
         },
         update: {
-          summary: caseStudy.summary,
+          summary: caseStudy.summary || undefined,
           metrics: caseStudy.metrics,
           testimonial: caseStudy.testimonial,
         },

@@ -101,6 +101,14 @@ export default function AdminProjectsPage() {
   const [activeTab, setActiveTab] = useState('basic');
   const [saving, setSaving] = useState(false);
 
+  // Category creation & direct image URL input
+  const [newCatInput, setNewCatInput] = useState('');
+  const [showAddCat, setShowAddCat] = useState(false);
+  const [creatingCat, setCreatingCat] = useState(false);
+
+  const [heroUrlInput, setHeroUrlInput] = useState('');
+  const [applyingHeroUrl, setApplyingHeroUrl] = useState(false);
+
   // Delete / Archive Modal
   const [confirmModal, setConfirmModal] = useState<{
     open: boolean;
@@ -134,23 +142,28 @@ export default function AdminProjectsPage() {
       const techJson = await techRes.json();
       const catJson = await catRes.json();
 
+      let loadedCategories: Category[] = [];
+      if (catJson.success && Array.isArray(catJson.data) && catJson.data.length > 0) {
+        loadedCategories = catJson.data;
+        setCategories(loadedCategories);
+      }
+
       if (projJson.success && projJson.data) {
         const rawProjects: Project[] = Array.isArray(projJson.data)
           ? projJson.data
           : (projJson.data.projects || []);
         setProjects(rawProjects);
 
-        if (catJson.success && Array.isArray(catJson.data) && catJson.data.length > 0) {
-          setCategories(catJson.data);
-        } else {
-          // Extract unique categories from projects as fallback
+        if (loadedCategories.length === 0) {
           const catMap = new Map<string, Category>();
           rawProjects.forEach((p: Project) => {
             if (p.category) {
               catMap.set(p.category.id, p.category);
             }
           });
-          setCategories(Array.from(catMap.values()));
+          if (catMap.size > 0) {
+            setCategories(Array.from(catMap.values()));
+          }
         }
       }
 
@@ -164,17 +177,85 @@ export default function AdminProjectsPage() {
     }
   };
 
+  const handleCreateCategory = async () => {
+    if (!newCatInput.trim()) return;
+    setCreatingCat(true);
+    try {
+      const res = await fetch('/api/v1/projects/categories', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: newCatInput.trim() }),
+      });
+      const json = await res.json();
+      if (json.success && json.data) {
+        const createdCat = json.data;
+        setCategories((prev) => [...prev, createdCat]);
+        setEditingProject((prev) => (prev ? { ...prev, categoryId: createdCat.id } : null));
+        setNewCatInput('');
+        setShowAddCat(false);
+        success(`Category "${createdCat.name}" created`);
+      } else {
+        error(json.error || 'Failed to create category');
+      }
+    } catch {
+      error('Error creating category');
+    } finally {
+      setCreatingCat(false);
+    }
+  };
+
+  const handleApplyHeroUrl = async () => {
+    if (!heroUrlInput.trim()) return;
+    setApplyingHeroUrl(true);
+    try {
+      const res = await fetch('/api/v1/media/upload', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: heroUrlInput.trim() }),
+      });
+      const json = await res.json();
+      if (json.success && json.data) {
+        const asset = json.data;
+        setEditingProject((prev) =>
+          prev
+            ? {
+                ...prev,
+                heroImageId: asset.id,
+                heroImage: {
+                  id: asset.id,
+                  url: asset.url || asset.storageUrl,
+                  originalName: asset.originalName || asset.fileName || 'Showcase Image',
+                },
+              }
+            : null
+        );
+        setHeroUrlInput('');
+        success('Showcase image loaded successfully');
+      } else {
+        error(json.error?.message || 'Failed to import image from URL');
+      }
+    } catch {
+      error('Error importing image from URL');
+    } finally {
+      setApplyingHeroUrl(false);
+    }
+  };
+
   // Open editor for new project
   const handleNewProject = () => {
+    const defaultCatId = categories[0]?.id || '';
+
     setEditingProject({
       title: '',
       slug: '',
       shortDescription: '',
       fullDescription: '',
-      categoryId: categories[0]?.id || '',
+      categoryId: defaultCatId,
       projectType: 'Enterprise Web Platform',
       clientName: '',
       clientVisibility: false,
+      heroImageId: null,
+      heroImage: null,
       challenge: '',
       strategy: '',
       designApproach: '',
@@ -203,6 +284,9 @@ export default function AdminProjectsPage() {
         },
       },
     });
+    setNewCatInput('');
+    setShowAddCat(false);
+    setHeroUrlInput('');
     setActiveTab('basic');
     setEditorOpen(true);
   };
@@ -225,6 +309,9 @@ export default function AdminProjectsPage() {
         },
       },
     });
+    setNewCatInput('');
+    setShowAddCat(false);
+    setHeroUrlInput('');
     setActiveTab('basic');
     setEditorOpen(true);
   };
@@ -244,10 +331,37 @@ export default function AdminProjectsPage() {
     e.preventDefault();
     if (!editingProject) return;
 
-    if (!editingProject.title || !editingProject.slug || !editingProject.categoryId) {
-      error('Please complete mandatory fields: Title, Slug, and Category');
+    if (!editingProject.title?.trim()) {
+      error('Please enter Project Title');
+      setActiveTab('basic');
       return;
     }
+
+    const title = editingProject.title.trim();
+    const slug =
+      editingProject.slug?.trim() ||
+      title
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '');
+
+    let finalCategoryId = editingProject.categoryId;
+    if (!finalCategoryId && categories.length > 0) {
+      finalCategoryId = categories[0].id;
+    }
+
+    if (!finalCategoryId) {
+      error('Please select or create a Category');
+      setActiveTab('basic');
+      return;
+    }
+
+    const shortDesc =
+      editingProject.shortDescription?.trim() ||
+      `${title} — technical case study and platform architecture.`;
+    const fullDesc =
+      editingProject.fullDescription?.trim() ||
+      shortDesc;
 
     setSaving(true);
     try {
@@ -260,6 +374,12 @@ export default function AdminProjectsPage() {
 
       const payload = {
         ...editingProject,
+        title,
+        slug,
+        categoryId: finalCategoryId,
+        shortDescription: shortDesc,
+        fullDescription: fullDesc,
+        heroImageId: editingProject.heroImageId || null,
         technologyIds: selectedTechIds,
       };
 
@@ -276,7 +396,13 @@ export default function AdminProjectsPage() {
         setEditingProject(null);
         await loadData();
       } else {
-        error(json.error || 'Failed to save project');
+        const errorMsg =
+          json.details?.fieldErrors
+            ? Object.entries(json.details.fieldErrors)
+                .map(([field, errs]: [string, any]) => `${field}: ${Array.isArray(errs) ? errs.join(', ') : errs}`)
+                .join(' | ')
+            : json.error?.message || json.error || 'Failed to save project';
+        error(errorMsg);
       }
     } catch {
       error('Network error occurred while saving project');
@@ -624,12 +750,13 @@ export default function AdminProjectsPage() {
         onClose={() => setMediaPickerOpen(false)}
         selectedId={editingProject?.heroImageId || undefined}
         onSelect={(asset) => {
+          const resolvedUrl = asset.url || (asset as any).storageUrl || '';
           setEditingProject((prev) =>
             prev
               ? {
                   ...prev,
                   heroImageId: asset.id,
-                  heroImage: { id: asset.id, url: asset.url, originalName: asset.originalName },
+                  heroImage: { id: asset.id, url: resolvedUrl, originalName: asset.originalName || asset.filename },
                 }
               : null
           );
@@ -730,7 +857,42 @@ export default function AdminProjectsPage() {
 
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div className="space-y-1.5">
-                      <label className="text-xs font-mono text-slate-300">Category</label>
+                      <div className="flex items-center justify-between">
+                        <label className="text-xs font-mono text-slate-300">
+                          Category <span className="text-[#F43F5E]">*</span>
+                        </label>
+                        <button
+                          type="button"
+                          onClick={() => setShowAddCat(!showAddCat)}
+                          className="text-[10px] text-[#00F2FE] hover:underline font-mono flex items-center gap-1"
+                        >
+                          <Plus className="w-3 h-3" /> {showAddCat ? 'Cancel' : 'Add New'}
+                        </button>
+                      </div>
+
+                      {showAddCat && (
+                        <div className="flex items-center gap-1.5 p-2 bg-[#06090F] border border-[#00F2FE]/30 rounded-lg">
+                          <input
+                            type="text"
+                            value={newCatInput}
+                            onChange={(e) => setNewCatInput(e.target.value)}
+                            placeholder="New Category name..."
+                            className="flex-1 px-2.5 py-1 bg-[#0A0E17] border border-white/10 rounded text-xs text-white placeholder-slate-500 focus:outline-none focus:border-[#00F2FE]"
+                            autoFocus
+                          />
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="primary"
+                            isLoading={creatingCat}
+                            onClick={handleCreateCategory}
+                            className="text-xs px-2.5 py-1"
+                          >
+                            Save
+                          </Button>
+                        </div>
+                      )}
+
                       <select
                         value={editingProject.categoryId || ''}
                         onChange={(e) =>
@@ -738,11 +900,15 @@ export default function AdminProjectsPage() {
                         }
                         className="w-full px-3.5 py-2 bg-[#05070B] border border-white/10 rounded-lg text-xs text-slate-300 focus:outline-none focus:border-[#00F2FE]"
                       >
-                        {categories.map((cat) => (
-                          <option key={cat.id} value={cat.id}>
-                            {cat.name}
-                          </option>
-                        ))}
+                        {categories.length === 0 ? (
+                          <option value="">No categories available — click "Add New" above</option>
+                        ) : (
+                          categories.map((cat) => (
+                            <option key={cat.id} value={cat.id}>
+                              {cat.name}
+                            </option>
+                          ))
+                        )}
                       </select>
                     </div>
 
@@ -937,10 +1103,16 @@ export default function AdminProjectsPage() {
                         )}
                       </div>
 
-                      <div className="space-y-2 flex-1">
-                        <span className="text-xs text-slate-400 block truncate">
-                          {editingProject.heroImage?.originalName || 'No image attached'}
-                        </span>
+                      <div className="space-y-3 flex-1">
+                        <div>
+                          <span className="text-xs text-white font-medium block truncate">
+                            {editingProject.heroImage?.originalName || 'No image attached'}
+                          </span>
+                          <span className="text-[11px] text-slate-400 block mt-0.5">
+                            Upload a hero banner from your device or paste a public image URL
+                          </span>
+                        </div>
+
                         <div className="flex items-center gap-2">
                           <Button
                             type="button"
@@ -949,7 +1121,7 @@ export default function AdminProjectsPage() {
                             onClick={() => setMediaPickerOpen(true)}
                             leftIcon={<ImageIcon className="w-3.5 h-3.5" />}
                           >
-                            Select from Library
+                            Select / Upload from Library
                           </Button>
                           {editingProject.heroImageId && (
                             <Button
@@ -961,10 +1133,32 @@ export default function AdminProjectsPage() {
                                   prev ? { ...prev, heroImageId: null, heroImage: null } : null
                                 )
                               }
+                              className="text-slate-400 hover:text-[#F43F5E]"
                             >
-                              Remove
+                              Remove Image
                             </Button>
                           )}
+                        </div>
+
+                        {/* Direct Image URL input */}
+                        <div className="pt-2 border-t border-white/5 flex items-center gap-2">
+                          <input
+                            type="url"
+                            placeholder="Or paste direct image URL (https://... or data:...)"
+                            value={heroUrlInput}
+                            onChange={(e) => setHeroUrlInput(e.target.value)}
+                            className="flex-1 px-3 py-1.5 bg-[#0A0E17] border border-white/10 rounded-lg text-xs text-white placeholder-slate-500 focus:outline-none focus:border-[#00F2FE]"
+                          />
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="primary"
+                            isLoading={applyingHeroUrl}
+                            onClick={handleApplyHeroUrl}
+                            disabled={!heroUrlInput.trim()}
+                          >
+                            Apply URL
+                          </Button>
                         </div>
                       </div>
                     </div>
