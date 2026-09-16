@@ -1,22 +1,13 @@
 import React from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import type { Metadata } from 'next';
 import DataStore from '@/lib/db/data-store';
 import { Container } from '@/components/ui/Container';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { CallToAction } from '@/components/public/CallToAction';
-import {
-  ArrowUpRight,
-  Cpu,
-  Shield,
-  Layers,
-  Server,
-  CheckCircle2,
-  ExternalLink,
-  Sparkles,
-} from 'lucide-react';
+import { ArrowUpRight, Layers } from 'lucide-react';
+import { FeaturedProjectsShowcase } from '@/components/public/FeaturedProjectsShowcase';
 
 import { resolveActiveTheme } from '@/lib/theme/resolver';
 import { NexusWork } from '@/themes/nexus/components/NexusWork';
@@ -72,6 +63,25 @@ export default async function WorkPage({
       />
     );
   }
+
+  const formattedFilteredProjects = filteredProjects.map((p: any) => ({
+    id: p.id,
+    title: p.title,
+    slug: p.slug,
+    shortDescription: p.shortDescription || p.fullDescription || '',
+    fullDescription: p.fullDescription,
+    clientName: p.clientName,
+    projectType: p.projectType || 'Software System',
+    heroImageUrl: p.heroImage?.url || p.heroImageUrl,
+    challenge: p.challenge,
+    strategy: p.strategy,
+    architecture: p.architecture,
+    results: p.results,
+    technologies: (p.technologies || []).map((t: any) => ({
+      name: typeof t === 'string' ? t : t.technology?.name || t.name,
+    })),
+    isFeatured: p.isFeatured,
+  }));
 
   return (
     <div className="py-20 space-y-24 bg-[#05080F]">
@@ -137,151 +147,7 @@ export default async function WorkPage({
             </div>
           </div>
         ) : (
-          <div className="space-y-16">
-            {filteredProjects.map((project: any, idx: number) => {
-              const heroUrl = project.heroImage?.url || project.heroImageUrl;
-              const projectTechs = (project.technologies || []).map((t: any) =>
-                typeof t === 'string' ? t : t.technology?.name || t.name
-              );
-
-              return (
-                <article
-                  key={project.id || idx}
-                  className="gmd-panel rounded-2xl p-6 sm:p-10 lg:p-12 border border-white/10 hover:border-[#0066FF]/50 transition-all group scroll-mt-28"
-                >
-                  {/* Card Header Rail */}
-                  <div className="flex flex-wrap items-center justify-between gap-4 border-b border-white/[0.08] pb-6 mb-8">
-                    <div className="flex flex-wrap items-center gap-3">
-                      <Badge variant="cobalt">{project.projectType || 'Software System'}</Badge>
-                      <Badge variant="neutral">
-                        {project.clientName || 'Partner Project'}
-                      </Badge>
-                      {project.isFeatured && <Badge variant="cyan">Featured Project</Badge>}
-                    </div>
-                  </div>
-
-                  {/* Main 2-Column Content */}
-                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
-                    {/* Left: Project Narrative & Specs (7 Cols) */}
-                    <div className="lg:col-span-7 space-y-6">
-                      <h2 className="text-2xl sm:text-4xl font-extrabold text-white font-display tracking-tight group-hover:text-[#00D2FF] transition-colors">
-                        <Link href={`/work/${project.slug}`}>
-                          {project.title}
-                        </Link>
-                      </h2>
-
-                      <p className="text-sm sm:text-base text-[#94A3B8] leading-relaxed font-sans">
-                        {project.shortDescription || project.fullDescription}
-                      </p>
-
-                      {/* Highlights Grid */}
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
-                        {project.challenge && (
-                          <div className="p-3.5 rounded-lg bg-[#080D18] border border-white/[0.05] space-y-1">
-                            <span className="text-[11px] text-[#00D2FF] uppercase tracking-wider font-semibold flex items-center gap-1.5">
-                              <Cpu className="w-3 h-3 text-[#0066FF]" />
-                              Challenge
-                            </span>
-                            <p className="text-xs text-slate-300 line-clamp-2 font-sans">
-                              {project.challenge}
-                            </p>
-                          </div>
-                        )}
-
-                        {project.strategy && (
-                          <div className="p-3.5 rounded-lg bg-[#080D18] border border-white/[0.05] space-y-1">
-                            <span className="text-[11px] text-[#00D2FF] uppercase tracking-wider font-semibold flex items-center gap-1.5">
-                              <Layers className="w-3 h-3 text-[#0066FF]" />
-                              Strategy & Solution
-                            </span>
-                            <p className="text-xs text-slate-300 line-clamp-2 font-sans">
-                              {project.strategy}
-                            </p>
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Technology Stack Tags */}
-                      {projectTechs.length > 0 && (
-                        <div className="space-y-2 pt-2">
-                          <span className="text-[11px] text-[#64748B] uppercase tracking-wider font-medium block">
-                            Technologies:
-                          </span>
-                          <div className="flex flex-wrap gap-1.5">
-                            {projectTechs.slice(0, 6).map((tech: string) => (
-                              <span
-                                key={tech}
-                                className="px-2.5 py-1 rounded bg-[#0E1526] border border-white/[0.06] text-xs text-slate-300 font-medium"
-                              >
-                                {tech}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Actions */}
-                      <div className="pt-4 flex flex-wrap items-center gap-4">
-                        <Link href={`/work/${project.slug}`}>
-                          <Button
-                            variant="primary"
-                            size="md"
-                            rightIcon={<ArrowUpRight className="w-4 h-4" />}
-                          >
-                            Inspect 7-Dimensional Case Study
-                          </Button>
-                        </Link>
-                        <Link href="/contact">
-                          <Button variant="outline" size="md">
-                            Inquire Similar Build
-                          </Button>
-                        </Link>
-                      </div>
-                    </div>
-
-                    {/* Right: Visual Preview Frame (5 Cols) */}
-                    <div className="lg:col-span-5">
-                      <Link
-                        href={`/work/${project.slug}`}
-                        className="block relative aspect-video sm:aspect-[4/3] rounded-xl overflow-hidden border border-white/10 bg-[#080D18] group-hover:border-[#0066FF]/50 transition-all shadow-xl"
-                      >
-                        {heroUrl ? (
-                          <Image
-                            src={heroUrl}
-                            alt={project.title}
-                            fill
-                            sizes="(max-width: 1024px) 100vw, 40vw"
-                            className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-                          />
-                        ) : (
-                          <div className="w-full h-full flex flex-col items-center justify-center p-8 blueprint-grid">
-                            <div className="w-16 h-16 rounded-2xl bg-[#0066FF]/10 border border-[#0066FF]/30 flex items-center justify-center mb-4 text-[#0066FF]">
-                              <Layers className="w-8 h-8" />
-                            </div>
-                            <span className="font-display font-bold text-white text-lg tracking-tight text-center">
-                              {project.title}
-                            </span>
-                            <span className="font-mono text-xs text-[#64748B] mt-1">
-                              [ARCHITECTURAL BLUEPRINT // DEPLOYED]
-                            </span>
-                          </div>
-                        )}
-
-                        {/* Vignette */}
-                        <div className="absolute inset-0 bg-gradient-to-t from-[#05080F]/80 via-transparent to-transparent opacity-60" />
-
-                        {/* Verified Badge */}
-                        <div className="absolute bottom-3 left-3 px-2.5 py-1 rounded bg-[#05080F]/90 border border-white/10 font-mono text-[10px] text-[#00D2FF] flex items-center gap-1.5">
-                          <CheckCircle2 className="w-3 h-3 text-[#10B981]" />
-                          <span>PRODUCTION VERIFIED</span>
-                        </div>
-                      </Link>
-                    </div>
-                  </div>
-                </article>
-              );
-            })}
-          </div>
+          <FeaturedProjectsShowcase projects={formattedFilteredProjects} />
         )}
       </Container>
 
