@@ -171,16 +171,6 @@ export default async function HomePage({
         <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[850px] h-[550px] bg-[#0066FF]/10 blur-[150px] pointer-events-none rounded-full" />
 
         <Container size="wide" className="relative z-10 text-center space-y-8">
-          {/* Telemetry Status Banner */}
-          <div className="flex justify-center">
-            <div className="inline-flex items-center gap-3 px-4 py-1.5 rounded-full bg-[#080D18]/90 border border-white/10 backdrop-blur-xl shadow-lg shadow-black/40">
-              <span className="w-2 h-2 rounded-full bg-[#00D2FF] animate-pulse" />
-              <span className="font-mono text-xs text-[#94A3B8] tracking-widest uppercase font-medium">
-                {settings.homepage_hero_badge || '[GMD // GENESIS: ARCHITECTURE & DISTRIBUTED SYSTEMS]'}
-              </span>
-            </div>
-          </div>
-
           {/* Primary Cinematic Display Headline */}
           <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-tight text-white font-display leading-[1.04] max-w-5xl mx-auto">
             {settings.homepage_hero_headline || (

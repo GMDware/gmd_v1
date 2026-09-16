@@ -135,24 +135,24 @@ export const Footer: React.FC<FooterProps> = ({ settings, socialLinks, navItems 
               Architecting high-performance digital infrastructure, scalable systems, and bespoke software platforms for ambitious enterprises.
             </p>
 
-            {/* [GMD // SPECIFICATION] Compact Monospace Telemetry Widget */}
-            <div className="p-3.5 rounded-lg bg-[#080D18] border border-white/[0.06] font-mono text-xs space-y-1.5">
-              <div className="text-white font-semibold flex items-center justify-between text-[11px]">
-                <span className="text-cyan-400">[GMD // SPECIFICATION]</span>
-                <span className="text-slate-500">v3.0.4</span>
+            {/* Studio Info Card */}
+            <div className="p-3.5 rounded-lg bg-[#080D18] border border-white/[0.06] text-xs space-y-1.5">
+              <div className="text-white font-medium flex items-center justify-between text-[11px]">
+                <span className="text-cyan-400 font-mono font-bold">GMDware</span>
+                <span className="text-slate-500 font-mono">Studio</span>
               </div>
               <p className="text-slate-400 text-[11px] leading-relaxed">
-                G: Genesis (Architecture) ── M: Mechanics (Engineering) ── D: Dynamics (Scale)
+                Engineering high-performance software, scalable web platforms, and refined digital products.
               </p>
             </div>
           </div>
 
-          {/* Column 2: Architecture / Navigation */}
+          {/* Column 2: Navigation */}
           <div className="space-y-4">
-            <h3 className="text-xs font-mono uppercase tracking-[0.2em] text-white font-semibold flex items-center gap-2">
-              <span className="text-cyan-400 font-bold">//</span> ARCHITECTURE
+            <h3 className="text-xs font-mono uppercase tracking-wider text-white font-semibold">
+              Navigation
             </h3>
-            <ul className="space-y-2.5 text-sm font-mono">
+            <ul className="space-y-2.5 text-sm font-sans">
               {architectureLinks.map((item) => (
                 <li key={item.path}>
                   <Link
@@ -169,12 +169,12 @@ export const Footer: React.FC<FooterProps> = ({ settings, socialLinks, navItems 
             </ul>
           </div>
 
-          {/* Column 3: Platform & Ecosystem */}
+          {/* Column 3: Resources */}
           <div className="space-y-4">
-            <h3 className="text-xs font-mono uppercase tracking-[0.2em] text-white font-semibold flex items-center gap-2">
-              <span className="text-cyan-400 font-bold">//</span> PLATFORM
+            <h3 className="text-xs font-mono uppercase tracking-wider text-white font-semibold">
+              Resources
             </h3>
-            <ul className="space-y-2.5 text-sm font-mono">
+            <ul className="space-y-2.5 text-sm font-sans">
               {platformLinks.map((item) => (
                 <li key={item.path}>
                   <Link
@@ -191,14 +191,14 @@ export const Footer: React.FC<FooterProps> = ({ settings, socialLinks, navItems 
             </ul>
           </div>
 
-          {/* Column 4: Direct Dispatch & Contact */}
+          {/* Column 4: Contact */}
           <div className="space-y-4">
-            <h3 className="text-xs font-mono uppercase tracking-[0.2em] text-white font-semibold flex items-center gap-2">
-              <span className="text-cyan-400 font-bold">//</span> ENGAGEMENT
+            <h3 className="text-xs font-mono uppercase tracking-wider text-white font-semibold">
+              Contact Us
             </h3>
 
             <p className="text-xs text-slate-400 leading-relaxed font-sans">
-              Direct architectural inquiries, RFP specifications, and technical triage:
+              Have a project or inquiry? Reach out to our team directly:
             </p>
 
             {/* Email Contact Pill/Card with Copy-to-Clipboard & Direct Action */}

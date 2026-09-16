@@ -76,19 +76,12 @@ export default async function ServicesPage({
       <Container size="wide">
         {/* Editorial Header */}
         <div className="max-w-3xl space-y-4 mb-16">
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-[#0066FF] animate-pulse" />
-            <span className="font-mono text-xs tracking-[0.25em] uppercase text-[#00D2FF]">
-              // DISCIPLINES & ENGINEERING SPECIFICATION
-            </span>
-          </div>
-
-          <h1 className="text-4xl sm:text-6xl font-black text-white font-display tracking-tight leading-tight">
-            Enterprise Systems Built From First Principles
+          <h1 className="text-4xl sm:text-6xl font-extrabold text-white font-display tracking-tight leading-tight">
+            Software Engineering & Digital Services
           </h1>
 
-          <p className="text-base sm:text-lg text-[#94A3B8] leading-relaxed font-sans">
-            We do not deliver generic software or template wrappers. Every capability is engineered for mission-critical reliability, predictable scaling, and absolute mathematical determinism.
+          <p className="text-base sm:text-lg text-[#94A3B8] leading-relaxed font-sans max-w-2xl">
+            From end-to-end web applications and cloud architecture to custom digital platforms, we engineer reliable, high-performance software tailored to your business goals.
           </p>
         </div>
 
@@ -99,20 +92,17 @@ export default async function ServicesPage({
               <Server className="w-8 h-8 text-[#00D2FF]" />
             </div>
             <div className="space-y-2">
-              <span className="font-mono text-xs text-[#00D2FF] uppercase tracking-widest">
-                // CAPABILITY DIRECTORY STATUS: REFRESHING
-              </span>
               <h3 className="text-2xl font-bold text-white font-display">
-                Engineering Capabilities Being Updated
+                Services & Offerings
               </h3>
               <p className="text-sm text-[#94A3B8] leading-relaxed max-w-md mx-auto font-sans">
-                Service parameters, deliverable specifications, and production SLAs are actively being refreshed in the CMS.
+                We build bespoke web platforms, scalable backend architectures, and modern digital applications. Contact our team directly to discuss your project.
               </p>
             </div>
             <div className="pt-2">
               <Link href="/contact">
                 <Button variant="primary" size="md" rightIcon={<ArrowUpRight className="w-4 h-4" />}>
-                  Consult Engineering Leadership
+                  Get in Touch
                 </Button>
               </Link>
             </div>
@@ -126,7 +116,7 @@ export default async function ServicesPage({
                 className="gmd-panel rounded-2xl p-6 sm:p-10 lg:p-12 border border-white/10 hover:border-[#0066FF]/50 transition-all scroll-mt-28 space-y-8"
               >
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
-                  {/* Left Column: Capability Profile (5 Cols) */}
+                  {/* Left Column: Service Profile (5 Cols) */}
                   <div className="lg:col-span-5 space-y-6">
                     <div className="flex items-center justify-between">
                       <div className="w-12 h-12 rounded-xl bg-[#080D18] border border-white/10 flex items-center justify-center text-[#00D2FF]">
@@ -139,7 +129,7 @@ export default async function ServicesPage({
                         )}
                       </div>
                       <span className="font-mono text-xs text-[#64748B]">
-                        DISCIPLINE 0{idx + 1}
+                        SERVICE 0{idx + 1}
                       </span>
                     </div>
 
@@ -154,16 +144,16 @@ export default async function ServicesPage({
                     <div className="pt-2">
                       <Link href="/contact">
                         <Button variant="primary" size="md" rightIcon={<ArrowUpRight className="w-4 h-4" />}>
-                          Consult on {service.title || (service as any).name}
+                          Get Started with {service.title || (service as any).name}
                         </Button>
                       </Link>
                     </div>
                   </div>
 
-                  {/* Right Column: Architectural Deliverables (7 Cols) */}
+                  {/* Right Column: Key Deliverables (7 Cols) */}
                   <div className="lg:col-span-7 space-y-6">
-                    <h3 className="text-xs font-mono uppercase tracking-[0.2em] text-[#00D2FF] font-semibold">
-                      // ARCHITECTURAL DELIVERABLES & GUARANTEES
+                    <h3 className="text-xs uppercase tracking-wider text-[#00D2FF] font-semibold">
+                      Key Capabilities & Deliverables
                     </h3>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -195,9 +185,9 @@ export default async function ServicesPage({
       {/* Cross-Cutting Technology Graph */}
       <Container size="wide">
         <SectionHeading
-          tag="02 // INTEGRATED STACK"
-          title="Technology Infrastructure Radar"
-          subtitle="All capabilities leverage our rigorously tested core stack spanning distributed backends, edge delivery, and type-safe frontends."
+          tag="TECH STACK"
+          title="Our Technology Stack"
+          subtitle="Battle-tested technologies, modern frameworks, and robust tools we leverage to build scalable, high-performance applications."
         />
 
         <TechnologyGraph technologies={technologies} />
@@ -206,8 +196,8 @@ export default async function ServicesPage({
       {/* Conversion Banner */}
       <Container size="wide">
         <CallToAction
-          headline="Require an Architectural Audit of Your Current Systems?"
-          subtitle="Our engineering leadership evaluates legacy bottlenecks, scalability thresholds, and modern migration pathways."
+          headline="Have a Project in Mind?"
+          subtitle="Talk directly with our engineering team to discuss your technical requirements, architecture, and timeline."
         />
       </Container>
     </div>

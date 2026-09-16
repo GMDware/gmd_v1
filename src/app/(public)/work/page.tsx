@@ -77,32 +77,24 @@ export default async function WorkPage({
     <div className="py-20 space-y-24 bg-[#05080F]">
       <Container size="wide">
         {/* Editorial Work Header */}
-        <div className="max-w-4xl space-y-5 mb-14">
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-[#0066FF] animate-pulse" />
-            <span className="font-mono text-xs tracking-[0.25em] uppercase text-[#00D2FF]">
-              // PRODUCTION SYSTEMS ARCHIVE
-            </span>
-          </div>
-
-          <h1 className="text-4xl sm:text-6xl md:text-7xl font-black text-white font-display tracking-tight leading-[1.08]">
-            Architectural Work & Case Studies
+        <div className="max-w-4xl space-y-4 mb-14">
+          <h1 className="text-4xl sm:text-6xl md:text-7xl font-extrabold text-white font-display tracking-tight leading-[1.08]">
+            Our Work & Case Studies
           </h1>
 
           <p className="text-base sm:text-xl text-[#94A3B8] leading-relaxed font-sans max-w-3xl">
-            Inspect our deployed enterprise systems. Every case study documents our end-to-end engineering rigor: from domain problem modeling to zero-downtime distributed infrastructure.
+            Explore our portfolio of high-performance web applications, digital platforms, and custom software solutions built for ambitious organizations.
           </p>
         </div>
 
         {/* Category Filter Pills */}
         <div className="flex flex-wrap items-center gap-2 border-b border-white/[0.08] pb-6 mb-14">
-          <span className="text-xs font-mono text-[#64748B] uppercase mr-3">DOMAINS:</span>
           <Link href="/work">
             <Badge
               variant={!activeCategorySlug ? 'cobalt' : 'neutral'}
-              className="cursor-pointer transition-all hover:border-[#0066FF]/50"
+              className="cursor-pointer transition-all hover:border-[#0066FF]/50 px-3.5 py-1 text-xs"
             >
-              All Flagship Systems ({projects.length})
+              All Projects ({projects.length})
             </Badge>
           </Link>
           {categories.map((cat: any) => {
@@ -111,7 +103,7 @@ export default async function WorkPage({
               <Link key={cat.id} href={`/work?category=${cat.slug}`}>
                 <Badge
                   variant={isSelected ? 'cobalt' : 'neutral'}
-                  className="cursor-pointer transition-all hover:border-[#0066FF]/50"
+                  className="cursor-pointer transition-all hover:border-[#0066FF]/50 px-3.5 py-1 text-xs"
                 >
                   {cat.name}
                 </Badge>
@@ -127,22 +119,19 @@ export default async function WorkPage({
               <Layers className="w-8 h-8 text-[#00D2FF]" />
             </div>
             <div className="space-y-2">
-              <span className="font-mono text-xs text-[#00D2FF] uppercase tracking-widest">
-                // ARCHIVE STATUS: EMPTY
-              </span>
               <h3 className="text-2xl font-bold text-white font-display">
                 {activeCategorySlug
-                  ? `No Published Systems Under "${activeCategorySlug}"`
-                  : 'No Public Systems Currently Listed'}
+                  ? `No Projects Found in "${activeCategorySlug}"`
+                  : 'No Public Projects Currently Listed'}
               </h3>
               <p className="text-sm text-[#94A3B8] leading-relaxed max-w-md mx-auto font-sans">
-                Case studies are being calibrated in the CMS. Contact our engineering directors directly to receive confidential enterprise case summaries.
+                Case studies are actively being published. Contact our team directly to explore relevant project examples and demos.
               </p>
             </div>
             <div className="pt-2">
               <Link href="/contact">
                 <Button variant="primary" size="md" rightIcon={<ArrowUpRight className="w-4 h-4" />}>
-                  Request Architecture Portfolio
+                  Contact Our Team
                 </Button>
               </Link>
             </div>
@@ -151,36 +140,23 @@ export default async function WorkPage({
           <div className="space-y-16">
             {filteredProjects.map((project: any, idx: number) => {
               const heroUrl = project.heroImage?.url || project.heroImageUrl;
-              const projectTechs =
-                project.technologies?.map(
-                  (t: any) => t.technology?.name || t.name
-                ) || [];
+              const projectTechs = (project.technologies || []).map((t: any) =>
+                typeof t === 'string' ? t : t.technology?.name || t.name
+              );
 
               return (
                 <article
                   key={project.id || idx}
-                  id={project.slug}
-                  className="gmd-panel rounded-2xl p-6 sm:p-10 lg:p-12 border border-white/10 hover:border-[#0066FF]/50 transition-all scroll-mt-28 relative overflow-hidden group shadow-2xl"
+                  className="gmd-panel rounded-2xl p-6 sm:p-10 lg:p-12 border border-white/10 hover:border-[#0066FF]/50 transition-all group scroll-mt-28"
                 >
-                  {/* Background Index Watermark */}
-                  <div className="absolute top-4 right-8 font-mono text-7xl sm:text-8xl font-black text-white/[0.02] select-none pointer-events-none">
-                    0{idx + 1}
-                  </div>
-
                   {/* Card Header Rail */}
                   <div className="flex flex-wrap items-center justify-between gap-4 border-b border-white/[0.08] pb-6 mb-8">
                     <div className="flex flex-wrap items-center gap-3">
-                      <span className="font-mono text-xs text-[#00D2FF] font-semibold">
-                        0{idx + 1} //
-                      </span>
                       <Badge variant="cobalt">{project.projectType || 'Software System'}</Badge>
                       <Badge variant="neutral">
-                        {project.clientName || 'Confidential Partner'}
+                        {project.clientName || 'Partner Project'}
                       </Badge>
-                      {project.isFeatured && <Badge variant="cyan">FLAGSHIP</Badge>}
-                    </div>
-                    <div className="font-mono text-xs text-[#64748B]">
-                      SPEC_UID: {project.slug}
+                      {project.isFeatured && <Badge variant="cyan">Featured Project</Badge>}
                     </div>
                   </div>
 
@@ -188,7 +164,7 @@ export default async function WorkPage({
                   <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
                     {/* Left: Project Narrative & Specs (7 Cols) */}
                     <div className="lg:col-span-7 space-y-6">
-                      <h2 className="text-2xl sm:text-4xl font-black text-white font-display tracking-tight group-hover:text-[#00D2FF] transition-colors">
+                      <h2 className="text-2xl sm:text-4xl font-extrabold text-white font-display tracking-tight group-hover:text-[#00D2FF] transition-colors">
                         <Link href={`/work/${project.slug}`}>
                           {project.title}
                         </Link>
@@ -202,9 +178,9 @@ export default async function WorkPage({
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
                         {project.challenge && (
                           <div className="p-3.5 rounded-lg bg-[#080D18] border border-white/[0.05] space-y-1">
-                            <span className="font-mono text-[10px] text-[#00D2FF] uppercase tracking-wider font-semibold flex items-center gap-1.5">
+                            <span className="text-[11px] text-[#00D2FF] uppercase tracking-wider font-semibold flex items-center gap-1.5">
                               <Cpu className="w-3 h-3 text-[#0066FF]" />
-                              THE CHALLENGE
+                              Challenge
                             </span>
                             <p className="text-xs text-slate-300 line-clamp-2 font-sans">
                               {project.challenge}
@@ -214,9 +190,9 @@ export default async function WorkPage({
 
                         {project.strategy && (
                           <div className="p-3.5 rounded-lg bg-[#080D18] border border-white/[0.05] space-y-1">
-                            <span className="font-mono text-[10px] text-[#00D2FF] uppercase tracking-wider font-semibold flex items-center gap-1.5">
+                            <span className="text-[11px] text-[#00D2FF] uppercase tracking-wider font-semibold flex items-center gap-1.5">
                               <Layers className="w-3 h-3 text-[#0066FF]" />
-                              STRATEGY
+                              Strategy & Solution
                             </span>
                             <p className="text-xs text-slate-300 line-clamp-2 font-sans">
                               {project.strategy}
@@ -228,14 +204,14 @@ export default async function WorkPage({
                       {/* Technology Stack Tags */}
                       {projectTechs.length > 0 && (
                         <div className="space-y-2 pt-2">
-                          <span className="font-mono text-[10px] text-[#64748B] uppercase tracking-widest block">
-                            SYSTEM STACK:
+                          <span className="text-[11px] text-[#64748B] uppercase tracking-wider font-medium block">
+                            Technologies:
                           </span>
                           <div className="flex flex-wrap gap-1.5">
                             {projectTechs.slice(0, 6).map((tech: string) => (
                               <span
                                 key={tech}
-                                className="px-2.5 py-1 rounded bg-[#0E1526] border border-white/[0.06] font-mono text-xs text-slate-300"
+                                className="px-2.5 py-1 rounded bg-[#0E1526] border border-white/[0.06] text-xs text-slate-300 font-medium"
                               >
                                 {tech}
                               </span>

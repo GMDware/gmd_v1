@@ -47,20 +47,13 @@ export default async function ContactPage({
     <div className="py-16 space-y-20 bg-[#05080F]">
       <Container size="wide">
         {/* Header */}
-        <div className="max-w-3xl space-y-4 mb-16">
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-[#0066FF] animate-pulse" />
-            <span className="font-mono text-xs tracking-[0.25em] uppercase text-[#00D2FF]">
-              // TECHNICAL CONSULTATION TERMINAL
-            </span>
-          </div>
-
-          <h1 className="text-4xl sm:text-6xl font-black text-white font-display tracking-tight leading-tight">
-            Initiate Direct Architectural Consultation
+        <div className="max-w-3xl space-y-4 mb-14">
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white font-display tracking-tight leading-[1.1]">
+            Let's Build Something Great Together
           </h1>
 
-          <p className="text-base sm:text-lg text-[#94A3B8] leading-relaxed font-sans">
-            Submit your technical specifications or project parameters. Every submission is treated with strict confidentiality.
+          <p className="text-base sm:text-lg text-[#94A3B8] leading-relaxed font-sans max-w-2xl">
+            Have a project in mind, need software engineering expertise, or want to discuss a new product? Send us a message and our team will get back to you promptly.
           </p>
         </div>
 
@@ -70,22 +63,22 @@ export default async function ContactPage({
             <ContactForm />
           </div>
 
-          {/* Contact Metadata & Security Guarantees (5 Cols) */}
+          {/* Contact Metadata & Info (5 Cols) */}
           <div className="lg:col-span-5 space-y-6">
             <div className="gmd-panel rounded-xl p-6 space-y-5">
-              <h3 className="text-sm font-mono uppercase tracking-wider text-white font-semibold flex items-center gap-2">
-                <Terminal className="w-4 h-4 text-[#0066FF]" />
-                <span>DIRECT CHANNELS</span>
+              <h3 className="text-sm uppercase tracking-wider text-white font-semibold flex items-center gap-2">
+                <Mail className="w-4 h-4 text-[#0066FF]" />
+                <span>Direct Contact</span>
               </h3>
 
               <div className="space-y-4 text-sm">
                 <div className="flex items-start gap-3">
                   <Mail className="w-4 h-4 text-[#00D2FF] shrink-0 mt-1" />
                   <div>
-                    <div className="text-[10px] text-[#64748B] font-mono uppercase">PRIMARY INQUIRIES</div>
+                    <div className="text-[11px] text-[#64748B] uppercase font-medium">Email Address</div>
                     <a
                       href={`mailto:${contactEmail}`}
-                      className="text-white hover:text-[#00D2FF] font-mono text-xs transition-colors"
+                      className="text-white hover:text-[#00D2FF] text-sm transition-colors font-medium"
                     >
                       {contactEmail}
                     </a>
@@ -95,14 +88,14 @@ export default async function ContactPage({
                 <div className="flex items-start gap-3">
                   <MapPin className="w-4 h-4 text-[#80B3FF] shrink-0 mt-1" />
                   <div>
-                    <div className="text-[10px] text-[#64748B] font-mono uppercase">OPERATIONAL MODEL</div>
-                    <div className="text-slate-300 text-xs font-sans">{location}</div>
+                    <div className="text-[11px] text-[#64748B] uppercase font-medium">Location</div>
+                    <div className="text-slate-300 text-sm font-sans">{location}</div>
                   </div>
                 </div>
 
                 {/* Official Social Media Channels */}
                 <div className="pt-3 border-t border-white/5 space-y-2">
-                  <div className="text-[10px] text-[#64748B] font-mono uppercase">OFFICIAL PRESENCE</div>
+                  <div className="text-[11px] text-[#64748B] uppercase font-medium">Social Channels</div>
                   <div className="flex flex-wrap items-center gap-2">
                     {socialLinks.map((link) => (
                       <a
@@ -111,10 +104,10 @@ export default async function ContactPage({
                         target="_blank"
                         rel="noopener noreferrer"
                         aria-label={`Official ${link.platform}`}
-                        className="p-1.5 rounded-lg bg-[#080D18] border border-white/10 text-slate-400 hover:text-[#00D2FF] hover:border-[#0066FF]/40 transition-colors"
+                        className="p-2 rounded-lg bg-[#080D18] border border-white/10 text-slate-400 hover:text-[#00D2FF] hover:border-[#0066FF]/40 transition-colors"
                         title={link.platform}
                       >
-                        <SocialIcon platform={link.platform} className="w-3.5 h-3.5" />
+                        <SocialIcon platform={link.platform} className="w-4 h-4" />
                       </a>
                     ))}
                   </div>
@@ -125,26 +118,26 @@ export default async function ContactPage({
             <div className="gmd-panel rounded-xl p-6 space-y-3 border-l-2 border-l-[#0066FF]">
               <div className="flex items-center gap-2 text-white text-sm font-semibold">
                 <ShieldCheck className="w-4 h-4 text-[#10B981]" />
-                <span>Confidentiality & Mutual NDA</span>
+                <span>Strict Confidentiality & NDA</span>
               </div>
               <p className="text-xs text-[#94A3B8] leading-relaxed font-sans">
-                We routinely execute bilateral non-disclosure agreements prior to reviewing proprietary codebases, systems designs, or organizational IP.
+                Every project inquiry is treated with complete confidentiality. Non-disclosure agreements (NDAs) are available upon request before reviewing any sensitive details.
               </p>
             </div>
 
-            <div className="p-6 rounded-xl bg-[#080D18] border border-white/[0.06] space-y-2 font-mono">
+            <div className="p-6 rounded-xl bg-[#080D18] border border-white/[0.06] space-y-2">
               <div className="flex items-center justify-between text-xs text-[#64748B]">
-                <span className="flex items-center gap-1.5">
+                <span className="flex items-center gap-1.5 text-slate-400 font-medium">
                   <Clock className="w-3.5 h-3.5 text-[#00D2FF]" />
-                  <span>COMMUNICATION</span>
+                  <span>Response Time</span>
                 </span>
-                <span className="text-[#10B981]">ACTIVE</span>
+                <span className="text-[#10B981] font-medium font-mono">Within 24 Hours</span>
               </div>
-              <div className="text-lg font-bold text-white tracking-tight font-display">
-                Direct Technical Triage
+              <div className="text-base font-bold text-white tracking-tight font-display">
+                Fast & Direct Response
               </div>
-              <p className="text-[11px] text-[#64748B] font-sans leading-relaxed">
-                Inquiries are triaged directly in the administration console and answered via email.
+              <p className="text-xs text-[#94A3B8] font-sans leading-relaxed">
+                Inquiries are reviewed directly by our engineering leadership team.
               </p>
             </div>
           </div>

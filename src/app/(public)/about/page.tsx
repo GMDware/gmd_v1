@@ -66,62 +66,55 @@ export default async function AboutPage({
       <Container size="wide">
         {/* Editorial Header */}
         <div className="max-w-3xl space-y-4 mb-16">
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-[#0066FF] animate-pulse" />
-            <span className="font-mono text-xs tracking-[0.25em] uppercase text-[#00D2FF]">
-              // PHILOSOPHY, GENESIS & LEADERSHIP
-            </span>
-          </div>
-
-          <h1 className="text-4xl sm:text-6xl font-black text-white font-display tracking-tight leading-tight">
-            Architectural Discipline. Digital Craftsmanship.
+          <h1 className="text-4xl sm:text-6xl font-extrabold text-white font-display tracking-tight leading-tight">
+            Built for Craftsmanship & Scalability
           </h1>
 
-          <p className="text-base sm:text-lg text-[#94A3B8] leading-relaxed font-sans">
+          <p className="text-base sm:text-lg text-[#94A3B8] leading-relaxed font-sans max-w-2xl">
             {settings.vision_statement ||
-              'Setting the benchmark for modern software craftsmanship, zero-compromise security, and cinematic digital user experiences.'}
+              'GMDware is an independent software studio dedicated to engineering reliable, beautifully designed digital products and scalable systems.'}
           </p>
         </div>
 
-        {/* ── G - M - D Tripartite Philosophy Section ── */}
+        {/* ── G - M - D Principles Section ── */}
         <div className="mb-20">
           <SectionHeading
-            tag="01 // THE GMD CONCEPT"
-            title="The Tripartite Engineering Triad"
-            subtitle="The fundamental framework guiding every system, interface, and infrastructure rollout."
+            tag="OUR PRINCIPLES"
+            title="Our Core Engineering Principles"
+            subtitle="The fundamental philosophy guiding every product, interface, and system we deliver."
           />
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="gmd-panel rounded-2xl p-8 space-y-4 border-t-2 border-t-[#0066FF]">
               <div className="flex items-center justify-between font-mono text-xs text-[#00D2FF]">
-                <span>[G] // PHASE_01</span>
-                <span>ORIGIN</span>
+                <span>01. DISCOVERY</span>
+                <span>STRATEGY</span>
               </div>
-              <h3 className="text-2xl font-bold text-white font-display">GENESIS</h3>
+              <h3 className="text-2xl font-bold text-white font-display">Architecture & Strategy</h3>
               <p className="text-sm text-[#94A3B8] leading-relaxed font-sans">
-                First-principles architecture, formal domain modeling, and algorithmic foundations. We define system boundaries before writing a single line of production code.
+                First-principles design, domain modeling, and clear technical planning. We define system boundaries and architecture before writing production code.
               </p>
             </div>
 
             <div className="gmd-panel rounded-2xl p-8 space-y-4 border-t-2 border-t-[#FFFFFF]">
               <div className="flex items-center justify-between font-mono text-xs text-white">
-                <span>[M] // PHASE_02</span>
-                <span>STRUCTURE</span>
+                <span>02. CRAFTSMANSHIP</span>
+                <span>EXECUTION</span>
               </div>
-              <h3 className="text-2xl font-bold text-white font-display">MECHANICS</h3>
+              <h3 className="text-2xl font-bold text-white font-display">Engineering & Design</h3>
               <p className="text-sm text-[#94A3B8] leading-relaxed font-sans">
-                Precision full-stack construction, high-concurrency distributed data pipelines, and cinematic interactive interfaces executed with strict type integrity.
+                Modern full-stack construction, clean code practices, and refined interactive user experiences built with strict type safety and performance.
               </p>
             </div>
 
             <div className="gmd-panel rounded-2xl p-8 space-y-4 border-t-2 border-t-[#00D2FF]">
               <div className="flex items-center justify-between font-mono text-xs text-[#00D2FF]">
-                <span>[D] // PHASE_03</span>
-                <span>HORIZON</span>
+                <span>03. HORIZON</span>
+                <span>GROWTH</span>
               </div>
-              <h3 className="text-2xl font-bold text-white font-display">DYNAMICS</h3>
+              <h3 className="text-2xl font-bold text-white font-display">Scale & Reliability</h3>
               <p className="text-sm text-[#94A3B8] leading-relaxed font-sans">
-                Global cloud orchestration, automated CI/CD deployment vectors, and live telemetry. Ensuring 99.99% availability under extreme operational load.
+                Scalable cloud deployment, automated CI/CD workflows, and continuous monitoring to ensure your product remains fast, reliable, and available as you scale.
               </p>
             </div>
           </div>
@@ -130,37 +123,37 @@ export default async function AboutPage({
         {/* Mission & Vision Statements */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-20">
           <div className="gmd-panel rounded-2xl p-8 space-y-4 border border-[#0066FF]/30">
-            <div className="font-mono text-xs text-[#00D2FF] uppercase tracking-wider font-semibold flex items-center gap-2">
+            <div className="text-xs text-[#00D2FF] uppercase tracking-wider font-semibold flex items-center gap-2">
               <span className="w-1.5 h-1.5 rounded-full bg-[#00D2FF]" />
-              // OUR VISION
+              Our Vision
             </div>
-            <h3 className="text-2xl font-bold text-white font-display">The Benchmark Standard</h3>
+            <h3 className="text-2xl font-bold text-white font-display">Craftsmanship Standard</h3>
             <p className="text-sm sm:text-base text-[#94A3B8] leading-relaxed font-sans">
               {settings.vision_statement ||
-                'Setting the global benchmark for modern software craftsmanship, zero-compromise security, and cinematic digital user experiences.'}
+                'Setting the standard for modern software craftsmanship, zero-compromise security, and refined digital user experiences.'}
             </p>
           </div>
 
           <div className="gmd-panel rounded-2xl p-8 space-y-4 border border-white/10">
-            <div className="font-mono text-xs text-white uppercase tracking-wider font-semibold flex items-center gap-2">
+            <div className="text-xs text-white uppercase tracking-wider font-semibold flex items-center gap-2">
               <span className="w-1.5 h-1.5 rounded-full bg-white" />
-              // OUR MISSION
+              Our Mission
             </div>
-            <h3 className="text-2xl font-bold text-white font-display">Why GMDware Exists</h3>
+            <h3 className="text-2xl font-bold text-white font-display">Why We Build</h3>
             <p className="text-sm sm:text-base text-[#94A3B8] leading-relaxed font-sans">
               {settings.mission_statement ||
-                'To engineer resilient, scalable, and mathematically sound digital infrastructure that accelerates enterprise transformation.'}
+                'To engineer resilient, scalable, and beautifully crafted software products that help ambitious teams grow and succeed.'}
             </p>
           </div>
 
           <div className="gmd-panel rounded-2xl p-8 space-y-4 border border-white/10">
-            <div className="font-mono text-xs text-[#80B3FF] uppercase tracking-wider font-semibold flex items-center gap-2">
+            <div className="text-xs text-[#80B3FF] uppercase tracking-wider font-semibold flex items-center gap-2">
               <span className="w-1.5 h-1.5 rounded-full bg-[#80B3FF]" />
-              // THE GMD CODE
+              Our Commitment
             </div>
-            <h3 className="text-2xl font-bold text-white font-display">Mathematical Determinism</h3>
+            <h3 className="text-2xl font-bold text-white font-display">Quality Without Bloat</h3>
             <p className="text-sm sm:text-base text-[#94A3B8] leading-relaxed font-sans">
-              We reject fragile abstractions, dependency bloat, and premature optimization. We design systems from domain boundaries outward, guaranteeing predictable performance.
+              We reject fragile shortcuts, unnecessary dependency bloat, and poor architectural habits. We engineer clean, maintainable systems that stand the test of time.
             </p>
           </div>
         </div>
@@ -169,9 +162,9 @@ export default async function AboutPage({
         {founders.length > 0 && (
           <div className="space-y-8 mb-20">
             <SectionHeading
-              tag="02 // EXECUTIVE ARCHITECTS"
+              tag="LEADERSHIP"
               title="Founders & Leadership"
-              subtitle="Directing GMDware engineering methodology, technical standards, and client architecture engagements."
+              subtitle="Directing GMDware's engineering standards, product strategy, and client engagements."
             />
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
@@ -186,9 +179,9 @@ export default async function AboutPage({
         {engineers.length > 0 && (
           <div className="space-y-8 mb-20">
             <SectionHeading
-              tag="03 // CORE ENGINEERING"
-              title="Systems Specialists & UI Architects"
-              subtitle="Senior practitioners dedicated to distributed backends, algorithmic optimization, and cinematic motion design."
+              tag="THE TEAM"
+              title="Software Engineers & Designers"
+              subtitle="Specialists dedicated to full-stack engineering, cloud architecture, and intuitive user experiences."
             />
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -206,12 +199,9 @@ export default async function AboutPage({
               <Users className="w-6 h-6 text-[#00D2FF]" />
             </div>
             <div className="space-y-1">
-              <span className="font-mono text-xs text-[#00D2FF] uppercase tracking-wider">
-                // PRACTITIONER ROSTER
-              </span>
               <h4 className="text-xl font-bold text-white font-display">Team Directory Updating</h4>
               <p className="text-xs text-[#94A3B8] leading-relaxed">
-                Staff and leadership profiles are being calibrated in the CMS.
+                Staff and leadership profiles are being updated in the studio directory.
               </p>
             </div>
           </div>
@@ -221,9 +211,9 @@ export default async function AboutPage({
         {values.length > 0 && (
           <div className="space-y-8 mb-20">
             <SectionHeading
-              tag="04 // OPERATIONAL VALUES"
-              title="The GMDware Principles"
-              subtitle="Standards that govern every pull request, architecture review, and deployment protocol."
+              tag="OUR VALUES"
+              title="Our Values & Standards"
+              subtitle="The values that guide how we write code, build digital products, and collaborate with our clients."
             />
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
