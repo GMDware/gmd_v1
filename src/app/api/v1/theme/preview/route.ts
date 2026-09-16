@@ -20,9 +20,9 @@ export async function POST(req: NextRequest) {
     if (isSetAction) {
       response.cookies.set(THEME_PREVIEW_COOKIE, themeId, {
         path: '/',
-        maxAge: 60 * 60 * 2, // 2 hours preview expiration
+        maxAge: 60 * 60 * 24 * 30, // 30 days theme persistence
         sameSite: 'lax',
-        httpOnly: false, // Accessible to client banner
+        httpOnly: false, // Accessible to client components
       });
     } else if (action === 'clear' || body.clear) {
       response.cookies.delete({

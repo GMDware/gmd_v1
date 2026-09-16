@@ -11,7 +11,7 @@ import { SectionConduit } from '@/components/ui/SectionConduit';
 import { TransformationPipeline } from '@/components/public/TransformationPipeline';
 import { ServiceEnvironment } from '@/components/public/ServiceEnvironment';
 import { WhatWeBuild } from '@/components/public/WhatWeBuild';
-import { ProjectPreview } from '@/components/public/ProjectPreview';
+import { FeaturedProjectsShowcase } from '@/components/public/FeaturedProjectsShowcase';
 import { TechnologyEcosystem } from '@/components/public/TechnologyEcosystem';
 import { ProcessTimeline } from '@/components/public/ProcessTimeline';
 import { TeamMemberCard } from '@/components/public/TeamMemberCard';
@@ -303,11 +303,7 @@ export default async function HomePage({
           />
 
           {formattedProjects.length > 0 ? (
-            <div className="space-y-12">
-              {formattedProjects.map((project, idx) => (
-                <ProjectPreview key={project.id} project={project} index={idx} />
-              ))}
-            </div>
+            <FeaturedProjectsShowcase projects={formattedProjects} />
           ) : (
             <div className="gmd-panel rounded-2xl p-10 border border-white/10 text-center space-y-4 max-w-xl mx-auto">
               <div className="w-12 h-12 rounded-xl bg-[#080D18] border border-white/10 mx-auto flex items-center justify-center text-[#0066FF]">

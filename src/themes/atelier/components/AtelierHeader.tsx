@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Menu, X, ArrowUpRight } from 'lucide-react';
 import { GMDwareLogo } from '@/components/ui/GMDwareLogo';
+import { ThemeSwitcher } from '@/components/public/ThemeSwitcher';
 
 interface AtelierHeaderProps {
   navItems?: Array<{ label: string; path: string }>;
@@ -81,6 +82,9 @@ export const AtelierHeader: React.FC<AtelierHeaderProps> = ({
 
         {/* Right-Aligned CTA Hierarchy: Solitary Primary Action */}
         <div className="flex-1 flex justify-end items-center gap-3">
+          {/* Desktop Theme Switcher */}
+          <ThemeSwitcher variant="pill" className="hidden sm:inline-flex" />
+
           <Link
             href="/contact"
             className="hidden sm:inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-slate-300 hover:border-slate-900 bg-white/50 hover:bg-slate-900 text-slate-800 hover:text-white font-medium text-xs sm:text-sm transition-all duration-200 shadow-sm group active:scale-[0.98]"
@@ -88,6 +92,9 @@ export const AtelierHeader: React.FC<AtelierHeaderProps> = ({
             <span>Start a project</span>
             <ArrowUpRight className="w-3.5 h-3.5 text-slate-500 group-hover:text-white group-hover:-translate-y-0.5 group-hover:translate-x-0.5 transition-transform" />
           </Link>
+
+          {/* Mobile Theme Toggle */}
+          <ThemeSwitcher variant="compact" className="sm:hidden" />
 
           {/* Mobile Hamburger Toggle */}
           <button
@@ -128,7 +135,14 @@ export const AtelierHeader: React.FC<AtelierHeaderProps> = ({
             })}
           </div>
 
-          <div className="pt-2 border-t border-slate-100">
+          <div className="space-y-3 pt-3 border-t border-slate-100">
+            <div className="space-y-1">
+              <span className="text-[11px] font-mono uppercase tracking-wider text-slate-500 font-semibold block">
+                Studio Experience Theme:
+              </span>
+              <ThemeSwitcher variant="drawer" />
+            </div>
+
             <Link
               href="/contact"
               onClick={() => setMobileOpen(false)}

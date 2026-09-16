@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { GMDwareLogo } from '@/components/ui/GMDwareLogo';
 import { Menu, X, ArrowUpRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { ThemeSwitcher } from '@/components/public/ThemeSwitcher';
 
 export interface NavItem {
   label: string;
@@ -144,6 +145,9 @@ export const Header: React.FC<HeaderProps> = ({ navItems = [], brandName = 'GMDw
 
           {/* ── Right Column: Call To Action & Mobile Controls ── */}
           <div className="flex items-center justify-end gap-3">
+            {/* Desktop Theme Switcher Pill */}
+            <ThemeSwitcher variant="pill" className="hidden md:inline-flex" />
+
             {/* Desktop Styled Gradient Start a Project Button */}
             <Link
               href="/contact"
@@ -155,6 +159,8 @@ export const Header: React.FC<HeaderProps> = ({ navItems = [], brandName = 'GMDw
 
             {/* Mobile Viewport Actions */}
             <div className="flex md:hidden items-center gap-2">
+              <ThemeSwitcher variant="compact" />
+
               <Link
                 href="/contact"
                 className="inline-flex items-center gap-1 bg-gradient-to-r from-blue-600 to-cyan-500 text-white font-medium text-xs px-3.5 py-1.5 rounded-lg shadow-[0_0_12px_rgba(6,182,212,0.35)]"
@@ -270,6 +276,14 @@ export const Header: React.FC<HeaderProps> = ({ navItems = [], brandName = 'GMDw
 
               {/* Drawer Footer & Actions */}
               <div className="pt-6 border-t border-white/[0.08] space-y-4">
+                {/* Theme Selector for Mobile */}
+                <div className="space-y-1.5">
+                  <span className="text-[11px] font-mono uppercase tracking-wider text-slate-400 font-semibold block">
+                    Studio Experience Theme:
+                  </span>
+                  <ThemeSwitcher variant="drawer" />
+                </div>
+
                 <Link
                   href="/contact"
                   onClick={() => setMobileMenuOpen(false)}
