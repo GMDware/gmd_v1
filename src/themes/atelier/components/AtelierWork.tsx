@@ -102,14 +102,18 @@ export const AtelierWork: React.FC<AtelierWorkProps> = ({
   const cardRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
   useEffect(() => {
+    const el = railRef.current;
+    if (!el) return;
+
     const checkOverflow = () => {
-      if (railRef.current) {
-        setHasOverflow(railRef.current.scrollWidth > railRef.current.clientWidth + 8);
-      }
+      setHasOverflow(el.scrollWidth > el.clientWidth + 8);
     };
+
     checkOverflow();
-    window.addEventListener('resize', checkOverflow);
-    return () => window.removeEventListener('resize', checkOverflow);
+
+    const ro = new ResizeObserver(checkOverflow);
+    ro.observe(el);
+    return () => ro.disconnect();
   }, [allProjects.length]);
 
   const ROTATION_INTERVAL = 4500; // 4.5 seconds per project cycle
@@ -509,10 +513,8 @@ export const AtelierWork: React.FC<AtelierWorkProps> = ({
 
           <div
             ref={railRef}
-            className={`flex items-stretch gap-5 pb-4 pt-1 ${
-              hasOverflow
-                ? 'overflow-x-auto scroll-smooth snap-x snap-mandatory [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]'
-                : 'justify-center flex-wrap'
+            className={`flex items-stretch gap-5 pb-4 pt-1 overflow-x-auto flex-nowrap scroll-smooth snap-x snap-mandatory [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] ${
+              hasOverflow ? 'justify-start' : 'justify-center'
             }`}
           >
             {allProjects.map((project, idx) => {

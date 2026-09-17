@@ -46,15 +46,18 @@ export const UnifiedTeamRail: React.FC<UnifiedTeamRailProps> = ({
   const [hasOverflow, setHasOverflow] = useState(false);
 
   useEffect(() => {
+    const el = railRef.current;
+    if (!el) return;
+
     const checkOverflow = () => {
-      if (railRef.current) {
-        const { scrollWidth, clientWidth } = railRef.current;
-        setHasOverflow(scrollWidth > clientWidth + 8);
-      }
+      setHasOverflow(el.scrollWidth > el.clientWidth + 8);
     };
+
     checkOverflow();
-    window.addEventListener('resize', checkOverflow);
-    return () => window.removeEventListener('resize', checkOverflow);
+
+    const ro = new ResizeObserver(checkOverflow);
+    ro.observe(el);
+    return () => ro.disconnect();
   }, [members]);
 
   // Auto-scroll when members overflow
@@ -196,17 +199,15 @@ export const UnifiedTeamRail: React.FC<UnifiedTeamRailProps> = ({
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
         className={cn(
-          'flex items-stretch gap-5 pb-4 pt-1',
-          hasOverflow
-            ? 'overflow-x-auto snap-x snap-mandatory scroll-smooth [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden'
-            : 'justify-center flex-wrap'
+          'flex items-stretch gap-5 pb-4 pt-1 overflow-x-auto flex-nowrap snap-x snap-mandatory scroll-smooth [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden',
+          hasOverflow ? 'justify-start' : 'justify-center'
         )}
       >
         {members.map((member, idx) => (
           <div
             key={member.id || idx}
             data-team-card="true"
-            className={`shrink-0 w-[85vw] max-w-[320px] sm:w-[calc((100%-1.25rem)/2)] lg:w-[calc((100%-3.75rem)/4)] snap-start rounded-3xl bg-[#080D18] border p-5 flex flex-col justify-between space-y-4 relative overflow-hidden group transition-all duration-300 ${
+            className={`shrink-0 w-[280px] sm:w-[300px] snap-start rounded-3xl bg-[#080D18] border p-5 flex flex-col justify-between space-y-4 relative overflow-hidden group transition-all duration-300 ${
               member.isFounder
                 ? 'border-[#0066FF]/40 shadow-lg shadow-[#0066FF]/5 hover:border-[#00F2FE]/70 hover:shadow-[0_0_25px_rgba(0,242,254,0.15)]'
                 : 'border-white/10 hover:border-[#0066FF]/60 hover:shadow-[0_0_20px_rgba(0,102,255,0.12)]'

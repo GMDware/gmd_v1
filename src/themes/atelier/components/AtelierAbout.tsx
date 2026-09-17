@@ -61,7 +61,7 @@ const MemberCard: React.FC<{
       viewport={{ once: true, amount: 0.15 }}
       transition={{ duration: 0.5, delay: index * 0.06, ease: editorialEasing }}
       whileHover={shouldReduceMotion ? undefined : { y: -6 }}
-      className={`shrink-0 w-[85vw] max-w-[320px] sm:w-[calc((100%-1.25rem)/2)] lg:w-[calc((100%-3.75rem)/4)] snap-start rounded-3xl bg-white border p-5 flex flex-col justify-between space-y-4 relative overflow-hidden group transition-all duration-300 ${
+      className={`shrink-0 w-[280px] sm:w-[300px] snap-start rounded-3xl bg-white border p-5 flex flex-col justify-between space-y-4 relative overflow-hidden group transition-all duration-300 ${
         member.isFounder
           ? 'border-blue-200/90 shadow-md shadow-blue-500/5 hover:border-blue-400 hover:shadow-xl'
           : 'border-slate-200/90 shadow-sm hover:border-slate-300 hover:shadow-lg'
@@ -295,14 +295,18 @@ export const AtelierAbout: React.FC<AtelierAboutProps> = ({
   const [hasOverflow, setHasOverflow] = useState(false);
 
   useEffect(() => {
+    const el = railRef.current;
+    if (!el) return;
+
     const checkOverflow = () => {
-      if (railRef.current) {
-        setHasOverflow(railRef.current.scrollWidth > railRef.current.clientWidth + 8);
-      }
+      setHasOverflow(el.scrollWidth > el.clientWidth + 8);
     };
+
     checkOverflow();
-    window.addEventListener('resize', checkOverflow);
-    return () => window.removeEventListener('resize', checkOverflow);
+
+    const ro = new ResizeObserver(checkOverflow);
+    ro.observe(el);
+    return () => ro.disconnect();
   }, [normalizedMembers.length]);
 
   // Automated continuous horizontal scroll when members count exceeds 4
@@ -568,10 +572,8 @@ export const AtelierAbout: React.FC<AtelierAboutProps> = ({
             ref={railRef}
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
-            className={`flex items-stretch gap-5 pb-4 pt-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${
-              hasOverflow
-                ? 'overflow-x-auto scroll-smooth snap-x snap-mandatory cursor-grab active:cursor-grabbing'
-                : 'justify-center flex-wrap'
+            className={`flex items-stretch gap-5 pb-4 pt-1 overflow-x-auto flex-nowrap scroll-smooth snap-x snap-mandatory cursor-grab active:cursor-grabbing [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${
+              hasOverflow ? 'justify-start' : 'justify-center'
             }`}
           >
             {normalizedMembers.map((member, idx) => (

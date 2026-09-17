@@ -29,15 +29,18 @@ export const TechnologyGraph: React.FC<TechnologyGraphProps> = ({ technologies }
     : technologies.filter((t) => t.category?.toLowerCase() === activeCategory.toLowerCase());
 
   useEffect(() => {
+    const el = railRef.current;
+    if (!el) return;
+
     const checkOverflow = () => {
-      if (railRef.current) {
-        const { scrollWidth, clientWidth } = railRef.current;
-        setHasOverflow(scrollWidth > clientWidth + 8);
-      }
+      setHasOverflow(el.scrollWidth > el.clientWidth + 8);
     };
+
     checkOverflow();
-    window.addEventListener('resize', checkOverflow);
-    return () => window.removeEventListener('resize', checkOverflow);
+
+    const ro = new ResizeObserver(checkOverflow);
+    ro.observe(el);
+    return () => ro.disconnect();
   }, [filtered]);
 
   const scrollPrev = () => {
@@ -118,10 +121,8 @@ export const TechnologyGraph: React.FC<TechnologyGraphProps> = ({ technologies }
       <div
         ref={railRef}
         className={cn(
-          'flex items-stretch gap-3.5 pb-2 pt-1',
-          hasOverflow
-            ? 'overflow-x-auto snap-x snap-mandatory scroll-smooth [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden'
-            : 'justify-center flex-wrap'
+          'flex items-stretch gap-3.5 pb-2 pt-1 overflow-x-auto flex-nowrap snap-x snap-mandatory scroll-smooth [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden',
+          hasOverflow ? 'justify-start' : 'justify-center'
         )}
       >
         {filtered.map((tech) => (

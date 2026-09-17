@@ -38,15 +38,18 @@ export const FeaturedProjectsShowcase: React.FC<FeaturedProjectsShowcaseProps> =
   const { setCursorState } = useCursor();
 
   useEffect(() => {
+    const el = railRef.current;
+    if (!el) return;
+
     const checkOverflow = () => {
-      if (railRef.current) {
-        const { scrollWidth, clientWidth } = railRef.current;
-        setHasOverflow(scrollWidth > clientWidth + 8);
-      }
+      setHasOverflow(el.scrollWidth > el.clientWidth + 8);
     };
+
     checkOverflow();
-    window.addEventListener('resize', checkOverflow);
-    return () => window.removeEventListener('resize', checkOverflow);
+
+    const ro = new ResizeObserver(checkOverflow);
+    ro.observe(el);
+    return () => ro.disconnect();
   }, [projects]);
 
   if (projects.length === 0) return null;
@@ -265,10 +268,8 @@ export const FeaturedProjectsShowcase: React.FC<FeaturedProjectsShowcaseProps> =
         <div
           ref={railRef}
           className={cn(
-            'flex items-stretch gap-4 pb-3 pt-1',
-            hasOverflow
-              ? 'overflow-x-auto snap-x snap-mandatory scroll-smooth [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden'
-              : 'justify-center flex-wrap'
+            'flex items-stretch gap-4 pb-3 pt-1 overflow-x-auto flex-nowrap snap-x snap-mandatory scroll-smooth [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden',
+            hasOverflow ? 'justify-start' : 'justify-center'
           )}
         >
           {projects.map((project, idx) => {
@@ -282,7 +283,7 @@ export const FeaturedProjectsShowcase: React.FC<FeaturedProjectsShowcaseProps> =
                 type="button"
                 onClick={() => selectProject(idx)}
                 className={cn(
-                  'shrink-0 w-[80vw] max-w-[280px] sm:w-[calc((100%-1rem)/2)] lg:w-[calc((100%-3rem)/3)] xl:w-[calc((100%-4.5rem)/4)] snap-start rounded-2xl p-4 text-left transition-all duration-300 flex flex-col justify-between space-y-3 relative group border',
+                  'shrink-0 w-[280px] sm:w-[320px] snap-start rounded-2xl p-4 text-left transition-all duration-300 flex flex-col justify-between space-y-3 relative group border',
                   isActive
                     ? 'bg-[#0A1329] border-[#00D2FF] shadow-[0_0_20px_rgba(0,210,255,0.2)] ring-1 ring-[#00D2FF]'
                     : 'bg-[#080D18] border-white/10 hover:border-white/30 hover:bg-[#0A0F1D]'
