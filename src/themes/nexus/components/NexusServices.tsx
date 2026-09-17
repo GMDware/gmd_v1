@@ -25,7 +25,7 @@ export const NexusServices: React.FC<NexusServicesProps> = ({
         <div className="text-center max-w-3xl mx-auto space-y-4">
           <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-purple-500/10 border border-purple-500/30 text-[11px] font-mono text-purple-300">
             <Zap className="w-3 h-3 text-[#00F2FE]" />
-            <span>NETWORK CAPABILITIES // DISTRIBUTED ARCHITECTURE</span>
+            <span>NETWORK CAPABILITIES — DISTRIBUTED ARCHITECTURE</span>
           </div>
           <h2 className="text-3xl sm:text-5xl font-black text-white tracking-tight font-sans">
             Modular Capabilities in the Living Fabric

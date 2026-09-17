@@ -47,7 +47,7 @@ export const GuideNav: React.FC<GuideNavProps> = () => {
         <div className="flex items-center gap-2 text-xs font-mono text-slate-400">
           <BookOpen className="w-3.5 h-3.5 text-[#00D2FF]" />
           <span className="text-white font-semibold">GMDware Documentation Hub</span>
-          <span className="text-slate-600">//</span>
+          <span className="text-slate-600">—</span>
           <span className="text-[#0066FF] uppercase">
             {pathname === '/guide/developers'
               ? 'Developer Technical Reference'

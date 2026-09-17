@@ -188,7 +188,7 @@ export const NexusHero: React.FC<NexusHeroProps> = ({
         <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-[#080D1A]/80 border border-cyan-500/30 backdrop-blur-xl shadow-[0_0_20px_rgba(0,242,254,0.15)] pointer-events-auto">
           <span className="w-2 h-2 rounded-full bg-[#00F2FE] animate-pulse" />
           <span className="font-mono text-xs text-cyan-300 tracking-wider uppercase font-medium">
-            {badge || '// LIVING DIGITAL ECOSYSTEM // MULTI-NODE FABRIC'}
+            {badge || 'LIVING DIGITAL ECOSYSTEM — MULTI-NODE FABRIC'}
           </span>
         </div>
 

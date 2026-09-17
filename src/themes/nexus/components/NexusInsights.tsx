@@ -19,7 +19,7 @@ export const NexusInsights: React.FC<NexusInsightsProps> = ({
         <div className="space-y-3 max-w-3xl">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/25 text-[11px] font-mono text-[#00F2FE]">
             <Orbit className="w-3 h-3" />
-            <span>DISPATCH ARCHIVE // SYSTEMS RESEARCH</span>
+            <span>DISPATCH ARCHIVE — SYSTEMS RESEARCH</span>
           </div>
           <h2 className="text-3xl sm:text-5xl font-black text-white tracking-tight font-sans">
             Technical Essays & Node Dispatches
@@ -39,7 +39,7 @@ export const NexusInsights: React.FC<NexusInsightsProps> = ({
               >
                 <div className="space-y-3">
                   <div className="flex items-center justify-between text-xs font-mono text-cyan-400">
-                    <span>DISPATCH // 0{idx + 1}</span>
+                    <span>DISPATCH — 0{idx + 1}</span>
                     <span className="text-slate-500 flex items-center gap-1">
                       <Clock className="w-3 h-3" />
                       {item.readingTimeMinutes ? `${item.readingTimeMinutes} min read` : '5 min read'}

@@ -144,7 +144,7 @@ export function TechnologyEcosystem({ technologies = [] }: TechnologyEcosystemPr
             <div className="flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-[#0066FF] animate-pulse" />
               <span className="font-mono text-xs tracking-[0.25em] uppercase text-[#00D2FF]">
-                04 // ARCHITECTURAL TOPOLOGY
+                04 — ARCHITECTURAL TOPOLOGY
               </span>
             </div>
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-white font-display tracking-tight">
@@ -244,7 +244,7 @@ export function TechnologyEcosystem({ technologies = [] }: TechnologyEcosystemPr
                 </div>
                 <div>
                   <div className="font-mono text-xs text-[#00D2FF] tracking-wider uppercase">
-                    SYSTEM LAYER {activeTier.step} // {activeTier.category.toUpperCase()}
+                    SYSTEM LAYER {activeTier.step} — {activeTier.category.toUpperCase()}
                   </div>
                   <h3 className="text-2xl sm:text-3xl font-black text-white font-display">
                     {activeTier.name} Architecture

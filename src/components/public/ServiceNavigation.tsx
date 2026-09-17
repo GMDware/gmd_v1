@@ -35,7 +35,7 @@ export const ServiceNavigation: React.FC<ServiceNavigationProps> = ({ services }
       {/* Left Selector Rail (5 Cols) */}
       <div className="lg:col-span-5 space-y-2">
         <span className="font-mono text-[11px] text-[#64748B] uppercase tracking-[0.2em] block mb-3">
-          // CAPABILITIES MATRIX ({services.length} DISCIPLINES)
+          CAPABILITIES MATRIX ({services.length} DISCIPLINES)
         </span>
 
         {services.map((service, idx) => {
@@ -89,7 +89,7 @@ export const ServiceNavigation: React.FC<ServiceNavigationProps> = ({ services }
           <div className="space-y-4 border-b border-white/[0.08] pb-6">
             <div className="flex items-center justify-between">
               <span className="font-mono text-xs text-[#00D2FF] tracking-wider uppercase">
-                // ARCHITECTURAL DOSSIER
+                ARCHITECTURAL DOSSIER
               </span>
               <Badge variant="cobalt" size="sm">
                 SPEC_v3

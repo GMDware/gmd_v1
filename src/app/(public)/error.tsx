@@ -15,7 +15,7 @@ export default function PublicErrorBoundary({
 }) {
   useEffect(() => {
     // Log exception telemetry
-    console.error('⚠️ [GMD // TELEMETRY EXCEPTION CAUGHT BY BOUNDARY]:', error);
+    console.error('[GMD — TELEMETRY EXCEPTION CAUGHT BY BOUNDARY]:', error);
   }, [error]);
 
   return (
@@ -30,7 +30,7 @@ export default function PublicErrorBoundary({
           <div className="flex items-center justify-between border-b border-white/[0.08] pb-4 relative z-10 font-mono text-xs">
             <div className="flex items-center gap-2 text-red-400">
               <AlertTriangle className="w-4 h-4" />
-              <span>SYSTEM_FAULT_TRAP // STATUS: ISOLATED</span>
+              <span>SYSTEM_FAULT_TRAP — STATUS: ISOLATED</span>
             </div>
             <span className="text-[#64748B]">CORE_RUN_ID: {error.digest || 'ERR_RECOVERABLE'}</span>
           </div>
@@ -55,7 +55,7 @@ export default function PublicErrorBoundary({
               {error.message || 'An unknown network or rendering fault occurred.'}
             </div>
             <div className="text-[#64748B] text-[10px]">
-              TIMESTAMP: {new Date().toISOString()} // THREAD: CLIENT_ISOLATED
+              TIMESTAMP: {new Date().toISOString()} — THREAD: CLIENT_ISOLATED
             </div>
           </div>
 

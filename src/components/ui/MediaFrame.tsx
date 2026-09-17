@@ -35,7 +35,7 @@ export const MediaFrame: React.FC<MediaFrameProps> = ({
       <div className="flex items-center justify-between px-3 py-1.5 bg-[#080D18] border-b border-white/[0.06] text-[10px] font-mono text-[#64748B] select-none">
         <div className="flex items-center gap-2">
           <span className="w-1.5 h-1.5 rounded-full bg-[#0066FF]" />
-          <span>{tag || 'ASSET // SPECIFICATION'}</span>
+          <span>{tag || 'ASSET — SPECIFICATION'}</span>
         </div>
         <span className="text-slate-500 tracking-wider">[GMD_FRAME_v3]</span>
       </div>

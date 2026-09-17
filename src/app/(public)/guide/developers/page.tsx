@@ -83,7 +83,7 @@ export default function DeveloperGuidePage() {
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-[#0066FF] animate-pulse" />
             <span className="font-mono text-xs tracking-[0.25em] uppercase text-[#00D2FF]">
-              // DEVELOPER DOCUMENTATION & ARCHITECTURE
+              DEVELOPER DOCUMENTATION & ARCHITECTURE
             </span>
           </div>
 
@@ -111,7 +111,7 @@ export default function DeveloperGuidePage() {
           <div className="gmd-panel rounded-2xl p-6 sm:p-10 border border-white/10 space-y-6">
             <div className="p-6 rounded-xl bg-[#03060C] border border-white/10 font-mono text-xs overflow-x-auto text-slate-300 space-y-4">
               <div className="text-[#00D2FF] font-semibold">
-                // TOPOLOGICAL ARCHITECTURE & DATA ACCESS
+                TOPOLOGICAL ARCHITECTURE & DATA ACCESS
               </div>
               <pre className="text-[12px] leading-relaxed text-slate-300">
 {`┌─────────────────────────────────────────────────────────────────────────────┐
@@ -255,7 +255,7 @@ export default function DeveloperGuidePage() {
           <div className="gmd-panel rounded-2xl p-6 sm:p-8 border border-white/10 space-y-6">
             <div className="space-y-3">
               <span className="text-xs font-mono text-[#00D2FF] uppercase tracking-wider block font-semibold">
-                // VERIFIED CLI COMMANDS
+                VERIFIED CLI COMMANDS
               </span>
               <div className="divide-y divide-white/5 font-mono text-xs">
                 {verifiedCommands.map((item, idx) => (

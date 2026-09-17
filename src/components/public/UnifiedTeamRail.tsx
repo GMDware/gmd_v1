@@ -14,6 +14,7 @@ import {
   Pause,
 } from 'lucide-react';
 import { SocialIcon } from '@/components/public/SocialIcons';
+import { cn } from '@/lib/utils';
 
 export interface UnifiedMember {
   id: string;
@@ -42,11 +43,24 @@ export const UnifiedTeamRail: React.FC<UnifiedTeamRailProps> = ({
   const [activeIndex, setActiveIndex] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
   const [isHovered, setIsHovered] = useState(false);
+  const [hasOverflow, setHasOverflow] = useState(false);
 
-  // Auto-scroll when members > 4
+  useEffect(() => {
+    const checkOverflow = () => {
+      if (railRef.current) {
+        const { scrollWidth, clientWidth } = railRef.current;
+        setHasOverflow(scrollWidth > clientWidth + 8);
+      }
+    };
+    checkOverflow();
+    window.addEventListener('resize', checkOverflow);
+    return () => window.removeEventListener('resize', checkOverflow);
+  }, [members]);
+
+  // Auto-scroll when members overflow
   useEffect(() => {
     if (!isAutoPlaying || isHovered) return;
-    if (members.length <= 4) return;
+    if (!hasOverflow) return;
 
     const interval = setInterval(() => {
       const rail = railRef.current;
@@ -143,9 +157,9 @@ export const UnifiedTeamRail: React.FC<UnifiedTeamRailProps> = ({
           </p>
         </div>
 
-        {/* Scroll Controls (Shown when members > 4 or on touch devices) */}
-        <div className="flex items-center gap-2 self-start sm:self-end">
-          {members.length > 4 && (
+        {/* Scroll Controls (Shown only when overflowing) */}
+        {hasOverflow && (
+          <div className="flex items-center gap-2 self-start sm:self-end">
             <button
               type="button"
               onClick={() => setIsAutoPlaying((prev) => !prev)}
@@ -155,24 +169,24 @@ export const UnifiedTeamRail: React.FC<UnifiedTeamRailProps> = ({
             >
               {isAutoPlaying ? <Pause className="w-4 h-4 text-[#00D2FF]" /> : <Play className="w-4 h-4 text-slate-300" />}
             </button>
-          )}
-          <button
-            type="button"
-            onClick={scrollPrev}
-            aria-label="Previous team member"
-            className="w-10 h-10 rounded-xl bg-[#0A0E1A] border border-white/10 hover:border-white/30 text-white flex items-center justify-center transition-all hover:bg-white/5 active:scale-95 shadow-sm"
-          >
-            <ChevronLeft className="w-4 h-4" />
-          </button>
-          <button
-            type="button"
-            onClick={scrollNext}
-            aria-label="Next team member"
-            className="w-10 h-10 rounded-xl bg-[#0A0E1A] border border-white/10 hover:border-white/30 text-white flex items-center justify-center transition-all hover:bg-white/5 active:scale-95 shadow-sm"
-          >
-            <ChevronRight className="w-4 h-4" />
-          </button>
-        </div>
+            <button
+              type="button"
+              onClick={scrollPrev}
+              aria-label="Previous team member"
+              className="w-10 h-10 rounded-xl bg-[#0A0E1A] border border-white/10 hover:border-white/30 text-white flex items-center justify-center transition-all hover:bg-white/5 active:scale-95 shadow-sm"
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </button>
+            <button
+              type="button"
+              onClick={scrollNext}
+              aria-label="Next team member"
+              className="w-10 h-10 rounded-xl bg-[#0A0E1A] border border-white/10 hover:border-white/30 text-white flex items-center justify-center transition-all hover:bg-white/5 active:scale-95 shadow-sm"
+            >
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
+        )}
       </div>
 
       {/* 4 Cards Side-by-Side Track with Smooth Horizontal Scroll */}
@@ -181,7 +195,12 @@ export const UnifiedTeamRail: React.FC<UnifiedTeamRailProps> = ({
         onScroll={handleScroll}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
-        className="flex items-stretch gap-5 overflow-x-auto snap-x snap-mandatory scroll-smooth pb-4 pt-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        className={cn(
+          'flex items-stretch gap-5 pb-4 pt-1',
+          hasOverflow
+            ? 'overflow-x-auto snap-x snap-mandatory scroll-smooth [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden'
+            : 'justify-center flex-wrap'
+        )}
       >
         {members.map((member, idx) => (
           <div

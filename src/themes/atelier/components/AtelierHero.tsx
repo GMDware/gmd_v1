@@ -497,7 +497,7 @@ export const AtelierHero: React.FC<AtelierHeroProps> = ({
                           className="p-2.5 rounded-lg bg-amber-50/90 border border-amber-200/80 shadow-xs -rotate-1 transition-all hover:rotate-0"
                         >
                           <div className="text-[10px] font-bold text-amber-800 uppercase tracking-tight flex items-center gap-1 mb-1">
-                            <span>📌 User Research</span>
+                            <span>User Research</span>
                           </div>
                           <p className="text-[11px] text-amber-900 leading-snug">
                             &ldquo;84% of surveyed leads prefer visual workflow builders over raw forms.&rdquo;
@@ -509,7 +509,7 @@ export const AtelierHero: React.FC<AtelierHeroProps> = ({
                           className="p-2.5 rounded-lg bg-blue-50/90 border border-blue-200/80 shadow-xs rotate-1 transition-all hover:rotate-0"
                         >
                           <div className="text-[10px] font-bold text-blue-800 uppercase tracking-tight flex items-center gap-1 mb-1">
-                            <span>⚡ Core Requirement</span>
+                            <span>Core Requirement</span>
                           </div>
                           <p className="text-[11px] text-blue-900 leading-snug">
                             Sub-second catalog search with edge caching across multilingual sessions.

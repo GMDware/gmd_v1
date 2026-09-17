@@ -32,9 +32,22 @@ interface FeaturedProjectsShowcaseProps {
 
 export const FeaturedProjectsShowcase: React.FC<FeaturedProjectsShowcaseProps> = ({ projects }) => {
   const [activeIndex, setActiveIndex] = useState(0);
+  const [hasOverflow, setHasOverflow] = useState(false);
   const railRef = useRef<HTMLDivElement>(null);
   const cardRefs = useRef<(HTMLButtonElement | null)[]>([]);
   const { setCursorState } = useCursor();
+
+  useEffect(() => {
+    const checkOverflow = () => {
+      if (railRef.current) {
+        const { scrollWidth, clientWidth } = railRef.current;
+        setHasOverflow(scrollWidth > clientWidth + 8);
+      }
+    };
+    checkOverflow();
+    window.addEventListener('resize', checkOverflow);
+    return () => window.removeEventListener('resize', checkOverflow);
+  }, [projects]);
 
   if (projects.length === 0) return null;
 
@@ -89,7 +102,7 @@ export const FeaturedProjectsShowcase: React.FC<FeaturedProjectsShowcaseProps> =
             {/* Metadata Badges */}
             <div className="flex flex-wrap items-center gap-2">
               <span className="font-mono text-xs text-[#00D2FF] tracking-wider uppercase font-semibold">
-                // CASE_0{activeIndex + 1}
+                CASE_0{activeIndex + 1}
               </span>
               <span className="text-white/20">•</span>
               <span className="font-mono text-xs text-slate-400 uppercase">
@@ -200,7 +213,7 @@ export const FeaturedProjectsShowcase: React.FC<FeaturedProjectsShowcaseProps> =
                     {activeProject.title}
                   </h4>
                   <p className="font-mono text-xs text-[#00D2FF] uppercase tracking-wider mt-2 relative z-10">
-                    [BLUEPRINT // ARCHITECTURE_SCHEMATIC]
+                    [BLUEPRINT — ARCHITECTURAL SCHEMATIC]
                   </p>
 
                   <span className="absolute top-4 left-4 font-mono text-[10px] text-slate-500">
@@ -226,30 +239,37 @@ export const FeaturedProjectsShowcase: React.FC<FeaturedProjectsShowcaseProps> =
             </p>
           </div>
 
-          <div className="flex items-center gap-2 self-start sm:self-end">
-            <button
-              type="button"
-              onClick={scrollPrev}
-              aria-label="Previous project"
-              className="w-9 h-9 rounded-xl bg-[#0A0E1A] border border-white/10 hover:border-white/30 text-white flex items-center justify-center transition-all hover:bg-white/5 active:scale-95 shadow-sm"
-            >
-              <ChevronLeft className="w-4 h-4" />
-            </button>
-            <button
-              type="button"
-              onClick={scrollNext}
-              aria-label="Next project"
-              className="w-9 h-9 rounded-xl bg-[#0A0E1A] border border-white/10 hover:border-white/30 text-white flex items-center justify-center transition-all hover:bg-white/5 active:scale-95 shadow-sm"
-            >
-              <ChevronRight className="w-4 h-4" />
-            </button>
-          </div>
+          {hasOverflow && (
+            <div className="flex items-center gap-2 self-start sm:self-end">
+              <button
+                type="button"
+                onClick={scrollPrev}
+                aria-label="Previous project"
+                className="w-9 h-9 rounded-xl bg-[#0A0E1A] border border-white/10 hover:border-white/30 text-white flex items-center justify-center transition-all hover:bg-white/5 active:scale-95 shadow-sm"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </button>
+              <button
+                type="button"
+                onClick={scrollNext}
+                aria-label="Next project"
+                className="w-9 h-9 rounded-xl bg-[#0A0E1A] border border-white/10 hover:border-white/30 text-white flex items-center justify-center transition-all hover:bg-white/5 active:scale-95 shadow-sm"
+              >
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Horizontal Track */}
         <div
           ref={railRef}
-          className="flex items-stretch gap-4 overflow-x-auto snap-x snap-mandatory scroll-smooth pb-3 pt-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          className={cn(
+            'flex items-stretch gap-4 pb-3 pt-1',
+            hasOverflow
+              ? 'overflow-x-auto snap-x snap-mandatory scroll-smooth [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden'
+              : 'justify-center flex-wrap'
+          )}
         >
           {projects.map((project, idx) => {
             const isActive = idx === activeIndex;

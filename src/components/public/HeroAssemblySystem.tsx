@@ -14,14 +14,14 @@ interface Step {
 }
 
 const STEPS: Step[] = [
-  { id: 1, label: 'Minimal GMD', tag: 'STAGE 01 // ORIGIN', description: 'Discrete coordinate input & origin vectors' },
-  { id: 2, label: 'Grid Matrix', tag: 'STAGE 02 // COORDINATES', description: 'Orthogonal architectural grid generation' },
-  { id: 3, label: 'Structural Lines', tag: 'STAGE 03 // VECTOR BUS', description: 'Hairline communication and data conduits' },
-  { id: 4, label: 'Coordinate Nodes', tag: 'STAGE 04 // CROSSHAIRS', description: 'Precision topological intersection points' },
-  { id: 5, label: 'Interface Fragments', tag: 'STAGE 05 // SCHEMATICS', description: 'Modular UI components & telemetry panels' },
-  { id: 6, label: 'Typography', tag: 'STAGE 06 // HIERARCHY', description: 'Monospaced telemetry & bold display hierarchy' },
-  { id: 7, label: 'Digital Product', tag: 'STAGE 07 // ASSEMBLY', description: 'Cohesive high-concurrency software platform' },
-  { id: 8, label: 'GMDware Identity', tag: 'STAGE 08 // CONVERGENCE', description: 'Mission-critical digital flagship locked in production' },
+  { id: 1, label: 'Minimal GMD', tag: 'STAGE 01 — ORIGIN', description: 'Discrete coordinate input & origin vectors' },
+  { id: 2, label: 'Grid Matrix', tag: 'STAGE 02 — COORDINATES', description: 'Orthogonal architectural grid generation' },
+  { id: 3, label: 'Structural Lines', tag: 'STAGE 03 — VECTOR BUS', description: 'Hairline communication and data conduits' },
+  { id: 4, label: 'Coordinate Nodes', tag: 'STAGE 04 — CROSSHAIRS', description: 'Precision topological intersection points' },
+  { id: 5, label: 'Interface Fragments', tag: 'STAGE 05 — SCHEMATICS', description: 'Modular UI components & telemetry panels' },
+  { id: 6, label: 'Typography', tag: 'STAGE 06 — HIERARCHY', description: 'Monospaced telemetry & bold display hierarchy' },
+  { id: 7, label: 'Digital Product', tag: 'STAGE 07 — ASSEMBLY', description: 'Cohesive high-concurrency software platform' },
+  { id: 8, label: 'GMDware Identity', tag: 'STAGE 08 — CONVERGENCE', description: 'Mission-critical digital flagship locked in production' },
 ];
 
 export const HeroAssemblySystem: React.FC = () => {
@@ -43,7 +43,7 @@ export const HeroAssemblySystem: React.FC = () => {
         <div className="flex items-center gap-2">
           <span className="w-2 h-2 rounded-full bg-[#00D2FF] animate-pulse" />
           <span className="text-white font-semibold tracking-wider">
-            SYSTEM ASSEMBLY // [COMPLEXITY → STRUCTURE → PRODUCT]
+            SYSTEM ASSEMBLY — [COMPLEXITY → STRUCTURE → PRODUCT]
           </span>
         </div>
 
@@ -102,7 +102,7 @@ export const HeroAssemblySystem: React.FC = () => {
             <div className="hidden sm:block p-3 rounded-xl bg-[#080D18]/90 border border-white/10 shadow-lg font-mono text-[10px] text-[#64748B] space-y-1.5 animate-in slide-in-from-left duration-300">
               <div className="flex items-center gap-1.5 text-white font-semibold">
                 <Terminal className="w-3 h-3 text-[#0066FF]" />
-                <span>DAEMON // PID_801</span>
+                <span>DAEMON — PID_801</span>
               </div>
               <p className="text-[#00D2FF]">status: listening_active</p>
               <p className="text-slate-400">concurrency: 50,000 req/s</p>

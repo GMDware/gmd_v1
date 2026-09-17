@@ -54,7 +54,7 @@ export default async function InsightsPage({
           </div>
           <div className="space-y-2">
             <span className="font-mono text-xs text-[#00D2FF] uppercase tracking-widest">
-              // ESSAYS ARCHIVE: PREPARING RELEASES
+              ESSAYS ARCHIVE: PREPARING RELEASES
             </span>
             <h3 className="text-2xl font-bold text-white font-display">
               Technical Perspectives Under Peer Review

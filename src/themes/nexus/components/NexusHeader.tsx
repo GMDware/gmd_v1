@@ -113,7 +113,7 @@ export const NexusHeader: React.FC<NexusHeaderProps> = ({
       {mobileOpen && (
         <div className="md:hidden pointer-events-auto mt-3 p-5 rounded-2xl bg-[#080D1A]/95 border border-cyan-500/30 backdrop-blur-2xl shadow-2xl space-y-3 animate-in fade-in slide-in-from-top-2">
           <div className="flex items-center justify-between pb-3 border-b border-white/10 text-xs font-mono text-[#00F2FE]">
-            <span>// NEXUS NETWORK DIRECTORY</span>
+            <span>NEXUS NETWORK DIRECTORY</span>
             <span className="flex items-center gap-1">
               <span className="w-1.5 h-1.5 rounded-full bg-[#00F2FE] animate-pulse" />
               ONLINE

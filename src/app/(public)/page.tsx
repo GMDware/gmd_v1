@@ -220,7 +220,7 @@ export default async function HomePage({
       </section>
 
       {/* Structural Storytelling Conduit */}
-      <SectionConduit label="CONTINUUM // 01 PIPELINE TRANSFORMATION" />
+      <SectionConduit label="CONTINUUM — 01 PIPELINE TRANSFORMATION" />
 
       {/* ─────────────────────────────────────────────────────────────────
           2. TRANSFORMATION PIPELINE: FROM IDEA TO IMPACT
@@ -228,7 +228,7 @@ export default async function HomePage({
       <section className="py-16 border-b border-white/[0.08]">
         <Container size="wide">
           <SectionHeading
-            tag="01 // TRANSFORMATION PIPELINE"
+            tag="01 — TRANSFORMATION PIPELINE"
             title="From Idea to Operational Impact"
             subtitle="Software is not created in disjointed stages. We operate an unbroken engineering continuum from raw domain hypothesis to global multi-region production."
             align="center"
@@ -241,7 +241,7 @@ export default async function HomePage({
       </section>
 
       {/* Structural Storytelling Conduit */}
-      <SectionConduit label="CONTINUUM // 02 SERVICE ENVIRONMENT" />
+      <SectionConduit label="CONTINUUM — 02 SERVICE ENVIRONMENT" />
 
       {/* ─────────────────────────────────────────────────────────────────
           3. INTERACTIVE SERVICE ENVIRONMENT
@@ -249,7 +249,7 @@ export default async function HomePage({
       <section className="py-16 border-b border-white/[0.08]">
         <Container size="wide">
           <SectionHeading
-            tag="02 // CAPABILITIES ENVIRONMENT"
+            tag="02 — CAPABILITIES ENVIRONMENT"
             title="Disciplined Full-Stack Engineering"
             subtitle="Selecting a capability alters the canvas, revealing concrete deliverables, verified architectures, and execution parameters."
             action={
@@ -266,7 +266,7 @@ export default async function HomePage({
       </section>
 
       {/* Structural Storytelling Conduit */}
-      <SectionConduit label="CONTINUUM // 03 PRODUCT ARCHETYPES" />
+      <SectionConduit label="CONTINUUM — 03 PRODUCT ARCHETYPES" />
 
       {/* ─────────────────────────────────────────────────────────────────
           4. WHAT WE BUILD: 8 ARCHITECTURAL PRODUCT ARCHETYPES
@@ -274,7 +274,7 @@ export default async function HomePage({
       <WhatWeBuild />
 
       {/* Structural Storytelling Conduit */}
-      <SectionConduit label="CONTINUUM // 04 PINNED NARRATIVE ARCHITECTURE" />
+      <SectionConduit label="CONTINUUM — 04 PINNED NARRATIVE ARCHITECTURE" />
 
       {/* ─────────────────────────────────────────────────────────────────
           5. PINNED NARRATIVE ARCHITECTURE: THE CONTINUOUS CONTINUUM
@@ -282,7 +282,7 @@ export default async function HomePage({
       <PinnedScrollStory steps={processSteps} />
 
       {/* Structural Storytelling Conduit */}
-      <SectionConduit label="CONTINUUM // 05 VERIFIED DEPLOYMENTS" />
+      <SectionConduit label="CONTINUUM — 05 VERIFIED DEPLOYMENTS" />
 
       {/* ─────────────────────────────────────────────────────────────────
           6. FEATURED SYSTEMS & CASE STUDY TEARSHEETS
@@ -290,7 +290,7 @@ export default async function HomePage({
       <section className="py-24 border-b border-white/[0.08]">
         <Container size="wide">
           <SectionHeading
-            tag="04 // FLAGSHIP WORK"
+            tag="04 — FLAGSHIP WORK"
             title="Architectural Work & Case Studies"
             subtitle="Explore real systems built to withstand high concurrency, distributed network partitions, and mission-critical enterprise workloads."
             action={
@@ -311,7 +311,7 @@ export default async function HomePage({
               </div>
               <div className="space-y-1">
                 <span className="font-mono text-xs text-[#00D2FF] uppercase tracking-wider">
-                  // DEPLOYMENT PIPELINE
+                  DEPLOYMENT PIPELINE
                 </span>
                 <h4 className="text-xl font-bold text-white font-display">
                   Featured Systems Currently Under Verification
@@ -331,7 +331,7 @@ export default async function HomePage({
       </section>
 
       {/* Structural Storytelling Conduit */}
-      <SectionConduit label="CONTINUUM // 05 ARCHITECTURAL TOPOLOGY" />
+      <SectionConduit label="CONTINUUM — 05 ARCHITECTURAL TOPOLOGY" />
 
       {/* ─────────────────────────────────────────────────────────────────
           6. TECHNOLOGY TOPOLOGY & PIPELINE ECOSYSTEM
@@ -339,7 +339,7 @@ export default async function HomePage({
       <TechnologyEcosystem technologies={technologies} />
 
       {/* Structural Storytelling Conduit */}
-      <SectionConduit label="CONTINUUM // 06 DELIVERY PROTOCOL" />
+      <SectionConduit label="CONTINUUM — 06 DELIVERY PROTOCOL" />
 
       {/* ─────────────────────────────────────────────────────────────────
           7. DELIVERY PROTOCOL & ENGINEERING METHODOLOGY (7 PHASES)
@@ -347,7 +347,7 @@ export default async function HomePage({
       <section className="py-24 border-b border-white/[0.08]">
         <Container size="wide">
           <SectionHeading
-            tag="06 // METHODOLOGY"
+            tag="06 — METHODOLOGY"
             title="7-Phase Deterministic Delivery Protocol"
             subtitle="We eliminate delivery ambiguity through structured mathematical milestones, explicit deliverables, and continuous architectural verification."
             align="center"
@@ -360,7 +360,7 @@ export default async function HomePage({
       </section>
 
       {/* Structural Storytelling Conduit */}
-      <SectionConduit label="CONTINUUM // 07 THE GMDWARE CODE" />
+      <SectionConduit label="CONTINUUM — 07 THE GMDWARE CODE" />
 
       {/* ─────────────────────────────────────────────────────────────────
           8. CORE VALUES & FIRST-PRINCIPLES PHILOSOPHY
@@ -374,7 +374,7 @@ export default async function HomePage({
                 <div className="flex items-center gap-2">
                   <span className="w-2 h-2 rounded-full bg-[#0066FF] animate-pulse" />
                   <span className="font-mono text-xs tracking-[0.25em] uppercase text-[#00D2FF]">
-                    07 // THE GMDWARE CODE
+                    07 — THE GMDWARE CODE
                   </span>
                 </div>
 
@@ -421,41 +421,13 @@ export default async function HomePage({
       )}
 
       {/* ─────────────────────────────────────────────────────────────────
-          9. LEADERSHIP & ARCHITECTURAL DIRECTORS
-      ───────────────────────────────────────────────────────────────── */}
-      {formattedMembers.length > 0 && (
-        <section className="py-24 border-b border-white/[0.08]">
-          <Container size="wide">
-            <SectionHeading
-              tag="08 // ARCHITECTURAL DIRECTORS"
-              title="Built by Practitioners"
-              subtitle="Directly engage with veteran software architects, distributed systems engineers, and technical founders."
-              action={
-                <Link href="/about">
-                  <Button variant="outline" size="sm" rightIcon={<ArrowUpRight className="w-3.5 h-3.5" />}>
-                    Meet Leadership
-                  </Button>
-                </Link>
-              }
-            />
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {formattedMembers.slice(0, 3).map((member) => (
-                <TeamMemberCard key={member.id} member={member} />
-              ))}
-            </div>
-          </Container>
-        </section>
-      )}
-
-      {/* ─────────────────────────────────────────────────────────────────
-          10. TECHNICAL FAQS
+          9. TECHNICAL FAQS
       ───────────────────────────────────────────────────────────────── */}
       {faqs.length > 0 && (
         <section className="py-24 border-b border-white/[0.08]">
           <Container size="narrow">
             <SectionHeading
-              tag="09 // TECHNICAL CLARIFICATIONS"
+              tag="08 — TECHNICAL CLARIFICATIONS"
               title="Direct Answers to Technical Questions"
               subtitle="Clear architectural expectations, engagement models, and delivery governance."
               align="center"

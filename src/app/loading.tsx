@@ -31,7 +31,7 @@ export default function GlobalLoading() {
               <span className="w-1.5 h-1.5 rounded-full bg-[#00D2FF] animate-ping" />
               <span>CORE: INITIALIZING</span>
             </span>
-            <span>SYSTEM // READY</span>
+            <span>SYSTEM READY</span>
           </div>
         </div>
       </div>

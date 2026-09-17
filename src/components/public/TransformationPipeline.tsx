@@ -102,7 +102,7 @@ export const TransformationPipeline: React.FC = () => {
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-white/[0.08]">
         <div className="space-y-2">
           <span className="font-mono text-xs uppercase tracking-[0.25em] text-[#00D2FF]">
-            // TRANSFORMATION CONTINUUM
+            TRANSFORMATION CONTINUUM
           </span>
           <h3 className="text-3xl sm:text-4xl font-extrabold text-white font-display tracking-tight">
             From Idea to Impact

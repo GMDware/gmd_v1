@@ -112,7 +112,7 @@ export default function AdminThemePage() {
         <div className="relative z-10 space-y-3">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-[11px] font-mono text-[#00F2FE]">
             <Palette className="w-3.5 h-3.5" />
-            <span>MULTI-IDENTITY THEME ENGINE // THREE RADICAL WEBSITE IDENTITIES</span>
+            <span>MULTI-IDENTITY THEME ENGINE — THREE RADICAL WEBSITE IDENTITIES</span>
           </div>
 
           <h1 className="text-3xl sm:text-4xl font-black text-white tracking-tight font-sans">
@@ -145,7 +145,7 @@ export default function AdminThemePage() {
                 {theme.id === 'systems' && (
                   <div className="absolute inset-0 bg-[#05080F] flex flex-col justify-between p-4 overflow-hidden">
                     <div className="flex items-center justify-between text-[9px] font-mono text-cyan-400">
-                      <span>[GMD // SYSTEMS]</span>
+                      <span>[GMD — SYSTEMS]</span>
                       <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
                     </div>
                     {/* Wireframe grid preview */}
@@ -309,9 +309,9 @@ export default function AdminThemePage() {
             </div>
 
             <div className="p-4 rounded-2xl bg-[#05070B] border border-white/5 text-xs font-mono text-slate-400 space-y-1">
-              <div>// ZERO APPLICATION REBUILD REQUIRED</div>
-              <div>// PERSISTED TO POSTGRESQL AUTHORITATIVELY</div>
-              <div>// ALL EXISTING CMS CONTENT PRESERVED</div>
+              <div>ZERO APPLICATION REBUILD REQUIRED</div>
+              <div>PERSISTED TO POSTGRESQL AUTHORITATIVELY</div>
+              <div>ALL EXISTING CMS CONTENT PRESERVED</div>
             </div>
 
             <div className="flex items-center justify-end gap-3 pt-2">

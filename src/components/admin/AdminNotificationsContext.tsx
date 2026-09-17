@@ -64,7 +64,7 @@ export const AdminNotificationsProvider: React.FC<{
         if (isInitial && count > 0 && !hasNotifiedRef.current) {
           hasNotifiedRef.current = true;
           toast(
-            `🔔 ${count} New Inquir${count === 1 ? 'y' : 'ies'} Awaiting Review`,
+            `${count} New Inquir${count === 1 ? 'y' : 'ies'} Awaiting Review`,
             {
               type: 'warning',
               description: `You have ${count} pending client inquiry submission${count === 1 ? '' : 's'} in your triage inbox.`,
@@ -75,7 +75,7 @@ export const AdminNotificationsProvider: React.FC<{
           // New inquiry arrived during live session
           const diff = count - prevCountRef.current;
           toast(
-            `⚡ New Client Inquiry Received!`,
+            `New Client Inquiry Received!`,
             {
               type: 'info',
               description: `${diff} new lead${diff === 1 ? '' : 's'} just submitted via the website contact form.`,

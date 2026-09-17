@@ -35,7 +35,7 @@ export interface PinnedStage {
 const DEFAULT_STAGES: PinnedStage[] = [
   {
     id: 1,
-    tag: 'STAGE 01 // DISCOVER',
+    tag: 'STAGE 01 — DISCOVER',
     phase: 'Discover',
     title: 'Discover: Domain Modeling & Discovery',
     summary:
@@ -52,7 +52,7 @@ const DEFAULT_STAGES: PinnedStage[] = [
   },
   {
     id: 2,
-    tag: 'STAGE 02 // STRATEGIZE',
+    tag: 'STAGE 02 — STRATEGIZE',
     phase: 'Strategize',
     title: 'Strategize: Systems Architecture & Topologies',
     summary:
@@ -69,7 +69,7 @@ const DEFAULT_STAGES: PinnedStage[] = [
   },
   {
     id: 3,
-    tag: 'STAGE 03 // DESIGN',
+    tag: 'STAGE 03 — DESIGN',
     phase: 'Design',
     title: 'Design: UI/UX & Design Systems',
     summary:
@@ -86,7 +86,7 @@ const DEFAULT_STAGES: PinnedStage[] = [
   },
   {
     id: 4,
-    tag: 'STAGE 04 // BUILD',
+    tag: 'STAGE 04 — BUILD',
     phase: 'Build',
     title: 'Build: Core Engineering & Concurrency Pipelines',
     summary:
@@ -103,7 +103,7 @@ const DEFAULT_STAGES: PinnedStage[] = [
   },
   {
     id: 5,
-    tag: 'STAGE 05 // TEST',
+    tag: 'STAGE 05 — TEST',
     phase: 'Test',
     title: 'Test: Automated Verification & Load Hardening',
     summary:
@@ -120,7 +120,7 @@ const DEFAULT_STAGES: PinnedStage[] = [
   },
   {
     id: 6,
-    tag: 'STAGE 06 // DEPLOY',
+    tag: 'STAGE 06 — DEPLOY',
     phase: 'Deploy',
     title: 'Deploy: Zero-Downtime Multi-Region Cutover',
     summary:
@@ -137,7 +137,7 @@ const DEFAULT_STAGES: PinnedStage[] = [
   },
   {
     id: 7,
-    tag: 'STAGE 07 // EVOLVE',
+    tag: 'STAGE 07 — EVOLVE',
     phase: 'Evolve',
     title: 'Evolve: Observability, Scaling & Stewardship',
     summary:
@@ -168,7 +168,7 @@ export const PinnedScrollStory: React.FC<PinnedScrollStoryProps> = ({ steps }) =
           const fallback = DEFAULT_STAGES[idx % DEFAULT_STAGES.length];
           return {
             id: step.stepNumber || idx + 1,
-            tag: `STAGE 0${step.stepNumber || idx + 1} // ${(step.phase || fallback.phase).toUpperCase()}`,
+            tag: `STAGE 0${step.stepNumber || idx + 1} — ${(step.phase || fallback.phase).toUpperCase()}`,
             phase: step.phase || fallback.phase,
             title: step.title || fallback.title,
             summary: step.description || fallback.summary,
@@ -220,7 +220,7 @@ export const PinnedScrollStory: React.FC<PinnedScrollStoryProps> = ({ steps }) =
           <div className="flex items-center gap-2.5">
             <span className="w-2 h-2 rounded-full bg-[#00D2FF] animate-pulse" />
             <span className="font-mono text-xs tracking-[0.25em] uppercase text-[#00D2FF] font-semibold">
-              04 // PINNED NARRATIVE ARCHITECTURE
+              04 — PINNED NARRATIVE ARCHITECTURE
             </span>
           </div>
 
@@ -246,7 +246,7 @@ export const PinnedScrollStory: React.FC<PinnedScrollStoryProps> = ({ steps }) =
               <span className="font-semibold tracking-wider">
                 {`NARRATIVE_STAGE_0${activeStage.id}.SYS`}
               </span>
-              <span className="hidden sm:inline text-white/20">//</span>
+              <span className="hidden sm:inline text-white/20">—</span>
               <span className="hidden sm:inline text-[#64748B]">
                 CONTINUUM_PROTOCOL
               </span>
@@ -418,7 +418,7 @@ export const PinnedScrollStory: React.FC<PinnedScrollStoryProps> = ({ steps }) =
         <div className="space-y-3">
           <div className="flex items-center justify-between text-xs font-mono text-[#64748B]">
             <span className="tracking-widest uppercase">
-              INTERACTIVE PIPELINE TIMELINE // SELECT STAGE
+              INTERACTIVE PIPELINE TIMELINE — SELECT STAGE
             </span>
             <span className="text-[#00D2FF]">
               {`ACTIVE: 0${activeStage.id} / 0${stages.length} — ${activeStage.phase.toUpperCase()}`}

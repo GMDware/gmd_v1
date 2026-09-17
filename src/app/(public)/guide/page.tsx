@@ -57,7 +57,7 @@ export default async function UserGuidePage() {
     {
       title: 'Home',
       route: '/',
-      tag: '01 // ORIGIN',
+      tag: '01 — ORIGIN',
       icon: Sparkles,
       color: '#0066FF',
       summary: 'The digital flagship showcasing GMDware’s philosophy and core capabilities.',
@@ -73,7 +73,7 @@ export default async function UserGuidePage() {
     {
       title: 'Work / Projects',
       route: '/work',
-      tag: '02 // PORTFOLIO',
+      tag: '02 — PORTFOLIO',
       icon: FolderGit2,
       color: '#00D2FF',
       summary: 'Published case studies, technical breakdowns, and architectural briefs.',
@@ -89,7 +89,7 @@ export default async function UserGuidePage() {
     {
       title: 'Services',
       route: '/services',
-      tag: '03 // CAPABILITIES',
+      tag: '03 — CAPABILITIES',
       icon: Layers,
       color: '#80B3FF',
       summary: 'Specialized enterprise software engineering and cloud infrastructure disciplines.',
@@ -105,7 +105,7 @@ export default async function UserGuidePage() {
     {
       title: 'Delivery Process',
       route: '/process',
-      tag: '04 // METHODOLOGY',
+      tag: '04 — METHODOLOGY',
       icon: Workflow,
       color: '#0066FF',
       summary: 'The deterministic 7-phase software delivery engineering framework.',
@@ -121,7 +121,7 @@ export default async function UserGuidePage() {
     {
       title: 'About GMDware',
       route: '/about',
-      tag: '05 // LEADERSHIP',
+      tag: '05 — LEADERSHIP',
       icon: Building2,
       color: '#00D2FF',
       summary: 'Corporate genesis, engineering values, and technical leadership.',
@@ -137,7 +137,7 @@ export default async function UserGuidePage() {
     {
       title: 'Insights & Publications',
       route: '/insights',
-      tag: '06 // RESEARCH',
+      tag: '06 — RESEARCH',
       icon: BookOpen,
       color: '#80B3FF',
       summary: 'Technical essays, systems architecture whitepapers, and motion design mathematics.',
@@ -153,7 +153,7 @@ export default async function UserGuidePage() {
     {
       title: 'Consultation & Contact',
       route: '/contact',
-      tag: '07 // ENGAGEMENT',
+      tag: '07 — ENGAGEMENT',
       icon: Mail,
       color: '#0066FF',
       summary: 'Direct consultation terminal for project scoping and RFP submissions.',
@@ -176,7 +176,7 @@ export default async function UserGuidePage() {
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-[#0066FF] animate-pulse" />
             <span className="font-mono text-xs tracking-[0.25em] uppercase text-[#00D2FF]">
-              // PLATFORM DIRECTORY & USER GUIDE
+              PLATFORM DIRECTORY & USER GUIDE
             </span>
           </div>
 
@@ -202,7 +202,7 @@ export default async function UserGuidePage() {
 
           <div className="flex items-center gap-2 text-xs font-mono text-[#00D2FF]">
             <span>[GENESIS]</span>
-            <span>//</span>
+            <span>—</span>
             <span>WHAT IS GMDWARE?</span>
           </div>
 
@@ -367,7 +367,7 @@ export default async function UserGuidePage() {
             {/* Official Social Media Links */}
             <div className="space-y-4">
               <span className="font-mono text-xs text-white uppercase tracking-wider block font-semibold">
-                // OFFICIAL SOCIAL & REPOSITORY CHANNELS
+                OFFICIAL SOCIAL & REPOSITORY CHANNELS
               </span>
               <p className="text-xs text-[#94A3B8] leading-relaxed font-sans">
                 Follow and inspect GMDware across authorized corporate social networks and our official GitHub organization:

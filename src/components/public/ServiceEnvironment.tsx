@@ -45,7 +45,7 @@ const CORE_SERVICES: ServiceSpec[] = [
       'Automated Comprehensive Test Harnesses',
     ],
     techStack: ['TypeScript', 'Go', 'Rust', 'PostgreSQL', 'Docker', 'Kafka'],
-    architectureSnippet: 'DomainDrivenDesign // EventBus.Dispatch(TxState)',
+    architectureSnippet: 'DomainDrivenDesign — EventBus.Dispatch(TxState)',
   },
   {
     id: 'web-dev',
@@ -61,7 +61,7 @@ const CORE_SERVICES: ServiceSpec[] = [
       'WCAG AA Accessibility Compliance',
     ],
     techStack: ['Next.js', 'React', 'Tailwind CSS', 'TypeScript', 'Prisma', 'Edge CDN'],
-    architectureSnippet: 'NextServerComponent // React.Suspense(EdgeData)',
+    architectureSnippet: 'NextServerComponent — React.Suspense(EdgeData)',
   },
   {
     id: 'ui-ux',
@@ -164,7 +164,7 @@ export const ServiceEnvironment: React.FC<ServiceEnvironmentProps> = ({ services
                 )
               : ['TypeScript', 'Next.js', 'PostgreSQL', 'Docker'],
           architectureSnippet:
-            s.codeSnippet || `${(s.title || s.name).replace(/\s+/g, '')} // Pipeline.Dispatch(TxState)`,
+            s.codeSnippet || `${(s.title || s.name).replace(/\s+/g, '')} — Pipeline.Dispatch(TxState)`,
         }))
       : CORE_SERVICES;
 
@@ -254,7 +254,7 @@ export const ServiceEnvironment: React.FC<ServiceEnvironmentProps> = ({ services
           <div className="lg:col-span-7 space-y-6">
             <div className="flex items-center gap-3">
               <span className="font-mono text-xs text-[#00D2FF] uppercase tracking-wider font-semibold">
-                // {activeService.category}: {activeService.name.toUpperCase()}
+                {activeService.category}: {activeService.name.toUpperCase()}
               </span>
               <Badge variant="cobalt" size="sm">
                 PRODUCTION SLA
@@ -338,7 +338,7 @@ export const ServiceEnvironment: React.FC<ServiceEnvironmentProps> = ({ services
                     </div>
                   </div>
                   <div className="text-[10px] text-[#94A3B8] text-center">
-                    ACID Strict Transactions // Zero State Drift
+                    ACID Strict Transactions — Zero State Drift
                   </div>
                 </div>
               )}
@@ -360,7 +360,7 @@ export const ServiceEnvironment: React.FC<ServiceEnvironmentProps> = ({ services
                     </div>
                   </div>
                   <div className="text-[10px] text-[#94A3B8] text-center">
-                    Edge SSR // Stale-While-Revalidate Caching
+                    Edge SSR — Stale-While-Revalidate Caching
                   </div>
                 </div>
               )}
@@ -384,7 +384,7 @@ export const ServiceEnvironment: React.FC<ServiceEnvironmentProps> = ({ services
                     </div>
                   </div>
                   <div className="text-[10px] text-[#94A3B8] text-center">
-                    Mathematical Ergonomics // Zero Visual Noise
+                    Mathematical Ergonomics — Zero Visual Noise
                   </div>
                 </div>
               )}
@@ -413,7 +413,7 @@ export const ServiceEnvironment: React.FC<ServiceEnvironmentProps> = ({ services
                     </div>
                   </div>
                   <div className="text-[10px] text-[#94A3B8] text-center">
-                    Automated Self-Healing Pods // Zero Single Point of Failure
+                    Automated Self-Healing Pods — Zero Single Point of Failure
                   </div>
                 </div>
               )}
@@ -437,7 +437,7 @@ export const ServiceEnvironment: React.FC<ServiceEnvironmentProps> = ({ services
                     </div>
                   </div>
                   <div className="text-[10px] text-[#94A3B8] text-center">
-                    Strict Schema Guardrails // Zero Hallucinations
+                    Strict Schema Guardrails — Zero Hallucinations
                   </div>
                 </div>
               )}
@@ -459,7 +459,7 @@ export const ServiceEnvironment: React.FC<ServiceEnvironmentProps> = ({ services
                     ))}
                   </div>
                   <div className="text-[10px] text-[#94A3B8] text-center">
-                    24/7 Guaranteed Response SLA // Continuous Vulnerability Scans
+                    24/7 Guaranteed Response SLA — Continuous Vulnerability Scans
                   </div>
                 </div>
               )}
@@ -485,7 +485,7 @@ export const ServiceEnvironment: React.FC<ServiceEnvironmentProps> = ({ services
                     </div>
                   </div>
                   <div className="text-[10px] text-[#94A3B8] text-center">
-                    Deterministic Architecture // Live Specification
+                    Deterministic Architecture — Live Specification
                   </div>
                 </div>
               )}
@@ -494,7 +494,7 @@ export const ServiceEnvironment: React.FC<ServiceEnvironmentProps> = ({ services
             {/* Deliverables Matrix */}
             <div className="p-6 rounded-2xl bg-[#080D18] border border-white/10 space-y-4">
               <h4 className="font-mono text-xs uppercase tracking-[0.2em] text-white font-semibold">
-                // VERIFIED DELIVERABLES
+                VERIFIED DELIVERABLES
               </h4>
 
               <div className="space-y-3">

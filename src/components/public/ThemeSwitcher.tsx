@@ -2,7 +2,7 @@
 
 import React, { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
-import { Terminal, Sparkles, Loader2 } from 'lucide-react';
+import { Terminal, Palette, Loader2 } from 'lucide-react';
 import { useTheme } from '@/components/theme/ThemeProvider';
 import { cn } from '@/lib/utils';
 
@@ -81,7 +81,7 @@ export const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({
           </>
         ) : (
           <>
-            <Sparkles className="w-3.5 h-3.5 text-blue-600" />
+            <Palette className="w-3.5 h-3.5 text-blue-600" />
             <span className="text-[11px] font-semibold">ATL</span>
           </>
         )}
@@ -130,7 +130,7 @@ export const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({
           {switchingTo === 'atelier' ? (
             <Loader2 className="w-3.5 h-3.5 animate-spin" />
           ) : (
-            <Sparkles className="w-3.5 h-3.5" />
+            <Palette className="w-3.5 h-3.5" />
           )}
           <span>GMDware Atelier</span>
         </button>
@@ -194,7 +194,7 @@ export const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({
         {switchingTo === 'atelier' ? (
           <Loader2 className="w-3.5 h-3.5 animate-spin text-white" />
         ) : (
-          <Sparkles className={cn('w-3.5 h-3.5', activeTheme === 'atelier' ? 'text-amber-300' : isDark ? 'text-amber-400/70' : 'text-blue-600')} />
+          <Palette className={cn('w-3.5 h-3.5', activeTheme === 'atelier' ? 'text-white' : isDark ? 'text-slate-400' : 'text-blue-600')} />
         )}
         <span className="font-mono text-[11px] tracking-wide">ATELIER</span>
       </button>

@@ -31,7 +31,7 @@ export const NexusWork: React.FC<NexusWorkProps> = ({
           <div className="space-y-3">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-[11px] font-mono text-[#00F2FE]">
               <Orbit className="w-3 h-3" />
-              <span>CONSTELLATION // PROJECT ECOSYSTEM</span>
+              <span>CONSTELLATION — PROJECT ECOSYSTEM</span>
             </div>
             <h2 className="text-3xl sm:text-5xl font-black text-white tracking-tight font-sans">
               Interconnected Systems in Production

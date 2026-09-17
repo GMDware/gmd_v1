@@ -19,7 +19,7 @@ export default function GlobalError({
       <body className="bg-[#05080F] text-[#E2E8F0] min-h-screen flex items-center justify-center p-4 antialiased font-sans">
         <div className="max-w-md w-full p-8 rounded-2xl bg-[#080D18] border border-red-500/20 shadow-2xl text-center space-y-6">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-mono">
-            <span>SYSTEM_FAILURE // ISOLATED</span>
+            <span>SYSTEM_FAILURE — ISOLATED</span>
           </div>
 
           <div className="space-y-2">

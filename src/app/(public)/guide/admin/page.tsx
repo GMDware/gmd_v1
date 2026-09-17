@@ -100,7 +100,7 @@ export default function AdminGuidePage() {
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-[#0066FF] animate-pulse" />
             <span className="font-mono text-xs tracking-[0.25em] uppercase text-[#00D2FF]">
-              // CMS OPERATIONAL MANUAL
+              CMS OPERATIONAL MANUAL
             </span>
           </div>
 

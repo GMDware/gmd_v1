@@ -42,7 +42,7 @@ interface ProductArchetype {
 const ARCHETYPES: ProductArchetype[] = [
   {
     id: 'saas',
-    tag: '01 // ARCHETYPE',
+    tag: '01 — ARCHETYPE',
     name: 'SaaS Platforms',
     category: 'Cloud Software',
     headline: 'Multi-Tenant High-Scale SaaS Applications',
@@ -72,7 +72,7 @@ const ARCHETYPES: ProductArchetype[] = [
   },
   {
     id: 'ecommerce',
-    tag: '02 // ARCHETYPE',
+    tag: '02 — ARCHETYPE',
     name: 'E-Commerce Engines',
     category: 'High-Volume Commerce',
     headline: 'Headless, Composable Global Commerce Architectures',
@@ -102,7 +102,7 @@ const ARCHETYPES: ProductArchetype[] = [
   },
   {
     id: 'business-systems',
-    tag: '03 // ARCHETYPE',
+    tag: '03 — ARCHETYPE',
     name: 'Business Systems',
     category: 'Enterprise Operations',
     headline: 'Custom ERPs, CRMs & Mission-Critical Operations',
@@ -132,7 +132,7 @@ const ARCHETYPES: ProductArchetype[] = [
   },
   {
     id: 'dashboards',
-    tag: '04 // ARCHETYPE',
+    tag: '04 — ARCHETYPE',
     name: 'High-Frequency Dashboards',
     category: 'Real-Time Telemetry',
     headline: 'Low-Latency Financial & Operational Observability Consoles',
@@ -162,7 +162,7 @@ const ARCHETYPES: ProductArchetype[] = [
   },
   {
     id: 'mobile',
-    tag: '05 // ARCHETYPE',
+    tag: '05 — ARCHETYPE',
     name: 'Mobile Applications',
     category: 'Native & Cross-Platform',
     headline: 'Fluid, Offline-First iOS & Android Applications',
@@ -192,7 +192,7 @@ const ARCHETYPES: ProductArchetype[] = [
   },
   {
     id: 'apis',
-    tag: '06 // ARCHETYPE',
+    tag: '06 — ARCHETYPE',
     name: 'APIs & Microservices',
     category: 'Backend Architecture',
     headline: 'Resilient, Highly-Documented API Platforms',
@@ -222,7 +222,7 @@ const ARCHETYPES: ProductArchetype[] = [
   },
   {
     id: 'ai-products',
-    tag: '07 // ARCHETYPE',
+    tag: '07 — ARCHETYPE',
     name: 'AI Products & Agents',
     category: 'Intelligent Systems',
     headline: 'Domain-Specific LLM Workflows & Autonomous Agents',
@@ -252,7 +252,7 @@ const ARCHETYPES: ProductArchetype[] = [
   },
   {
     id: 'cloud-infrastructure',
-    tag: '08 // ARCHETYPE',
+    tag: '08 — ARCHETYPE',
     name: 'Cloud & DevOps',
     category: 'Platform Engineering',
     headline: 'Immutable, Self-Healing Infrastructure as Code',
@@ -299,7 +299,7 @@ export function WhatWeBuild() {
             <div className="flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-[#0066FF] animate-pulse" />
               <span className="font-mono text-xs tracking-[0.25em] uppercase text-[#00D2FF]">
-                03 // WHAT WE BUILD
+                03 — WHAT WE BUILD
               </span>
             </div>
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-white font-display tracking-tight">
@@ -371,7 +371,7 @@ export function WhatWeBuild() {
                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#0066FF]/10 border border-[#0066FF]/30">
                   <IconComponent className="w-3.5 h-3.5 text-[#00D2FF]" />
                   <span className="font-mono text-[11px] text-[#00D2FF] font-semibold tracking-wider uppercase">
-                    {activeArchetype.tag} // {activeArchetype.category}
+                    {activeArchetype.tag} — {activeArchetype.category}
                   </span>
                 </div>
                 <span className="font-mono text-xs text-[#64748B]">SPECIFICATION REVISION 4.1</span>

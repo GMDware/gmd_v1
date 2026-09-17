@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import {
   ArrowUpRight,
@@ -107,8 +107,21 @@ export const FeaturedServicesShowcase: React.FC<FeaturedServicesShowcaseProps> =
   defaultTechsMap = DEFAULT_SERVICE_TECHS_FALLBACK,
 }) => {
   const [activeIndex, setActiveIndex] = useState(0);
+  const [hasOverflow, setHasOverflow] = useState(false);
   const railRef = useRef<HTMLDivElement>(null);
   const cardRefs = useRef<(HTMLButtonElement | null)[]>([]);
+
+  useEffect(() => {
+    const checkOverflow = () => {
+      if (railRef.current) {
+        const { scrollWidth, clientWidth } = railRef.current;
+        setHasOverflow(scrollWidth > clientWidth + 8);
+      }
+    };
+    checkOverflow();
+    window.addEventListener('resize', checkOverflow);
+    return () => window.removeEventListener('resize', checkOverflow);
+  }, [services]);
 
   if (services.length === 0) return null;
 
@@ -269,30 +282,37 @@ export const FeaturedServicesShowcase: React.FC<FeaturedServicesShowcaseProps> =
             </p>
           </div>
 
-          <div className="flex items-center gap-2 self-start sm:self-end">
-            <button
-              type="button"
-              onClick={scrollPrev}
-              aria-label="Previous service"
-              className="w-9 h-9 rounded-xl bg-[#0A0E1A] border border-white/10 hover:border-white/30 text-white flex items-center justify-center transition-all hover:bg-white/5 active:scale-95 shadow-sm"
-            >
-              <ChevronLeft className="w-4 h-4" />
-            </button>
-            <button
-              type="button"
-              onClick={scrollNext}
-              aria-label="Next service"
-              className="w-9 h-9 rounded-xl bg-[#0A0E1A] border border-white/10 hover:border-white/30 text-white flex items-center justify-center transition-all hover:bg-white/5 active:scale-95 shadow-sm"
-            >
-              <ChevronRight className="w-4 h-4" />
-            </button>
-          </div>
+          {hasOverflow && (
+            <div className="flex items-center gap-2 self-start sm:self-end">
+              <button
+                type="button"
+                onClick={scrollPrev}
+                aria-label="Previous service"
+                className="w-9 h-9 rounded-xl bg-[#0A0E1A] border border-white/10 hover:border-white/30 text-white flex items-center justify-center transition-all hover:bg-white/5 active:scale-95 shadow-sm"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </button>
+              <button
+                type="button"
+                onClick={scrollNext}
+                aria-label="Next service"
+                className="w-9 h-9 rounded-xl bg-[#0A0E1A] border border-white/10 hover:border-white/30 text-white flex items-center justify-center transition-all hover:bg-white/5 active:scale-95 shadow-sm"
+              >
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Horizontal Scroll Track */}
         <div
           ref={railRef}
-          className="flex items-stretch gap-4 overflow-x-auto snap-x snap-mandatory scroll-smooth pb-3 pt-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          className={cn(
+            'flex items-stretch gap-4 pb-3 pt-1',
+            hasOverflow
+              ? 'overflow-x-auto snap-x snap-mandatory scroll-smooth [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden'
+              : 'justify-center flex-wrap'
+          )}
         >
           {services.map((service, idx) => {
             const isActive = idx === activeIndex;

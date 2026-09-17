@@ -25,7 +25,7 @@ export default function NotFound() {
         <div className="glass-panel rounded-3xl p-8 sm:p-12 border border-white/10 shadow-2xl space-y-6">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-[#00F2FE] text-xs font-mono">
             <Terminal className="w-3.5 h-3.5" />
-            <span>HTTP_STATUS // 404_NOT_FOUND</span>
+            <span>HTTP_STATUS — 404_NOT_FOUND</span>
           </div>
 
           <h1 className="text-4xl sm:text-6xl font-black font-mono tracking-tight text-white">
@@ -57,7 +57,7 @@ export default function NotFound() {
         </div>
 
         <div className="text-xs font-mono text-slate-500">
-          GMDware Core Platform // v1.0 Production
+          GMDware Core Platform — v1.0 Production
         </div>
       </Container>
     </div>

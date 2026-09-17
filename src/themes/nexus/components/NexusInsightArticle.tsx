@@ -23,7 +23,7 @@ export const NexusInsightArticle: React.FC<NexusInsightArticleProps> = ({ insigh
         <header className="space-y-6 pb-8 border-b border-white/10">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-xs font-mono text-[#00F2FE]">
             <Orbit className="w-3 h-3" />
-            <span>DISPATCH // {insight.slug?.toUpperCase()}</span>
+            <span>DISPATCH — {insight.slug?.toUpperCase()}</span>
           </div>
 
           <h1 className="text-3xl sm:text-5xl font-black text-white tracking-tight font-sans leading-tight">

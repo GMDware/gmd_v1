@@ -288,11 +288,22 @@ export const AtelierAbout: React.FC<AtelierAboutProps> = ({
       return a.displayOrder - b.displayOrder;
     });
 
-  // Horizontal scrolling & auto-scroll state
   const railRef = useRef<HTMLDivElement>(null);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
   const [isHovered, setIsHovered] = useState(false);
   const [currentScrollIdx, setCurrentScrollIdx] = useState(0);
+  const [hasOverflow, setHasOverflow] = useState(false);
+
+  useEffect(() => {
+    const checkOverflow = () => {
+      if (railRef.current) {
+        setHasOverflow(railRef.current.scrollWidth > railRef.current.clientWidth + 8);
+      }
+    };
+    checkOverflow();
+    window.addEventListener('resize', checkOverflow);
+    return () => window.removeEventListener('resize', checkOverflow);
+  }, [normalizedMembers.length]);
 
   // Automated continuous horizontal scroll when members count exceeds 4
   useEffect(() => {
@@ -493,7 +504,7 @@ export const AtelierAbout: React.FC<AtelierAboutProps> = ({
                 <span className="text-xs font-semibold text-blue-600 uppercase tracking-wider block">
                   Leadership &amp; Practitioners
                 </span>
-                {normalizedMembers.length > 4 && (
+                {hasOverflow && (
                   <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-blue-50 border border-blue-200/60 text-blue-700 text-[11px] font-mono font-medium">
                     <span
                       className={`w-1.5 h-1.5 rounded-full ${
@@ -513,8 +524,8 @@ export const AtelierAbout: React.FC<AtelierAboutProps> = ({
               </p>
             </div>
 
-            {/* Navigation & Auto-scroll Controls (Shown when > 4 cards) */}
-            {normalizedMembers.length > 4 && (
+            {/* Navigation & Auto-scroll Controls (Shown when overflowing) */}
+            {hasOverflow && (
               <div className="flex items-center gap-2 shrink-0 self-start sm:self-end">
                 {/* Play/Pause Button */}
                 <button
@@ -558,9 +569,9 @@ export const AtelierAbout: React.FC<AtelierAboutProps> = ({
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
             className={`flex items-stretch gap-5 pb-4 pt-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${
-              normalizedMembers.length > 4
+              hasOverflow
                 ? 'overflow-x-auto scroll-smooth snap-x snap-mandatory cursor-grab active:cursor-grabbing'
-                : 'overflow-x-auto sm:overflow-x-visible'
+                : 'justify-center flex-wrap'
             }`}
           >
             {normalizedMembers.map((member, idx) => (
@@ -573,8 +584,8 @@ export const AtelierAbout: React.FC<AtelierAboutProps> = ({
             ))}
           </div>
 
-          {/* Dot Pagination indicators when members exceed 4 */}
-          {normalizedMembers.length > 4 && (
+          {/* Dot Pagination indicators when overflowing */}
+          {hasOverflow && (
             <div className="flex items-center justify-center gap-1.5 pt-1">
               {normalizedMembers.map((_, dotIdx) => (
                 <button

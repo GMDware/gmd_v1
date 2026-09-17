@@ -195,7 +195,7 @@ export default async function InsightDetailPage({ params, searchParams }: Insigh
           {/* Executive Summary Callout */}
           <div className="gmd-panel rounded-xl p-6 sm:p-8 border-l-4 border-l-[#0066FF] bg-[#070D1A] space-y-2">
             <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-[#00D2FF] font-semibold block">
-              // ARCHITECTURAL ABSTRACT & THESIS
+              ARCHITECTURAL ABSTRACT & THESIS
             </span>
             <p className="text-base sm:text-lg text-white font-sans leading-relaxed italic">
               &ldquo;{article.summary}&rdquo;

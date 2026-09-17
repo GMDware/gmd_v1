@@ -188,16 +188,9 @@ export const ContactForm: React.FC = () => {
               $50,000+ (High-Scale Architecture)
             </option>
           </select>
-          {isDiscoveryTier ? (
-            <p className="text-[11px] font-mono text-[#00F2FE] flex items-center gap-1.5 pt-0.5">
-              <span className="text-xs">⚡</span>
-              <span>Fast-tracked to our engineering leads for an exploratory discovery call.</span>
-            </p>
-          ) : (
-            <p className="text-[11px] font-mono text-slate-500 pt-0.5">
-              Calibrates system architecture, sprint capacity, and delivery pace.
-            </p>
-          )}
+          <p className="text-[11px] font-mono text-slate-500 pt-0.5">
+            Calibrates system architecture, sprint capacity, and delivery pace.
+          </p>
         </div>
       </div>
 
@@ -250,7 +243,7 @@ export const ContactForm: React.FC = () => {
       {/* Security Guarantee */}
       <div className="flex items-center justify-center gap-2 text-[11px] font-mono text-[#64748B]">
         <Terminal className="w-3.5 h-3.5 text-[#0066FF]" />
-        <span>ENCRYPTED TRANSMISSION // DIRECT INQUIRY TRIAGE</span>
+        <span>ENCRYPTED TRANSMISSION — DIRECT INQUIRY TRIAGE</span>
       </div>
     </form>
   );

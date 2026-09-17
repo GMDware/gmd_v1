@@ -109,7 +109,7 @@ export const NexusProcess: React.FC<NexusProcessProps> = ({
 
             <div className="md:col-span-7 space-y-4">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-xs font-mono text-[#00F2FE]">
-                <span>STAGE {current.num} // SPECIFICATION</span>
+                <span>STAGE {current.num} — SPECIFICATION</span>
               </div>
               <h3 className="text-2xl sm:text-4xl font-bold text-white tracking-tight">
                 {current.title}

@@ -59,7 +59,7 @@ export default async function ProcessPage({
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-[#0066FF] animate-pulse" />
             <span className="font-mono text-xs tracking-[0.25em] uppercase text-[#00D2FF]">
-              // 7-PHASE DETERMINISTIC DELIVERY PROTOCOL
+              7-PHASE DETERMINISTIC DELIVERY PROTOCOL
             </span>
           </div>
 
@@ -86,7 +86,7 @@ export default async function ProcessPage({
         </div>
 
         {/* Storytelling Conduit */}
-        <SectionConduit label="PROTOCOL // CONTINUOUS FLOW" />
+        <SectionConduit label="PROTOCOL — CONTINUOUS FLOW" />
 
         {/* Detailed Process Timeline */}
         <div className="max-w-5xl mx-auto pt-8">

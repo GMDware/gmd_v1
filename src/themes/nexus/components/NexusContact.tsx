@@ -82,7 +82,7 @@ export const NexusContact: React.FC<NexusContactProps> = ({ isStandalone = false
         <div className="text-center space-y-4">
           <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-[11px] font-mono text-[#00F2FE]">
             <Radio className="w-3 h-3 animate-pulse" />
-            <span>DIRECT NETWORK DISPATCH // ZERO INTERMEDIARIES</span>
+            <span>DIRECT NETWORK DISPATCH — ZERO INTERMEDIARIES</span>
           </div>
           <h2 className="text-3xl sm:text-5xl font-black text-white tracking-tight font-sans">
             Initiate a Connection

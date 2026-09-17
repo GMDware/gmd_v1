@@ -96,8 +96,21 @@ export const AtelierWork: React.FC<AtelierWorkProps> = ({
   const [isHovered, setIsHovered] = useState(false);
   const [stageProgress, setStageProgress] = useState(0);
 
+  const [hasOverflow, setHasOverflow] = useState(false);
+
   const railRef = useRef<HTMLDivElement>(null);
   const cardRefs = useRef<(HTMLButtonElement | null)[]>([]);
+
+  useEffect(() => {
+    const checkOverflow = () => {
+      if (railRef.current) {
+        setHasOverflow(railRef.current.scrollWidth > railRef.current.clientWidth + 8);
+      }
+    };
+    checkOverflow();
+    window.addEventListener('resize', checkOverflow);
+    return () => window.removeEventListener('resize', checkOverflow);
+  }, [allProjects.length]);
 
   const ROTATION_INTERVAL = 4500; // 4.5 seconds per project cycle
 
@@ -466,24 +479,26 @@ export const AtelierWork: React.FC<AtelierWorkProps> = ({
             </span>
           </div>
 
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => handleRailScroll('left')}
-              className="p-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 hover:text-slate-900 transition-all active:scale-95 shadow-2xs"
-              aria-label="Scroll projects track left"
-            >
-              <ChevronLeft className="w-4 h-4" />
-            </button>
-            <button
-              type="button"
-              onClick={() => handleRailScroll('right')}
-              className="p-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 hover:text-slate-900 transition-all active:scale-95 shadow-2xs"
-              aria-label="Scroll projects track right"
-            >
-              <ChevronRight className="w-4 h-4" />
-            </button>
-          </div>
+          {hasOverflow && (
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => handleRailScroll('left')}
+                className="p-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 hover:text-slate-900 transition-all active:scale-95 shadow-2xs"
+                aria-label="Scroll projects track left"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </button>
+              <button
+                type="button"
+                onClick={() => handleRailScroll('right')}
+                className="p-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 hover:text-slate-900 transition-all active:scale-95 shadow-2xs"
+                aria-label="Scroll projects track right"
+              >
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Horizontal Track with Gradient Edge Fades */}
@@ -494,7 +509,11 @@ export const AtelierWork: React.FC<AtelierWorkProps> = ({
 
           <div
             ref={railRef}
-            className="flex items-stretch gap-5 overflow-x-auto pb-4 pt-1 scroll-smooth snap-x snap-mandatory [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+            className={`flex items-stretch gap-5 pb-4 pt-1 ${
+              hasOverflow
+                ? 'overflow-x-auto scroll-smooth snap-x snap-mandatory [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]'
+                : 'justify-center flex-wrap'
+            }`}
           >
             {allProjects.map((project, idx) => {
               const isCurrent = idx === activeIndex;
