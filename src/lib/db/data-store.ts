@@ -113,7 +113,7 @@ export class DataStore {
   static async getServices() {
     if (await isDatabaseReachable()) {
       try {
-        const services = await prisma.service.findMany({
+        let services = await prisma.service.findMany({
           where: { status: 'PUBLISHED', deletedAt: null },
           include: {
             features: { orderBy: { displayOrder: 'asc' } },
@@ -122,7 +122,22 @@ export class DataStore {
           },
           orderBy: { displayOrder: 'asc' },
         });
-        if (services) return services;
+
+        if (!services || services.length === 0) {
+          const { ServicesService } = await import('@/services/service.service');
+          await ServicesService.autoSeedIfEmpty();
+          services = await prisma.service.findMany({
+            where: { status: 'PUBLISHED', deletedAt: null },
+            include: {
+              features: { orderBy: { displayOrder: 'asc' } },
+              technologies: { include: { technology: true } },
+              heroImage: true,
+            },
+            orderBy: { displayOrder: 'asc' },
+          });
+        }
+
+        if (services && services.length > 0) return services;
       } catch {
         // Fallback on connection error
       }
@@ -177,7 +192,7 @@ export class DataStore {
           where.category = { slug: options.categorySlug };
         }
 
-        const projects = await prisma.project.findMany({
+        let projects = await prisma.project.findMany({
           where,
           include: {
             category: true,
@@ -187,6 +202,22 @@ export class DataStore {
           },
           orderBy: { displayOrder: 'asc' },
         });
+
+        if (!projects || projects.length === 0) {
+          const { ProjectService } = await import('@/services/project.service');
+          await ProjectService.autoSeedIfEmpty();
+          projects = await prisma.project.findMany({
+            where,
+            include: {
+              category: true,
+              caseStudy: true,
+              technologies: { include: { technology: true } },
+              heroImage: true,
+            },
+            orderBy: { displayOrder: 'asc' },
+          });
+        }
+
         if (projects && projects.length > 0) {
           return projects.map((p: any) => ({
             ...p,

@@ -120,6 +120,8 @@ export function normalizeProject(raw: any, fallbackId?: string): NormalizedProje
     image = raw.image;
   } else if (raw.heroImage?.url) {
     image = raw.heroImage.url;
+  } else if (raw.heroImage?.storageUrl) {
+    image = raw.heroImage.storageUrl;
   } else if (raw.heroImageUrl) {
     image = raw.heroImageUrl;
   }

@@ -1,9 +1,98 @@
 import prisma from '@/lib/db/prisma';
 import { PublicationStatus } from '@prisma/client';
 import { AuthService } from './auth.service';
+import { INITIAL_SEED_DATA } from '@/lib/db/seed-data';
 
 export class ServicesService {
+  /**
+   * Auto-seed baseline services from INITIAL_SEED_DATA if missing from database
+   */
+  static async autoSeedIfEmpty() {
+    try {
+      const existingCount = await prisma.service.count({ where: { deletedAt: null } });
+      if (existingCount >= INITIAL_SEED_DATA.services.length) return;
+
+      // Ensure baseline technologies exist
+      const techMap = new Map<string, string>();
+      for (const tech of INITIAL_SEED_DATA.technologies) {
+        const createdTech = await prisma.technology.upsert({
+          where: { slug: tech.slug },
+          update: { name: tech.name },
+          create: {
+            name: tech.name,
+            slug: tech.slug,
+            category: tech.category,
+            description: tech.description,
+            isFeatured: tech.isFeatured,
+            displayOrder: tech.displayOrder,
+          },
+        });
+        techMap.set(tech.name.toLowerCase(), createdTech.id);
+        techMap.set(tech.slug.toLowerCase(), createdTech.id);
+      }
+
+      for (const s of INITIAL_SEED_DATA.services) {
+        const existing = await prisma.service.findFirst({
+          where: {
+            OR: [
+              { slug: s.slug },
+              { id: s.id },
+            ],
+            deletedAt: null,
+          },
+        });
+
+        if (existing) continue;
+
+        const resolvedTechIds: string[] = [];
+        if (s.technologies) {
+          for (const item of s.technologies) {
+            const techName = (item as any).technology?.name || (item as any).name;
+            if (techName) {
+              const techId = techMap.get(techName.toLowerCase());
+              if (techId && !resolvedTechIds.includes(techId)) {
+                resolvedTechIds.push(techId);
+              }
+            }
+          }
+        }
+
+        await prisma.service.create({
+          data: {
+            id: s.id,
+            title: s.title,
+            slug: s.slug,
+            summary: s.summary,
+            content: s.content,
+            iconName: s.iconName,
+            displayOrder: s.displayOrder,
+            isFeatured: s.isFeatured ?? true,
+            isActive: true,
+            status: 'PUBLISHED',
+            features: s.features?.length
+              ? {
+                  create: s.features.map((f: any, idx: number) => ({
+                    title: f.title || f.name || String(f),
+                    description: f.description || '',
+                    displayOrder: f.displayOrder ?? idx + 1,
+                  })),
+                }
+              : undefined,
+            technologies: resolvedTechIds.length
+              ? {
+                  create: resolvedTechIds.map((tId) => ({ technologyId: tId })),
+                }
+              : undefined,
+          },
+        });
+      }
+    } catch (seedErr) {
+      console.error('Service auto-seed notice:', seedErr);
+    }
+  }
+
   static async list(options: { status?: PublicationStatus; isFeatured?: boolean; isActive?: boolean } = {}) {
+    await this.autoSeedIfEmpty();
     const where: Record<string, any> = { deletedAt: null };
 
     if (options.status) where.status = options.status;

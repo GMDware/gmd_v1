@@ -381,30 +381,51 @@ export default async function CaseStudyPage({ params, searchParams }: CaseStudyP
         )}
 
         {/* Client Testimonial (if populated in CaseStudy) */}
-        {caseStudy && (caseStudy as any).testimonial && (
-          <div className="mt-20 p-8 sm:p-12 rounded-2xl bg-[#091122] border border-[#0066FF]/30 relative overflow-hidden shadow-2xl">
-            <div className="absolute top-6 right-8 text-[#0066FF]/20 pointer-events-none">
-              <Quote className="w-24 h-24" />
-            </div>
+        {(() => {
+          const rawTestimonial = caseStudy ? (caseStudy as any).testimonial : null;
+          if (!rawTestimonial) return null;
 
-            <div className="relative z-10 max-w-3xl space-y-6">
-              <div className="font-mono text-xs text-[#00D2FF] tracking-wider uppercase">
-                PARTNER ENDORSEMENT
+          const quote =
+            typeof rawTestimonial === 'string'
+              ? rawTestimonial
+              : typeof rawTestimonial === 'object' && rawTestimonial !== null
+              ? rawTestimonial.quote || rawTestimonial.text || ''
+              : '';
+
+          if (!quote || typeof quote !== 'string') return null;
+
+          const author =
+            typeof rawTestimonial === 'object' && rawTestimonial?.author
+              ? String(rawTestimonial.author)
+              : null;
+          const role =
+            typeof rawTestimonial === 'object' && rawTestimonial?.role
+              ? String(rawTestimonial.role)
+              : null;
+
+          return (
+            <div className="mt-20 p-8 sm:p-12 rounded-2xl bg-[#091122] border border-[#0066FF]/30 relative overflow-hidden shadow-2xl">
+              <div className="absolute top-6 right-8 text-[#0066FF]/20 pointer-events-none">
+                <Quote className="w-24 h-24" />
               </div>
-              <p className="text-lg sm:text-2xl font-serif italic text-white leading-relaxed">
-                &ldquo;{(caseStudy as any).testimonial.quote || (caseStudy as any).testimonial}&rdquo;
-              </p>
-              {(caseStudy as any).testimonial.author && (
-                <div className="font-mono text-xs text-[#94A3B8]">
-                  <span className="text-white font-bold">{(caseStudy as any).testimonial.author}</span>
-                  {(caseStudy as any).testimonial.role && (
-                    <span> — {(caseStudy as any).testimonial.role}</span>
-                  )}
+
+              <div className="relative z-10 max-w-3xl space-y-6">
+                <div className="font-mono text-xs text-[#00D2FF] tracking-wider uppercase">
+                  PARTNER ENDORSEMENT
                 </div>
-              )}
+                <p className="text-lg sm:text-2xl font-serif italic text-white leading-relaxed">
+                  &ldquo;{quote}&rdquo;
+                </p>
+                {author && (
+                  <div className="font-mono text-xs text-[#94A3B8]">
+                    <span className="text-white font-bold">{author}</span>
+                    {role && <span> — {role}</span>}
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
-        )}
+          );
+        })()}
 
         {/* Media / Gallery Items (if populated) */}
         {gallery.length > 0 && (

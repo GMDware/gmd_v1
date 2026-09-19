@@ -20,9 +20,6 @@ export class ProjectService {
    */
   static async autoSeedIfEmpty() {
     try {
-      const count = await prisma.project.count({ where: { deletedAt: null } });
-      if (count > 0) return;
-
       // Ensure categories exist
       const categoryMap = new Map<string, string>();
       for (const cat of INITIAL_SEED_DATA.projectCategories) {
@@ -54,8 +51,19 @@ export class ProjectService {
         techMap.set(tech.slug, createdTech.id);
       }
 
-      // Seed all projects
+      // Seed missing projects item-by-item preserving existing projects (like TripStore)
       for (const p of INITIAL_SEED_DATA.projects) {
+        const existing = await prisma.project.findFirst({
+          where: {
+            OR: [
+              { id: p.id },
+              { slug: p.slug },
+            ],
+            deletedAt: null,
+          },
+        });
+        if (existing) continue;
+
         const resolvedCategoryId =
           categoryMap.get(p.categoryId) ||
           categoryMap.get((p as any).categorySlug) ||

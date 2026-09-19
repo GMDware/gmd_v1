@@ -41,27 +41,36 @@ export const ThemePreviewBanner: React.FC<ThemePreviewBannerProps> = ({
   const handleActivate = async () => {
     setActivating(true);
     try {
-      const res = await fetch('/api/v1/theme', {
+      // 1. Set theme preview cookie permanently (1 year) for the visitor/client session
+      await fetch('/api/v1/theme/preview', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ themeId }),
+        body: JSON.stringify({ action: 'set', themeId }),
       });
-      if (res.ok) {
-        // Clear preview cookie and reload
-        await fetch('/api/v1/theme/preview', {
+      document.cookie = `gmdware_theme_preview=${themeId}; path=/; max-age=31536000; SameSite=Lax`;
+      document.documentElement.setAttribute('data-theme', themeId);
+
+      // 2. If user is authenticated as admin, also persist to database
+      try {
+        await fetch('/api/v1/theme', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action: 'clear' }),
+          body: JSON.stringify({ themeId }),
         });
-        const url = new URL(window.location.href);
-        url.searchParams.delete('themePreview');
-        url.searchParams.delete('theme');
-        window.location.href = url.pathname;
-      } else {
-        router.push('/admin/theme');
+      } catch {
+        // If unauthenticated, client-side cookie persistence above is sufficient
       }
-    } catch {
-      router.push('/admin/theme');
+
+      // 3. Remove preview query parameters and reload clean page
+      const url = new URL(window.location.href);
+      url.searchParams.delete('themePreview');
+      url.searchParams.delete('theme');
+      window.location.href = url.pathname + (url.search ? url.search : '');
+    } catch (err) {
+      console.error('Failed to activate theme:', err);
+      const url = new URL(window.location.href);
+      url.searchParams.delete('themePreview');
+      window.location.href = url.pathname;
     } finally {
       setActivating(false);
     }

@@ -82,13 +82,9 @@ export const AtelierWork: React.FC<AtelierWorkProps> = ({
     normalizeProject(p, `cms-proj-${idx}`)
   );
 
-  // 2. Build full project list: real CMS projects first, then fill with concepts if < 3
-  const allProjects: NormalizedProject[] = [...normalizedCmsProjects];
-  for (let i = 0; allProjects.length < 3 && i < fallbackConcepts.length; i++) {
-    if (!allProjects.some((p) => p.slug === fallbackConcepts[i].slug)) {
-      allProjects.push(fallbackConcepts[i]);
-    }
-  }
+  // 2. Build full project list: real CMS projects if available, otherwise fallback concepts
+  const allProjects: NormalizedProject[] =
+    normalizedCmsProjects.length > 0 ? normalizedCmsProjects : fallbackConcepts;
 
   // Active showcase project index & horizontal rail refs
   const [activeIndex, setActiveIndex] = useState(0);
@@ -428,12 +424,23 @@ export const AtelierWork: React.FC<AtelierWorkProps> = ({
                       </span>
                     </div>
 
-                    {/* Interface Layout Composition */}
-                    <div className="space-y-2 pt-1">
-                      <div className="h-2.5 w-3/4 rounded-full bg-white/15" />
-                      <div className="h-2 w-full rounded-full bg-white/10" />
-                      <div className="h-2 w-5/6 rounded-full bg-white/10" />
-                    </div>
+                    {/* Interface Layout Composition / Visual Preview */}
+                    {activeProject.image ? (
+                      <div className="relative w-full h-48 rounded-lg overflow-hidden border border-white/10 bg-slate-950/80 group/img">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={activeProject.image}
+                          alt={activeProject.title}
+                          className="w-full h-full object-cover object-top transition-transform duration-500 group-hover/img:scale-105"
+                        />
+                      </div>
+                    ) : (
+                      <div className="space-y-2 pt-1">
+                        <div className="h-2.5 w-3/4 rounded-full bg-white/15" />
+                        <div className="h-2 w-full rounded-full bg-white/10" />
+                        <div className="h-2 w-5/6 rounded-full bg-white/10" />
+                      </div>
+                    )}
 
                     {/* Feature Highlight Tags */}
                     <div className="grid grid-cols-2 gap-2 pt-2 text-[11px]">
@@ -549,23 +556,34 @@ export const AtelierWork: React.FC<AtelierWorkProps> = ({
                     </div>
                   )}
 
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="font-mono text-[11px] font-semibold text-blue-600">
-                        0{idx + 1}
-                      </span>
-                      <span
-                        className={`px-2 py-0.5 rounded text-[10px] font-medium ${
-                          project.isConcept
-                            ? 'bg-amber-100/70 text-amber-800'
-                            : 'bg-slate-100 text-slate-700'
-                        }`}
-                      >
-                        {project.conceptBadge || (project.isConcept ? 'Studio Concept' : 'Live')}
-                      </span>
-                    </div>
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="font-mono text-[11px] font-semibold text-blue-600">
+                          0{idx + 1}
+                        </span>
+                        <span
+                          className={`px-2 py-0.5 rounded text-[10px] font-medium ${
+                            project.isConcept
+                              ? 'bg-amber-100/70 text-amber-800'
+                              : 'bg-slate-100 text-slate-700'
+                          }`}
+                        >
+                          {project.conceptBadge || (project.isConcept ? 'Studio Concept' : 'Live')}
+                        </span>
+                      </div>
 
-                    <h4 className="font-bold text-slate-900 group-hover:text-blue-600 transition-colors text-base line-clamp-1">
+                      {project.image && (
+                        <div className="relative w-full h-24 rounded-lg overflow-hidden border border-slate-100 bg-slate-100">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={project.image}
+                            alt={project.title}
+                            className="w-full h-full object-cover object-top transition-transform duration-300 group-hover:scale-105"
+                          />
+                        </div>
+                      )}
+
+                      <h4 className="font-bold text-slate-900 group-hover:text-blue-600 transition-colors text-base line-clamp-1">
                       {project.title}
                     </h4>
 

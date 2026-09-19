@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { ArrowUpRight, Cpu, Layers, ShieldCheck, Zap, Server, Code2, Globe2 } from 'lucide-react';
+import { INITIAL_SEED_DATA } from '@/lib/db/seed-data';
 
 interface NexusServicesProps {
   services: any[];
@@ -11,12 +12,13 @@ interface NexusServicesProps {
 }
 
 export const NexusServices: React.FC<NexusServicesProps> = ({
-  services,
+  services = [],
   technologies = [],
   isStandalone = false,
 }) => {
+  const effectiveServices = (services && services.length > 0) ? services : INITIAL_SEED_DATA.services;
   const [selectedIdx, setSelectedIdx] = useState(0);
-  const activeService = services[selectedIdx] || services[0];
+  const activeService = effectiveServices[selectedIdx] || effectiveServices[0];
 
   return (
     <section className={`relative overflow-hidden bg-[#030509] ${isStandalone ? 'pt-32 pb-24' : 'py-24 border-t border-white/5'}`}>
@@ -36,11 +38,11 @@ export const NexusServices: React.FC<NexusServicesProps> = ({
         </div>
 
         {/* Interactive Radial Capability Selector */}
-        {services.length > 0 && (
+        {effectiveServices.length > 0 && (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
             {/* Left Column: Capability Nodes List (5 Cols) */}
             <div className="lg:col-span-5 space-y-3">
-              {services.map((service: any, index: number) => {
+              {effectiveServices.map((service: any, index: number) => {
                 const isSelected = selectedIdx === index;
                 return (
                   <button
@@ -88,7 +90,7 @@ export const NexusServices: React.FC<NexusServicesProps> = ({
                     {activeService.title || activeService.name}
                   </h3>
                   <p className="text-sm text-slate-300 leading-relaxed">
-                    {activeService.description || activeService.shortDescription}
+                    {activeService.summary || activeService.description || activeService.shortDescription || activeService.content || ''}
                   </p>
                 </div>
 
@@ -105,7 +107,7 @@ export const NexusServices: React.FC<NexusServicesProps> = ({
                           className="flex items-center gap-2 p-2.5 rounded-xl bg-white/5 border border-white/5 text-xs text-slate-200 font-sans"
                         >
                           <span className="w-1.5 h-1.5 rounded-full bg-[#00F2FE] shrink-0" />
-                          <span>{feat.title || feat}</span>
+                          <span>{typeof feat === 'string' ? feat : feat.title || feat.name}</span>
                         </div>
                       ))}
                     </div>
