@@ -1,6 +1,7 @@
 import prisma from '@/lib/db/prisma';
 import { PublicationStatus } from '@prisma/client';
 import { AuthService } from './auth.service';
+import { TechnologyService } from './technology.service';
 import { isDatabaseReachable } from '@/lib/db/data-store';
 import { INITIAL_SEED_DATA } from '@/lib/db/seed-data';
 
@@ -361,14 +362,18 @@ export class ProjectService {
       if (firstCat) categoryId = firstCat.id;
     }
 
-    // Filter valid technologies
+    // Filter and resolve valid technologies (support IDs or custom names)
     let validTechIds: string[] = [];
     if (technologyIds?.length) {
-      const existingTechs = await prisma.technology.findMany({
-        where: { id: { in: technologyIds as string[] } },
-        select: { id: true },
-      });
-      validTechIds = existingTechs.map((t) => t.id);
+      for (const item of technologyIds) {
+        if (!item || typeof item !== 'string') continue;
+        const trimmed = item.trim();
+        if (!trimmed) continue;
+        const tech = await TechnologyService.findOrCreate({ name: trimmed, userId: data.userId });
+        if (tech && !validTechIds.includes(tech.id)) {
+          validTechIds.push(tech.id);
+        }
+      }
     }
 
     const project = await prisma.project.create({
@@ -499,11 +504,16 @@ export class ProjectService {
     if (technologyIds !== undefined) {
       await prisma.projectTechnology.deleteMany({ where: { projectId: id } });
       if (technologyIds.length > 0) {
-        const existingTechs = await prisma.technology.findMany({
-          where: { id: { in: technologyIds as string[] } },
-          select: { id: true },
-        });
-        const validIds = existingTechs.map((t) => t.id);
+        const validIds: string[] = [];
+        for (const item of technologyIds) {
+          if (!item || typeof item !== 'string') continue;
+          const trimmed = item.trim();
+          if (!trimmed) continue;
+          const tech = await TechnologyService.findOrCreate({ name: trimmed, userId });
+          if (tech && !validIds.includes(tech.id)) {
+            validIds.push(tech.id);
+          }
+        }
         if (validIds.length > 0) {
           await prisma.projectTechnology.createMany({
             data: validIds.map((tId: string) => ({ projectId: id, technologyId: tId })),

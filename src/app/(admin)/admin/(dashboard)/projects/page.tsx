@@ -110,6 +110,11 @@ export default function AdminProjectsPage() {
   const [heroUrlInput, setHeroUrlInput] = useState('');
   const [applyingHeroUrl, setApplyingHeroUrl] = useState(false);
 
+  // Custom technology input states
+  const [customTechInput, setCustomTechInput] = useState('');
+  const [addingTech, setAddingTech] = useState(false);
+  const [techSearch, setTechSearch] = useState('');
+
   // Delete / Archive Modal
   const [confirmModal, setConfirmModal] = useState<{
     open: boolean;
@@ -205,6 +210,60 @@ export default function AdminProjectsPage() {
     }
   };
 
+  const handleAddCustomTechnology = async () => {
+    if (!customTechInput.trim()) return;
+    setAddingTech(true);
+    try {
+      const rawNames = customTechInput
+        .split(',')
+        .map((s) => s.trim())
+        .filter(Boolean);
+
+      const newlyAdded: Technology[] = [];
+      for (const name of rawNames) {
+        const res = await fetch('/api/v1/technologies', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name }),
+        });
+        const json = await res.json();
+        if (json.success && json.data) {
+          newlyAdded.push(json.data);
+        }
+      }
+
+      if (newlyAdded.length > 0) {
+        setTechnologies((prev) => {
+          const existingIds = new Set(prev.map((t) => t.id));
+          const toAdd = newlyAdded.filter((t) => !existingIds.has(t.id));
+          return [...prev, ...toAdd];
+        });
+
+        setEditingProject((prev) => {
+          if (!prev) return null;
+          const current = prev.technologies || [];
+          const currentIds = new Set(current.map((t: any) => t.technology?.id || t.id));
+          const toAddObjs = newlyAdded
+            .filter((t) => !currentIds.has(t.id))
+            .map((t) => ({ technology: t }));
+          return {
+            ...prev,
+            technologies: [...current, ...toAddObjs],
+          };
+        });
+
+        setCustomTechInput('');
+        success(`Added ${newlyAdded.length} technology item(s)`);
+      } else {
+        error('Failed to add technology');
+      }
+    } catch {
+      error('Error adding custom technology');
+    } finally {
+      setAddingTech(false);
+    }
+  };
+
   const handleApplyHeroUrl = async () => {
     if (!heroUrlInput.trim()) return;
     setApplyingHeroUrl(true);
@@ -267,8 +326,8 @@ export default function AdminProjectsPage() {
       seoTitle: '',
       seoDescription: '',
       seoKeywords: [],
-      isFeatured: false,
-      status: 'DRAFT',
+      isFeatured: true,
+      status: 'PUBLISHED',
       displayOrder: projects.length + 1,
       technologies: [],
       caseStudy: {
@@ -288,6 +347,8 @@ export default function AdminProjectsPage() {
     setNewCatInput('');
     setShowAddCat(false);
     setHeroUrlInput('');
+    setCustomTechInput('');
+    setTechSearch('');
     setActiveTab('basic');
     setEditorOpen(true);
   };
@@ -992,6 +1053,43 @@ export default function AdminProjectsPage() {
                       className="w-full px-3.5 py-2 bg-[#05070B] border border-white/10 rounded-lg text-xs text-white focus:outline-none focus:border-[#00F2FE]"
                     />
                   </div>
+
+                  {/* Quick Visibility & Featured Showcase Controls */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-3.5 rounded-xl bg-[#060910] border border-white/10 mt-2">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <label className="text-xs font-bold text-white block">Featured on Homepage</label>
+                        <span className="text-[11px] text-slate-400">Display in the homepage showcase & archive</span>
+                      </div>
+                      <input
+                        type="checkbox"
+                        checked={editingProject.isFeatured ?? true}
+                        onChange={(e) =>
+                          setEditingProject((prev) => (prev ? { ...prev, isFeatured: e.target.checked } : null))
+                        }
+                        className="w-4 h-4 rounded border-white/20 text-[#00F2FE] focus:ring-[#00F2FE] bg-[#0A0E17]"
+                      />
+                    </div>
+                    <div className="flex items-center justify-between gap-3">
+                      <div>
+                        <label className="text-xs font-bold text-white block">Publication Status</label>
+                        <span className="text-[11px] text-slate-400">Public visibility state</span>
+                      </div>
+                      <select
+                        value={editingProject.status || 'PUBLISHED'}
+                        onChange={(e) =>
+                          setEditingProject((prev) =>
+                            prev ? { ...prev, status: e.target.value as any } : null
+                          )
+                        }
+                        className="px-2.5 py-1.5 bg-[#0A0E17] border border-white/10 rounded-lg text-xs text-white focus:outline-none focus:border-[#00F2FE]"
+                      >
+                        <option value="PUBLISHED">PUBLISHED (Live)</option>
+                        <option value="DRAFT">DRAFT (Hidden)</option>
+                        <option value="ARCHIVED">ARCHIVED</option>
+                      </select>
+                    </div>
+                  </div>
                 </div>
               )}
 
@@ -1071,43 +1169,163 @@ export default function AdminProjectsPage() {
 
               {/* TAB 3: TECHNOLOGIES */}
               {activeTab === 'tech' && (
-                <div className="space-y-4">
-                  <p className="text-xs text-slate-400">
-                    Select the technologies and architectural frameworks used in this deployment:
-                  </p>
+                <div className="space-y-6">
+                  {/* 1. Add Custom Technology Input */}
+                  <div className="p-4 rounded-xl bg-[#060910] border border-[#00F2FE]/30 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <label className="text-xs font-bold text-white flex items-center gap-1.5 font-mono">
+                        <Plus className="w-3.5 h-3.5 text-[#00F2FE]" />
+                        <span>Add Custom Technology or Framework</span>
+                      </label>
+                      <span className="text-[10px] text-slate-400 font-mono">
+                        Type any name (e.g. Flutter, MongoDB, AWS, Figma)
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="text"
+                        value={customTechInput}
+                        onChange={(e) => setCustomTechInput(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            handleAddCustomTechnology();
+                          }
+                        }}
+                        placeholder="Type any technology or tool name (supports comma-separated)..."
+                        className="flex-1 px-3.5 py-2 bg-[#0A0E17] border border-white/10 rounded-lg text-xs text-white placeholder-slate-500 focus:outline-none focus:border-[#00F2FE]"
+                      />
+                      <Button
+                        type="button"
+                        variant="primary"
+                        size="sm"
+                        isLoading={addingTech}
+                        onClick={handleAddCustomTechnology}
+                        disabled={!customTechInput.trim()}
+                        leftIcon={<Plus className="w-3.5 h-3.5" />}
+                      >
+                        Add
+                      </Button>
+                    </div>
+                  </div>
 
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5">
-                    {technologies.map((tech) => {
-                      const isSelected = (editingProject.technologies || []).some(
-                        (t) => t.technology.id === tech.id
-                      );
-
-                      return (
+                  {/* 2. Selected Technologies Badges */}
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="font-mono text-slate-300 font-semibold">
+                        Selected for this project ({editingProject.technologies?.length || 0})
+                      </span>
+                      {editingProject.technologies && editingProject.technologies.length > 0 && (
                         <button
-                          key={tech.id}
                           type="button"
-                          onClick={() => {
-                            setEditingProject((prev) => {
-                              if (!prev) return null;
-                              const current = prev.technologies || [];
-                              const exists = current.some((t) => t.technology.id === tech.id);
-                              const updated = exists
-                                ? current.filter((t) => t.technology.id !== tech.id)
-                                : [...current, { technology: tech }];
-                              return { ...prev, technologies: updated };
-                            });
-                          }}
-                          className={`p-2.5 rounded-xl border text-xs font-mono text-left flex items-center justify-between transition-all ${
-                            isSelected
-                              ? 'bg-[#00F2FE]/10 border-[#00F2FE] text-white'
-                              : 'bg-[#05070B] border-white/10 text-slate-400 hover:border-white/20'
-                          }`}
+                          onClick={() => setEditingProject((prev) => (prev ? { ...prev, technologies: [] } : null))}
+                          className="text-[11px] text-slate-400 hover:text-[#F43F5E] transition-colors font-mono"
                         >
-                          <span className="truncate">{tech.name}</span>
-                          {isSelected && <Check className="w-3.5 h-3.5 text-[#00F2FE] shrink-0" />}
+                          Clear All
                         </button>
-                      );
-                    })}
+                      )}
+                    </div>
+
+                    {editingProject.technologies && editingProject.technologies.length > 0 ? (
+                      <div className="flex flex-wrap gap-2 p-3 rounded-xl bg-[#05070B] border border-white/10 min-h-[48px]">
+                        {editingProject.technologies.map((t: any, idx: number) => {
+                          const techName = t.technology?.name || t.name || String(t);
+                          const techId = t.technology?.id || t.id || techName;
+                          return (
+                            <span
+                              key={techId || idx}
+                              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-[#00F2FE]/15 border border-[#00F2FE]/40 text-xs font-mono text-[#00F2FE]"
+                            >
+                              <span>{techName}</span>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setEditingProject((prev) => {
+                                    if (!prev) return null;
+                                    const filtered = (prev.technologies || []).filter(
+                                      (item: any) =>
+                                        (item.technology?.id || item.id || item.technology?.name) !== techId
+                                    );
+                                    return { ...prev, technologies: filtered };
+                                  });
+                                }}
+                                className="hover:text-white p-0.5 rounded-full hover:bg-white/10 transition-colors"
+                              >
+                                <X className="w-3 h-3" />
+                              </button>
+                            </span>
+                          );
+                        })}
+                      </div>
+                    ) : (
+                      <div className="p-4 rounded-xl border border-dashed border-white/10 text-center text-xs text-slate-500 font-mono">
+                        No technologies selected yet. Add custom ones above or pick from the library below.
+                      </div>
+                    )}
+                  </div>
+
+                  {/* 3. Available Library Technologies */}
+                  <div className="space-y-3 pt-2 border-t border-white/5">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-mono text-slate-400">
+                        Choose from library ({technologies.length} available):
+                      </span>
+                      <input
+                        type="text"
+                        value={techSearch}
+                        onChange={(e) => setTechSearch(e.target.value)}
+                        placeholder="Filter library..."
+                        className="px-2.5 py-1 bg-[#0A0E17] border border-white/10 rounded text-xs text-white placeholder-slate-500 focus:outline-none focus:border-[#00F2FE] w-44"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 max-h-56 overflow-y-auto pr-1">
+                      {technologies
+                        .filter((tech) =>
+                          tech.name.toLowerCase().includes(techSearch.toLowerCase())
+                        )
+                        .map((tech) => {
+                          const isSelected = (editingProject.technologies || []).some(
+                            (t: any) =>
+                              (t.technology?.id || t.id) === tech.id ||
+                              (t.technology?.name || t.name) === tech.name
+                          );
+
+                          return (
+                            <button
+                              key={tech.id}
+                              type="button"
+                              onClick={() => {
+                                setEditingProject((prev) => {
+                                  if (!prev) return null;
+                                  const current = prev.technologies || [];
+                                  const exists = current.some(
+                                    (t: any) =>
+                                      (t.technology?.id || t.id) === tech.id ||
+                                      (t.technology?.name || t.name) === tech.name
+                                  );
+                                  const updated = exists
+                                    ? current.filter(
+                                        (t: any) =>
+                                          (t.technology?.id || t.id) !== tech.id &&
+                                          (t.technology?.name || t.name) !== tech.name
+                                      )
+                                    : [...current, { technology: tech }];
+                                  return { ...prev, technologies: updated };
+                                });
+                              }}
+                              className={`p-2 rounded-lg border text-xs font-mono text-left flex items-center justify-between transition-all ${
+                                isSelected
+                                  ? 'bg-[#00F2FE]/10 border-[#00F2FE] text-white'
+                                  : 'bg-[#05070B] border-white/10 text-slate-400 hover:border-white/20'
+                              }`}
+                            >
+                              <span className="truncate">{tech.name}</span>
+                              {isSelected && <Check className="w-3.5 h-3.5 text-[#00F2FE] shrink-0" />}
+                            </button>
+                          );
+                        })}
+                    </div>
                   </div>
                 </div>
               )}

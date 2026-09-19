@@ -38,14 +38,14 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const parsed = technologySchema.safeParse(body);
-    if (!parsed.success) {
-      return errorResponse('VALIDATION_ERROR', 'Invalid technology payload', 400, parsed.error.flatten());
+    if (!body.name || typeof body.name !== 'string' || !body.name.trim()) {
+      return errorResponse('VALIDATION_ERROR', 'Technology name is required', 400);
     }
 
-    const tech = await TechnologyService.create({
-      ...parsed.data,
-      url: parsed.data.url || undefined,
+    const tech = await TechnologyService.findOrCreate({
+      name: body.name.trim(),
+      slug: body.slug?.trim(),
+      category: body.category?.trim(),
       userId: auth.session.userId,
     });
 

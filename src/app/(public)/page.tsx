@@ -49,7 +49,7 @@ export default async function HomePage({
 
   const [
     settings,
-    featuredProjects,
+    allProjects,
     services,
     processSteps,
     values,
@@ -59,7 +59,7 @@ export default async function HomePage({
     proofMetrics,
   ] = await Promise.all([
     DataStore.getSettings(),
-    DataStore.getProjects({ featuredOnly: true }),
+    DataStore.getProjects(),
     DataStore.getServices(),
     DataStore.getProcessSteps(),
     DataStore.getValues(),
@@ -69,8 +69,15 @@ export default async function HomePage({
     DataStore.getProofMetrics(),
   ]);
 
+  // Sort projects: featured first, then by displayOrder
+  const sortedProjects = [...(allProjects || [])].sort((a: any, b: any) => {
+    if (a.isFeatured && !b.isFeatured) return -1;
+    if (!a.isFeatured && b.isFeatured) return 1;
+    return (a.displayOrder || 0) - (b.displayOrder || 0);
+  });
+
   // Format projects for ProjectPreview
-  const formattedProjects = featuredProjects.map((p: any) => ({
+  const formattedProjects = sortedProjects.map((p: any) => ({
     id: p.id,
     title: p.title,
     slug: p.slug,
@@ -78,13 +85,14 @@ export default async function HomePage({
     fullDescription: p.fullDescription,
     clientName: p.clientName,
     projectType: p.projectType,
-    heroImageUrl: p.heroImage?.url || p.heroImageUrl,
+    heroImageUrl: p.heroImage?.url || p.heroImage?.storageUrl || p.heroImageUrl,
     challenge: p.challenge,
     strategy: p.strategy,
     architecture: p.architecture,
     results: p.results,
     technologies: p.technologies?.map((t: any) => ({ name: t.technology?.name || t.name })) || [],
     isFeatured: p.isFeatured,
+    category: p.category,
   }));
 
   // Format team members
@@ -120,29 +128,10 @@ export default async function HomePage({
 
   // Render Theme 03: KINETIC (Architectural / Light Monograph / Digital Craft)
   if (themeId === 'atelier') {
-    const allProjects = await DataStore.getProjects();
-    const formattedAllProjects = (allProjects && allProjects.length > 0 ? allProjects : featuredProjects).map((p: any) => ({
-      id: p.id,
-      title: p.title,
-      slug: p.slug,
-      shortDescription: p.shortDescription,
-      fullDescription: p.fullDescription,
-      clientName: p.clientName,
-      projectType: p.projectType,
-      heroImageUrl: p.heroImage?.url || p.heroImageUrl,
-      challenge: p.challenge,
-      strategy: p.strategy,
-      architecture: p.architecture,
-      results: p.results,
-      technologies: p.technologies?.map((t: any) => ({ name: t.technology?.name || t.name })) || [],
-      isFeatured: p.isFeatured,
-      category: p.category,
-    }));
-
     return (
       <AtelierHome
         settings={settings}
-        featuredProjects={formattedAllProjects}
+        featuredProjects={formattedProjects}
         services={services}
         processSteps={processSteps}
         values={values}

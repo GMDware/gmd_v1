@@ -19,6 +19,56 @@ export class TechnologyService {
     return prisma.technology.findUnique({ where: { id } });
   }
 
+  static async findOrCreate(data: {
+    name: string;
+    slug?: string;
+    category?: string;
+    userId?: string;
+  }) {
+    const trimmedName = data.name.trim();
+    const slug =
+      data.slug?.trim() ||
+      trimmedName
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/(^-|-$)/g, '') ||
+      `tech-${Date.now()}`;
+    const category = data.category?.trim() || 'Core Tech';
+
+    const existing = await prisma.technology.findFirst({
+      where: {
+        OR: [
+          { id: trimmedName },
+          { slug },
+          { name: { equals: trimmedName, mode: 'insensitive' } },
+        ],
+      },
+    });
+
+    if (existing) return existing;
+
+    const tech = await prisma.technology.create({
+      data: {
+        name: trimmedName,
+        slug,
+        category,
+        isActive: true,
+      },
+    });
+
+    if (data.userId) {
+      await AuthService.logAudit({
+        userId: data.userId,
+        action: 'CREATE',
+        entity: 'Technology',
+        entityId: tech.id,
+        metadata: { name: tech.name },
+      });
+    }
+
+    return tech;
+  }
+
   static async create(data: {
     name: string;
     slug: string;
