@@ -2,6 +2,7 @@ import prisma from './prisma';
 import { INITIAL_SEED_DATA } from './seed-data';
 import type { Metadata } from 'next';
 import type { ResolvedMetric } from '@/types/metrics';
+import { resolvePublicMediaUrl } from '@/lib/media';
 
 let isDbAvailable: boolean | null = null;
 let lastCheckTime = 0;
@@ -144,6 +145,17 @@ export class DataStore {
             heroImage: true,
           },
         });
+        if (service) {
+          return {
+            ...service,
+            heroImage: service.heroImage
+              ? {
+                  ...service.heroImage,
+                  url: resolvePublicMediaUrl(service.heroImage),
+                }
+              : null,
+          };
+        }
         return service;
       } catch {
         // Fallback on connection error
@@ -175,7 +187,17 @@ export class DataStore {
           },
           orderBy: { displayOrder: 'asc' },
         });
-        if (projects) return projects;
+        if (projects && projects.length > 0) {
+          return projects.map((p: any) => ({
+            ...p,
+            heroImage: p.heroImage
+              ? {
+                  ...p.heroImage,
+                  url: resolvePublicMediaUrl(p.heroImage),
+                }
+              : null,
+          }));
+        }
       } catch {
         // Fallback on connection error
       }
@@ -207,7 +229,26 @@ export class DataStore {
             gallery: { include: { mediaAsset: true }, orderBy: { displayOrder: 'asc' } },
           },
         });
-        return project;
+        if (project) {
+          return {
+            ...project,
+            heroImage: project.heroImage
+              ? {
+                  ...project.heroImage,
+                  url: resolvePublicMediaUrl(project.heroImage),
+                }
+              : null,
+            gallery: project.gallery?.map((g: any) => ({
+              ...g,
+              mediaAsset: g.mediaAsset
+                ? {
+                    ...g.mediaAsset,
+                    url: resolvePublicMediaUrl(g.mediaAsset),
+                  }
+                : null,
+            })),
+          };
+        }
       } catch {
         // Fallback on connection error
       }
@@ -290,7 +331,7 @@ export class DataStore {
             image: m.image
               ? {
                   ...m.image,
-                  url: m.image.storageUrl || m.image.url,
+                  url: resolvePublicMediaUrl(m.image),
                 }
               : null,
           }));

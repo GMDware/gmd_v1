@@ -1,6 +1,6 @@
 import crypto from 'crypto';
 import prisma from '@/lib/db/prisma';
-import { getStorageProvider } from '@/lib/media';
+import { getStorageProvider, resolvePublicMediaUrl } from '@/lib/media';
 import { AuthService } from './auth.service';
 
 const ALLOWED_MIME_TYPES = [
@@ -162,7 +162,10 @@ export class MediaService {
       });
     }
 
-    return asset;
+    return {
+      ...asset,
+      url: resolvePublicMediaUrl(asset),
+    };
   }
 
   /**
@@ -184,7 +187,10 @@ export class MediaService {
     ]);
 
     return {
-      items,
+      items: items.map((item) => ({
+        ...item,
+        url: resolvePublicMediaUrl(item),
+      })),
       pagination: {
         page,
         limit,
@@ -296,7 +302,10 @@ export class MediaService {
       });
     }
 
-    return asset;
+    return {
+      ...asset,
+      url: resolvePublicMediaUrl(asset),
+    };
   }
 }
 

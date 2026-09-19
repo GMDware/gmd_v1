@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
+import { INITIAL_SEED_DATA } from '../src/lib/db/seed-data';
 
 const prisma = new PrismaClient();
 
@@ -281,55 +282,67 @@ async function main() {
   });
 
   // 9. Seed Project Categories & Projects
-  const catEnterprise = await prisma.projectCategory.create({
-    data: { name: 'Enterprise Platforms', slug: 'enterprise-platforms', order: 1 },
-  });
+  const categoryIdMap = new Map<string, string>();
+  for (const cat of INITIAL_SEED_DATA.projectCategories) {
+    const createdCat = await prisma.projectCategory.create({
+      data: { name: cat.name, slug: cat.slug, order: cat.order },
+    });
+    categoryIdMap.set(cat.id, createdCat.id);
+    categoryIdMap.set(cat.slug, createdCat.id);
+  }
 
-  const proj1 = await prisma.project.create({
-    data: {
-      title: 'High-Throughput Telemetry Platform',
-      slug: 'telemetry-platform',
-      shortDescription: 'Enterprise telemetry platform processing real-time events with sub-100ms dashboard latency.',
-      fullDescription: 'Comprehensive case study breakdown for the enterprise telemetry streaming platform.',
-      categoryId: catEnterprise.id,
-      clientName: 'Confidential Partner',
-      clientVisibility: false,
-      projectType: 'High-Concurrency Web Application',
-      challenge: 'High-concurrency event stream ingestion requirements across global clusters.',
-      strategy: 'Distributed streaming pipelines with type-safe backend services and reactive client dashboards.',
-      designApproach: 'High-density telemetry dashboard with customizable grid widgets.',
-      architecture: 'Distributed microservices architecture with PostgreSQL persistence via Prisma.',
-      development: 'TypeScript strict mode with end-to-end Zod schema validation.',
-      infrastructure: 'Dockerized Alpine Linux deployment with automated health probing.',
-      results: 'Demonstrated sub-100ms latency and 99.99% target availability.',
-      isFeatured: true,
-      status: 'PUBLISHED',
-      displayOrder: 1,
-      technologies: {
-        create: [
-          { technologyId: techTs.id },
-          { technologyId: techNext.id },
-          { technologyId: techPg.id },
-        ],
+  const techIdMap = new Map<string, string>([
+    ['tech-ts', techTs.id],
+    ['tech-next', techNext.id],
+    ['tech-pg', techPg.id],
+  ]);
+
+  for (const p of INITIAL_SEED_DATA.projects) {
+    const resolvedCatId =
+      categoryIdMap.get(p.categoryId) ||
+      categoryIdMap.get((p as any).categorySlug) ||
+      Array.from(categoryIdMap.values())[0];
+
+    const techIds = ((p as any).technologyIds || [])
+      .map((id: string) => techIdMap.get(id))
+      .filter(Boolean) as string[];
+
+    const {
+      caseStudy,
+      technologyIds,
+      categorySlug,
+      uxApproach,
+      uiApproach,
+      liveUrl,
+      href,
+      isConcept,
+      conceptBadge,
+      archetype,
+      ...projData
+    } = p as any;
+
+    await prisma.project.create({
+      data: {
+        ...projData,
+        categoryId: resolvedCatId,
+        technologies: techIds.length
+          ? {
+              create: techIds.map((tId) => ({ technologyId: tId })),
+            }
+          : undefined,
+        caseStudy: caseStudy
+          ? {
+              create: {
+                summary: caseStudy.summary || '',
+                metrics: caseStudy.metrics,
+                testimonial: caseStudy.testimonial,
+                status: p.status || 'PUBLISHED',
+              },
+            }
+          : undefined,
       },
-      caseStudy: {
-        create: {
-          summary: 'In-depth case study exploring the telemetry platform engineering process.',
-          metrics: [
-            { label: 'Event Ingestion Target', value: '100,000 / sec' },
-            { label: 'Stream Render Latency', value: '< 100ms' },
-          ],
-          testimonial: {
-            quote: 'Architectural precision and predictable milestone delivery across all deployment phases.',
-            author: 'Engineering Leadership',
-            role: 'VP of Infrastructure',
-            organization: 'Enterprise Partner',
-          },
-          status: 'PUBLISHED',
-        },
-      },
-    },
-  });
+    });
+  }
 
   // 10. Seed Content: Process Steps, Values, FAQs, Insights, Settings
   const processData = [

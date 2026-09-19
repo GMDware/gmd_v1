@@ -775,7 +775,7 @@ export default function AdminTeamPage() {
                     className="w-full px-3.5 py-2 bg-[#05070B] border border-white/10 rounded-lg text-xs text-slate-300 focus:outline-none focus:border-[#00F2FE]"
                   >
                     {departments.length === 0 ? (
-                      <option value="">No departments available — click "Add New" above</option>
+                      <option value="">No departments available — click &quot;Add New&quot; above</option>
                     ) : (
                       departments.map((dept) => (
                         <option key={dept.id} value={dept.id}>
@@ -831,7 +831,7 @@ export default function AdminTeamPage() {
                     className="w-full px-3.5 py-2 bg-[#05070B] border border-white/10 rounded-lg text-xs text-slate-300 focus:outline-none focus:border-[#00F2FE]"
                   >
                     {roles.length === 0 ? (
-                      <option value="">No roles available — click "Add New" above</option>
+                      <option value="">No roles available — click &quot;Add New&quot; above</option>
                     ) : (
                       roles.map((role) => (
                         <option key={role.id} value={role.id}>

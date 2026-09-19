@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server';
 import { MediaService } from '@/services/media.service';
 import { requirePermission } from '@/lib/api/guard';
 import { successResponse, errorResponse } from '@/lib/api/response';
+import { resolvePublicMediaUrl } from '@/lib/media';
 
 export async function POST(req: NextRequest) {
   try {
@@ -30,7 +31,7 @@ export async function POST(req: NextRequest) {
       return successResponse(
         {
           ...asset,
-          url: asset.storageUrl,
+          url: asset.url || resolvePublicMediaUrl(asset),
           size: asset.sizeBytes,
           filename: asset.fileName,
         },
@@ -57,7 +58,7 @@ export async function POST(req: NextRequest) {
       return successResponse(
         {
           ...asset,
-          url: asset.storageUrl,
+          url: asset.url || resolvePublicMediaUrl(asset),
           size: asset.sizeBytes,
           filename: asset.fileName,
         },
@@ -84,7 +85,7 @@ export async function POST(req: NextRequest) {
 
     const mappedAsset = {
       ...asset,
-      url: asset.storageUrl,
+      url: asset.url || resolvePublicMediaUrl(asset),
       size: asset.sizeBytes,
       filename: asset.fileName,
     };

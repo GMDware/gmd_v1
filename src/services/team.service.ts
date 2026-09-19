@@ -1,5 +1,6 @@
 import prisma from '@/lib/db/prisma';
 import { AuthService } from './auth.service';
+import { resolvePublicMediaUrl } from '@/lib/media';
 
 export class TeamService {
   /**
@@ -34,7 +35,7 @@ export class TeamService {
       image: m.image
         ? {
             ...m.image,
-            url: m.image.storageUrl,
+            url: resolvePublicMediaUrl(m.image),
           }
         : null,
     }));
@@ -61,7 +62,7 @@ export class TeamService {
       image: member.image
         ? {
             ...member.image,
-            url: member.image.storageUrl,
+            url: resolvePublicMediaUrl(member.image),
           }
         : null,
     };
@@ -120,7 +121,7 @@ export class TeamService {
       image: member.image
         ? {
             ...member.image,
-            url: member.image.storageUrl,
+            url: resolvePublicMediaUrl(member.image),
           }
         : null,
     };
@@ -188,7 +189,7 @@ export class TeamService {
       image: updated.image
         ? {
             ...updated.image,
-            url: updated.image.storageUrl,
+            url: resolvePublicMediaUrl(updated.image),
           }
         : null,
     };

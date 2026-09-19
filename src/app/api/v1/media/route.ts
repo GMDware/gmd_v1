@@ -2,7 +2,7 @@ import { NextRequest } from 'next/server';
 import { MediaService } from '@/services/media.service';
 import { requirePermission } from '@/lib/api/guard';
 import { successResponse, errorResponse } from '@/lib/api/response';
-import { getStorageStatus } from '@/lib/media';
+import { getStorageStatus, resolvePublicMediaUrl } from '@/lib/media';
 
 export async function GET(req: NextRequest) {
   try {
@@ -18,7 +18,7 @@ export async function GET(req: NextRequest) {
     const result = await MediaService.list({ page, limit });
     const mapped = result.items.map((item) => ({
       ...item,
-      url: item.storageUrl,
+      url: item.url || resolvePublicMediaUrl(item),
       size: item.sizeBytes,
       filename: item.fileName,
     }));

@@ -7,6 +7,13 @@ import { DisabledStorageProvider } from './disabled-provider';
 let cachedStorageProvider: StorageProvider | null = null;
 
 /**
+ * Resets the cached storage provider instance (useful for runtime config changes and testing).
+ */
+export function resetStorageProvider(): void {
+  cachedStorageProvider = null;
+}
+
+/**
  * Checks whether all required Cloudflare R2 environment variables are present.
  */
 export function isR2Configured(): boolean {
@@ -29,11 +36,23 @@ export function isStorageUploadEnabled(): boolean {
     return false;
   }
 
-  if (provider === 'r2' || provider === 's3') {
-    return isR2Configured();
-  }
-
+// If R2 is explicitly configured, check credentials or allow fallback
   return true;
+}
+
+/**
+ * Resolves a client-safe public URL for a media asset.
+ * If stored in database as a Data-URI, resolves to the streaming endpoint /api/v1/media/file/[id].
+ */
+export function resolvePublicMediaUrl(
+  asset: { id?: string; storageUrl?: string | null; url?: string | null } | null | undefined
+): string {
+  if (!asset) return '';
+  const directUrl = asset.url || asset.storageUrl || '';
+  if (directUrl.startsWith('data:') && asset.id) {
+    return `/api/v1/media/file/${asset.id}`;
+  }
+  return directUrl;
 }
 
 /**
@@ -49,47 +68,57 @@ export function getStorageStatus(): {
   const isVercel = process.env.VERCEL === '1';
   const r2Ready = isR2Configured();
 
+  // 1. R2 is fully configured and ready
   if (r2Ready) {
     return {
       provider: 'r2',
       uploadsEnabled: true,
       isPersistent: true,
+      message: 'Cloudflare R2 cloud object storage active.',
     };
   }
 
-  if (providerType === 'r2' || providerType === 's3') {
-    return {
-      provider: 'r2',
-      uploadsEnabled: false,
-      isPersistent: false,
-      message:
-        'Cloudflare R2 is configured as the active provider, but required R2 credentials are not set.',
-    };
-  }
-
+  // 2. Explicitly disabled
   if (providerType === 'none' || providerType === 'disabled') {
     return {
       provider: 'disabled',
       uploadsEnabled: false,
       isPersistent: false,
-      message: 'Media uploads are explicitly disabled.',
+      message:
+        'Media uploads are explicitly disabled (STORAGE_PROVIDER=' +
+        providerType +
+        '). Set STORAGE_PROVIDER=database or configure Cloudflare R2 to enable persistent uploads.',
     };
   }
 
-  if (isVercel || providerType === 'database') {
+  // 3. R2 requested but credentials missing -> resilient fallback to Database
+  if (providerType === 'r2' || providerType === 's3') {
     return {
       provider: 'database',
       uploadsEnabled: true,
       isPersistent: true,
       message:
-        'Using database media storage. Connect Cloudflare R2 credentials anytime for S3-compatible cloud storage.',
+        'Cloudflare R2 credentials are not set. Operating on persistent PostgreSQL database storage until R2 variables are configured.',
     };
   }
 
+  // 4. Vercel deployment or explicit database storage
+  if (isVercel || providerType === 'database' || providerType === 'auto') {
+    return {
+      provider: 'database',
+      uploadsEnabled: true,
+      isPersistent: true,
+      message:
+        'Using persistent PostgreSQL database media storage. Connect Cloudflare R2 credentials anytime for S3-compatible cloud storage.',
+    };
+  }
+
+  // 5. Local storage (standard dev environment)
   return {
     provider: 'local',
     uploadsEnabled: true,
     isPersistent: true,
+    message: 'Using local filesystem storage (./public/uploads).',
   };
 }
 
@@ -120,7 +149,11 @@ export function getStorageProvider(): StorageProvider {
 
   // 2. Explicitly disabled
   if (providerType === 'none' || providerType === 'disabled') {
-    cachedStorageProvider = new DisabledStorageProvider();
+    cachedStorageProvider = new DisabledStorageProvider(
+      'Media uploads are disabled by STORAGE_PROVIDER=' +
+        providerType +
+        '. Configure STORAGE_PROVIDER=database or Cloudflare R2 to enable uploads.'
+    );
     return cachedStorageProvider;
   }
 

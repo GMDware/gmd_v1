@@ -49,7 +49,7 @@ export default async function ContactPage({
         {/* Header */}
         <div className="max-w-3xl space-y-4 mb-14">
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white font-display tracking-tight leading-[1.1]">
-            Let's Build Something Great Together
+            Let&apos;s Build Something Great Together
           </h1>
 
           <p className="text-base sm:text-lg text-[#94A3B8] leading-relaxed font-sans max-w-2xl">

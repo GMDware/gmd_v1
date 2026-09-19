@@ -1,6 +1,8 @@
 import prisma from '@/lib/db/prisma';
 import { PublicationStatus } from '@prisma/client';
 import { AuthService } from './auth.service';
+import { isDatabaseReachable } from '@/lib/db/data-store';
+import { INITIAL_SEED_DATA } from '@/lib/db/seed-data';
 
 export interface ProjectFilterOptions {
   status?: PublicationStatus;
@@ -14,6 +16,97 @@ export interface ProjectFilterOptions {
 
 export class ProjectService {
   /**
+   * Auto-seed baseline projects from INITIAL_SEED_DATA into database if project count is 0
+   */
+  static async autoSeedIfEmpty() {
+    try {
+      const count = await prisma.project.count({ where: { deletedAt: null } });
+      if (count > 0) return;
+
+      // Ensure categories exist
+      const categoryMap = new Map<string, string>();
+      for (const cat of INITIAL_SEED_DATA.projectCategories) {
+        const createdCat = await prisma.projectCategory.upsert({
+          where: { slug: cat.slug },
+          update: { name: cat.name },
+          create: { name: cat.name, slug: cat.slug, order: cat.order },
+        });
+        categoryMap.set(cat.id, createdCat.id);
+        categoryMap.set(cat.slug, createdCat.id);
+      }
+
+      // Ensure technologies exist
+      const techMap = new Map<string, string>();
+      for (const tech of INITIAL_SEED_DATA.technologies) {
+        const createdTech = await prisma.technology.upsert({
+          where: { slug: tech.slug },
+          update: { name: tech.name },
+          create: {
+            name: tech.name,
+            slug: tech.slug,
+            category: tech.category,
+            description: tech.description,
+            isFeatured: tech.isFeatured,
+            displayOrder: tech.displayOrder,
+          },
+        });
+        techMap.set(tech.id, createdTech.id);
+        techMap.set(tech.slug, createdTech.id);
+      }
+
+      // Seed all projects
+      for (const p of INITIAL_SEED_DATA.projects) {
+        const resolvedCategoryId =
+          categoryMap.get(p.categoryId) ||
+          categoryMap.get((p as any).categorySlug) ||
+          Array.from(categoryMap.values())[0];
+
+        const resolvedTechIds = ((p as any).technologyIds || [])
+          .map((id: string) => techMap.get(id))
+          .filter(Boolean) as string[];
+
+        const {
+          caseStudy,
+          technologyIds,
+          categorySlug,
+          uxApproach,
+          uiApproach,
+          liveUrl,
+          href,
+          isConcept,
+          conceptBadge,
+          archetype,
+          ...projData
+        } = p as any;
+
+        await prisma.project.create({
+          data: {
+            ...projData,
+            categoryId: resolvedCategoryId,
+            technologies: resolvedTechIds.length
+              ? {
+                  create: resolvedTechIds.map((tId) => ({ technologyId: tId })),
+                }
+              : undefined,
+            caseStudy: caseStudy
+              ? {
+                  create: {
+                    summary: caseStudy.summary || '',
+                    metrics: caseStudy.metrics,
+                    testimonial: caseStudy.testimonial,
+                    status: p.status || 'PUBLISHED',
+                  },
+                }
+              : undefined,
+          },
+        });
+      }
+    } catch (seedErr) {
+      console.error('Project auto-seed notice:', seedErr);
+    }
+  }
+
+  /**
    * List projects with filtering, search, and pagination
    */
   static async list(options: ProjectFilterOptions = {}) {
@@ -21,47 +114,112 @@ export class ProjectService {
     const limit = Math.min(100, Math.max(1, options.limit || 20));
     const skip = (page - 1) * limit;
 
-    const where: Record<string, any> = { deletedAt: null };
+    if (await isDatabaseReachable()) {
+      try {
+        await this.autoSeedIfEmpty();
 
+        const where: Record<string, any> = { deletedAt: null };
+
+        if (options.status) {
+          where.status = options.status;
+        }
+        if (options.isFeatured !== undefined) {
+          where.isFeatured = options.isFeatured;
+        }
+        if (options.categoryId) {
+          where.categoryId = options.categoryId;
+        }
+        if (options.categorySlug) {
+          where.category = { slug: options.categorySlug };
+        }
+        if (options.search) {
+          where.OR = [
+            { title: { contains: options.search, mode: 'insensitive' } },
+            { shortDescription: { contains: options.search, mode: 'insensitive' } },
+            { slug: { contains: options.search, mode: 'insensitive' } },
+          ];
+        }
+
+        const [total, projects] = await Promise.all([
+          prisma.project.count({ where }),
+          prisma.project.findMany({
+            where,
+            skip,
+            take: limit,
+            orderBy: [{ displayOrder: 'asc' }, { createdAt: 'desc' }],
+            include: {
+              category: true,
+              caseStudy: true,
+              heroImage: true,
+              technologies: { include: { technology: true } },
+              gallery: { include: { mediaAsset: true }, orderBy: { displayOrder: 'asc' } },
+            },
+          }),
+        ]);
+
+        if (total > 0 || projects.length > 0) {
+          return {
+            items: projects,
+            pagination: {
+              page,
+              limit,
+              total,
+              totalPages: Math.ceil(total / limit),
+            },
+          };
+        }
+      } catch (dbErr) {
+        console.warn('Database error in ProjectService.list, falling back to seed data:', dbErr);
+      }
+    }
+
+    // Fallback on offline or unreachable DB
+    let filtered = [...INITIAL_SEED_DATA.projects];
     if (options.status) {
-      where.status = options.status;
+      filtered = filtered.filter((p) => p.status === options.status);
     }
     if (options.isFeatured !== undefined) {
-      where.isFeatured = options.isFeatured;
+      filtered = filtered.filter((p) => p.isFeatured === options.isFeatured);
     }
     if (options.categoryId) {
-      where.categoryId = options.categoryId;
+      filtered = filtered.filter((p) => p.categoryId === options.categoryId);
     }
     if (options.categorySlug) {
-      where.category = { slug: options.categorySlug };
+      filtered = filtered.filter((p) => (p as any).categorySlug === options.categorySlug);
     }
     if (options.search) {
-      where.OR = [
-        { title: { contains: options.search, mode: 'insensitive' } },
-        { shortDescription: { contains: options.search, mode: 'insensitive' } },
-        { slug: { contains: options.search, mode: 'insensitive' } },
-      ];
+      const q = options.search.toLowerCase();
+      filtered = filtered.filter(
+        (p) =>
+          p.title.toLowerCase().includes(q) ||
+          p.shortDescription.toLowerCase().includes(q) ||
+          p.slug.toLowerCase().includes(q)
+      );
     }
 
-    const [total, projects] = await Promise.all([
-      prisma.project.count({ where }),
-      prisma.project.findMany({
-        where,
-        skip,
-        take: limit,
-        orderBy: [{ displayOrder: 'asc' }, { createdAt: 'desc' }],
-        include: {
-          category: true,
-          caseStudy: true,
-          heroImage: true,
-          technologies: { include: { technology: true } },
-          gallery: { include: { mediaAsset: true }, orderBy: { displayOrder: 'asc' } },
-        },
-      }),
-    ]);
+    const total = filtered.length;
+    const paginated = filtered.slice(skip, skip + limit).map((p) => {
+      const category = INITIAL_SEED_DATA.projectCategories.find((c) => c.id === p.categoryId) || {
+        id: p.categoryId,
+        name: (p as any).categorySlug || 'Enterprise Platforms',
+        slug: (p as any).categorySlug || 'enterprise-platforms',
+      };
+      const technologies = ((p as any).technologyIds || [])
+        .map((tId: string) => {
+          const tech = INITIAL_SEED_DATA.technologies.find((t) => t.id === tId);
+          return tech ? { technology: tech } : null;
+        })
+        .filter(Boolean);
+
+      return {
+        ...p,
+        category,
+        technologies,
+      };
+    });
 
     return {
-      items: projects,
+      items: paginated,
       pagination: {
         page,
         limit,
@@ -75,29 +233,67 @@ export class ProjectService {
    * Get single project by ID or Slug
    */
   static async getById(id: string) {
-    return prisma.project.findFirst({
-      where: { id, deletedAt: null },
-      include: {
-        category: true,
-        caseStudy: true,
-        heroImage: true,
-        technologies: { include: { technology: true } },
-        gallery: { include: { mediaAsset: true }, orderBy: { displayOrder: 'asc' } },
-      },
-    });
+    if (await isDatabaseReachable()) {
+      try {
+        const p = await prisma.project.findFirst({
+          where: { id, deletedAt: null },
+          include: {
+            category: true,
+            caseStudy: true,
+            heroImage: true,
+            technologies: { include: { technology: true } },
+            gallery: { include: { mediaAsset: true }, orderBy: { displayOrder: 'asc' } },
+          },
+        });
+        if (p) return p;
+      } catch {}
+    }
+
+    const fallback = INITIAL_SEED_DATA.projects.find((p) => p.id === id);
+    if (!fallback) return null;
+    const category = INITIAL_SEED_DATA.projectCategories.find((c) => c.id === fallback.categoryId);
+    const technologies = ((fallback as any).technologyIds || [])
+      .map((tId: string) => ({
+        technology: INITIAL_SEED_DATA.technologies.find((t) => t.id === tId),
+      }))
+      .filter((t: any) => Boolean(t.technology));
+    return {
+      ...fallback,
+      category,
+      technologies,
+    };
   }
 
   static async getBySlug(slug: string) {
-    return prisma.project.findFirst({
-      where: { slug, deletedAt: null },
-      include: {
-        category: true,
-        caseStudy: true,
-        heroImage: true,
-        technologies: { include: { technology: true } },
-        gallery: { include: { mediaAsset: true }, orderBy: { displayOrder: 'asc' } },
-      },
-    });
+    if (await isDatabaseReachable()) {
+      try {
+        const p = await prisma.project.findFirst({
+          where: { slug, deletedAt: null },
+          include: {
+            category: true,
+            caseStudy: true,
+            heroImage: true,
+            technologies: { include: { technology: true } },
+            gallery: { include: { mediaAsset: true }, orderBy: { displayOrder: 'asc' } },
+          },
+        });
+        if (p) return p;
+      } catch {}
+    }
+
+    const fallback = INITIAL_SEED_DATA.projects.find((p) => p.slug === slug);
+    if (!fallback) return null;
+    const category = INITIAL_SEED_DATA.projectCategories.find((c) => c.id === fallback.categoryId);
+    const technologies = ((fallback as any).technologyIds || [])
+      .map((tId: string) => ({
+        technology: INITIAL_SEED_DATA.technologies.find((t) => t.id === tId),
+      }))
+      .filter((t: any) => Boolean(t.technology));
+    return {
+      ...fallback,
+      category,
+      technologies,
+    };
   }
 
   /**
@@ -222,8 +418,21 @@ export class ProjectService {
       userId?: string;
     }>
   ) {
-    const existing = await prisma.project.findFirst({ where: { id, deletedAt: null } });
+    let existing = await prisma.project.findFirst({ where: { id, deletedAt: null } });
+    if (!existing && data.slug) {
+      existing = await prisma.project.findFirst({ where: { slug: data.slug, deletedAt: null } });
+    }
     if (!existing) {
+      const seedProj = INITIAL_SEED_DATA.projects.find((p) => p.id === id || (data.slug && p.slug === data.slug));
+      if (seedProj) {
+        return this.create({
+          ...(seedProj as any),
+          ...data,
+          slug: data.slug || seedProj.slug,
+          title: data.title || seedProj.title,
+          categoryId: data.categoryId || seedProj.categoryId,
+        });
+      }
       throw new Error(`Project with ID "${id}" not found`);
     }
 

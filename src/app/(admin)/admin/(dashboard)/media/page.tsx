@@ -135,7 +135,8 @@ export default function AdminMediaPage() {
   };
 
   const handleCopyUrl = (url: string, id: string) => {
-    navigator.clipboard.writeText(url);
+    const fullUrl = url.startsWith('/') && typeof window !== 'undefined' ? `${window.location.origin}${url}` : url;
+    navigator.clipboard.writeText(fullUrl);
     setCopiedId(id);
     success('Storage URL copied to clipboard');
     setTimeout(() => setCopiedId(null), 2000);
@@ -213,13 +214,45 @@ export default function AdminMediaPage() {
         </label>
       </div>
 
-      {!storageStatus.uploadsEnabled && (
-        <div className="flex items-center gap-3 p-3 bg-amber-500/10 border border-amber-500/20 rounded-xl text-xs text-amber-300">
-          <HardDrive className="w-4 h-4 flex-shrink-0 text-amber-400" />
-          <span>
-            {storageStatus.message ||
-              'Persistent cloud storage (Cloudflare R2) is not yet configured for this deployment. Uploads are paused to prevent ephemeral data loss. Existing media assets remain fully accessible.'}
-          </span>
+      {storageStatus.provider && (
+        <div
+          className={`flex items-center justify-between gap-3 p-3 rounded-xl text-xs border ${
+            !storageStatus.uploadsEnabled
+              ? 'bg-amber-500/10 border-amber-500/20 text-amber-300'
+              : storageStatus.provider === 'r2'
+              ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-300'
+              : 'bg-cyan-500/10 border-cyan-500/20 text-cyan-300'
+          }`}
+        >
+          <div className="flex items-center gap-2.5">
+            <HardDrive
+              className={`w-4 h-4 flex-shrink-0 ${
+                !storageStatus.uploadsEnabled
+                  ? 'text-amber-400'
+                  : storageStatus.provider === 'r2'
+                  ? 'text-emerald-400'
+                  : 'text-cyan-400'
+              }`}
+            />
+            <span>
+              {storageStatus.message ||
+                (storageStatus.provider === 'r2'
+                  ? 'Cloudflare R2 cloud object storage active.'
+                  : 'Persistent PostgreSQL database storage active.')}
+            </span>
+          </div>
+          <Badge
+            variant={
+              !storageStatus.uploadsEnabled
+                ? 'amber'
+                : storageStatus.provider === 'r2'
+                ? 'emerald'
+                : 'cyan'
+            }
+            className="uppercase font-mono text-[10px]"
+          >
+            {storageStatus.provider}
+          </Badge>
         </div>
       )}
 
