@@ -255,7 +255,7 @@ export default function AdminProcessPage() {
               </button>
             </div>
 
-            <form onSubmit={handleSaveStep} className="space-y-4">
+            <form onSubmit={handleSaveStep} noValidate className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div className="space-y-1.5">
                   <label className="text-xs font-mono text-slate-300">Step Number *</label>

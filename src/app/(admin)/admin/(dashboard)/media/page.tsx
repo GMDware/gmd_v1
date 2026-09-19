@@ -89,7 +89,7 @@ export default function AdminMediaPage() {
   };
 
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+    let file = e.target.files?.[0];
     if (!file) return;
 
     if (!storageStatus.uploadsEnabled) {
@@ -101,33 +101,97 @@ export default function AdminMediaPage() {
       return;
     }
 
-    if (file.size > 10 * 1024 * 1024) {
-      error('File exceeds maximum allowable size of 10MB');
-      return;
-    }
-
     setUploading(true);
     try {
+      // Optimize high-res image if needed to remain well below Vercel's 4.5MB limit
+      if (file.type.startsWith('image/') && !file.type.includes('svg') && file.size > 1.5 * 1024 * 1024) {
+        file = await new Promise<File>((resolve) => {
+          const img = new Image();
+          const objUrl = URL.createObjectURL(file!);
+          img.onload = () => {
+            URL.revokeObjectURL(objUrl);
+            const maxDim = 2048;
+            let { width, height } = img;
+            if (width > maxDim || height > maxDim) {
+              if (width > height) {
+                height = Math.round((height * maxDim) / width);
+                width = maxDim;
+              } else {
+                width = Math.round((width * maxDim) / height);
+                height = maxDim;
+              }
+            }
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            if (!ctx) return resolve(file!);
+            ctx.drawImage(img, 0, 0, width, height);
+            canvas.toBlob(
+              (blob) => {
+                if (!blob) return resolve(file!);
+                const baseName = file!.name.replace(/\.[^/.]+$/, '');
+                resolve(new File([blob], `${baseName}.webp`, { type: 'image/webp' }));
+              },
+              'image/webp',
+              0.85
+            );
+          };
+          img.onerror = () => {
+            URL.revokeObjectURL(objUrl);
+            resolve(file!);
+          };
+          img.src = objUrl;
+        });
+      }
+
+      if (file.size > 10 * 1024 * 1024) {
+        error('File exceeds maximum allowable size of 10MB');
+        return;
+      }
+
       const formData = new FormData();
       formData.append('file', file);
 
-      const res = await fetch('/api/v1/media/upload', {
-        method: 'POST',
-        body: formData,
-      });
+      let res: Response;
+      try {
+        res = await fetch('/api/v1/media/upload', {
+          method: 'POST',
+          body: formData,
+        });
+      } catch {
+        error('Connection failed. Please check your internet connection.');
+        return;
+      }
 
-      const json = await res.json();
-      if (json.success && json.data) {
+      if (!res.ok) {
+        if (res.status === 413) {
+          error('File exceeds server payload limit. Please select an image under 4.5MB.');
+          return;
+        }
+        let serverError = '';
+        try {
+          const errJson = await res.json();
+          serverError = errJson?.error?.message || errJson?.error || '';
+        } catch {
+          serverError = await res.text().catch(() => '');
+        }
+        error(serverError || `Upload failed with status ${res.status}`);
+        return;
+      }
+
+      const json = await res.json().catch(() => null);
+      if (json?.success && json.data) {
         success('Asset uploaded successfully');
         setAssets((prev) => [json.data, ...prev]);
         setSelectedAsset(json.data);
       } else {
         const errorMsg =
-          json.error?.message || (typeof json.error === 'string' ? json.error : 'Upload failed');
+          json?.error?.message || (typeof json?.error === 'string' ? json.error : 'Upload failed');
         error(errorMsg);
       }
-    } catch {
-      error('Network error during upload');
+    } catch (err: any) {
+      error(err?.message || 'Error during file upload');
     } finally {
       setUploading(false);
       if (e.target) e.target.value = '';

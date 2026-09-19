@@ -194,7 +194,7 @@ export const AtelierContact: React.FC<AtelierContactProps> = ({
               </motion.div>
             )}
 
-            <form onSubmit={handleSubmit} className="space-y-5 text-xs font-sans">
+            <form onSubmit={handleSubmit} noValidate className="space-y-5 text-xs font-sans">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <label htmlFor="full-name" className="font-medium text-slate-700 block text-xs">

@@ -267,7 +267,7 @@ export default function AdminSocialPage() {
               </button>
             </div>
 
-            <form onSubmit={handleSave} className="space-y-4">
+            <form onSubmit={handleSave} noValidate className="space-y-4">
               <div>
                 <label className="block text-xs font-mono text-slate-400 uppercase tracking-wider mb-1">
                   Platform Name

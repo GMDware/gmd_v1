@@ -100,6 +100,7 @@ export default function AdminProjectsPage() {
   const [editingProject, setEditingProject] = useState<Partial<Project> | null>(null);
   const [activeTab, setActiveTab] = useState('basic');
   const [saving, setSaving] = useState(false);
+  const [titleError, setTitleError] = useState('');
 
   // Category creation & direct image URL input
   const [newCatInput, setNewCatInput] = useState('');
@@ -332,10 +333,12 @@ export default function AdminProjectsPage() {
     if (!editingProject) return;
 
     if (!editingProject.title?.trim()) {
-      error('Please enter Project Title');
+      setTitleError('Project title is required');
       setActiveTab('basic');
+      error('Please enter Project Title');
       return;
     }
+    setTitleError('');
 
     const title = editingProject.title.trim();
     const slug =
@@ -370,10 +373,26 @@ export default function AdminProjectsPage() {
       const method = isNew ? 'POST' : 'PUT';
 
       // Extract technology IDs
-      const selectedTechIds = (editingProject.technologies || []).map((t) => t.technology.id);
+      const selectedTechIds = (editingProject.technologies || []).map((t: any) => t.technology?.id || t.id || t);
+
+      // Clean payload: strip relational objects that cause validation issues
+      const {
+        id: _id,
+        category: _category,
+        heroImage: _heroImage,
+        technologies: _technologies,
+        gallery: _gallery,
+        createdAt: _createdAt,
+        updatedAt: _updatedAt,
+        deletedAt: _deletedAt,
+        isConcept: _isConcept,
+        conceptBadge: _conceptBadge,
+        archetype: _archetype,
+        ...cleanProject
+      } = (editingProject || {}) as any;
 
       const payload = {
-        ...editingProject,
+        ...cleanProject,
         title,
         slug,
         categoryId: finalCategoryId,
@@ -389,19 +408,19 @@ export default function AdminProjectsPage() {
         body: JSON.stringify(payload),
       });
 
-      const json = await res.json();
-      if (json.success) {
+      const json = await res.json().catch(() => null);
+      if (json && json.success) {
         success(isNew ? 'Project created successfully' : 'Project updated successfully');
         setEditorOpen(false);
         setEditingProject(null);
         await loadData();
       } else {
-        const errorMsg =
-          json.details?.fieldErrors
-            ? Object.entries(json.details.fieldErrors)
-                .map(([field, errs]: [string, any]) => `${field}: ${Array.isArray(errs) ? errs.join(', ') : errs}`)
-                .join(' | ')
-            : json.error?.message || json.error || 'Failed to save project';
+        const fieldErrors = json?.error?.details?.fieldErrors || json?.details?.fieldErrors;
+        const errorMsg = fieldErrors
+          ? Object.entries(fieldErrors)
+              .map(([field, errs]: [string, any]) => `${field}: ${Array.isArray(errs) ? errs.join(', ') : errs}`)
+              .join(' | ')
+          : json?.error?.message || json?.error || 'Failed to save project';
         error(errorMsg);
       }
     } catch {
@@ -808,7 +827,7 @@ export default function AdminProjectsPage() {
             </div>
 
             {/* Modal Form Body */}
-            <form onSubmit={handleSaveProject} className="flex-1 overflow-y-auto p-6 space-y-6">
+            <form onSubmit={handleSaveProject} noValidate className="flex-1 overflow-y-auto p-6 space-y-6">
               {/* TAB 1: BASIC INFORMATION */}
               {activeTab === 'basic' && (
                 <div className="space-y-4">
@@ -819,14 +838,24 @@ export default function AdminProjectsPage() {
                       </label>
                       <input
                         type="text"
-                        required
                         value={editingProject.title || ''}
-                        onChange={(e) =>
-                          setEditingProject((prev) => (prev ? { ...prev, title: e.target.value } : null))
-                        }
+                        onChange={(e) => {
+                          setEditingProject((prev) => (prev ? { ...prev, title: e.target.value } : null));
+                          if (titleError) setTitleError('');
+                        }}
                         placeholder="e.g. Autonomous Real-Time Telemetry Platform"
-                        className="w-full px-3.5 py-2 bg-[#05070B] border border-white/10 rounded-lg text-xs text-white focus:outline-none focus:border-[#00F2FE]"
+                        className={`w-full px-3.5 py-2 bg-[#05070B] border rounded-lg text-xs text-white focus:outline-none transition-colors ${
+                          titleError
+                            ? 'border-[#F43F5E] focus:border-[#F43F5E] ring-1 ring-[#F43F5E]/30'
+                            : 'border-white/10 focus:border-[#00F2FE]'
+                        }`}
                       />
+                      {titleError && (
+                        <p className="text-[11px] text-[#F43F5E] font-sans flex items-center gap-1.5 mt-1">
+                          <span className="w-1.5 h-1.5 rounded-full bg-[#F43F5E]" />
+                          {titleError}
+                        </p>
+                      )}
                     </div>
 
                     <div className="space-y-1.5">
@@ -844,7 +873,6 @@ export default function AdminProjectsPage() {
                       </div>
                       <input
                         type="text"
-                        required
                         value={editingProject.slug || ''}
                         onChange={(e) =>
                           setEditingProject((prev) => (prev ? { ...prev, slug: e.target.value } : null))

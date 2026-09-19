@@ -298,7 +298,7 @@ export default function AdminNavigationPage() {
               </button>
             </div>
 
-            <form onSubmit={handleSaveItem} className="space-y-4">
+            <form onSubmit={handleSaveItem} noValidate className="space-y-4">
               <div className="space-y-1.5">
                 <label className="text-xs font-mono text-slate-300">Navigation Label *</label>
                 <input

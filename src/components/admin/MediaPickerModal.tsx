@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { Upload, Image as ImageIcon, Check, X, Search, Loader2, Link as LinkIcon } from 'lucide-react';
+import { Upload, Image as ImageIcon, Check, X, Search, Loader2, Link as LinkIcon, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 
 export interface MediaAsset {
@@ -24,6 +24,70 @@ interface MediaPickerModalProps {
   selectedId?: string;
 }
 
+/**
+ * Client-side optimization: downscale high-resolution photos (e.g. phone uploads > 1.5MB)
+ * to max 2048px and convert to WebP to keep payload well within Vercel's 4.5MB limit.
+ */
+async function optimizeImageForUpload(file: File): Promise<File> {
+  if (!file.type.startsWith('image/') || file.type.includes('svg')) {
+    return file;
+  }
+  if (file.size <= 1.5 * 1024 * 1024) {
+    return file;
+  }
+
+  return new Promise((resolve) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      const maxWidth = 2048;
+      const maxHeight = 2048;
+      let { width, height } = img;
+
+      if (width > maxWidth || height > maxHeight) {
+        if (width > height) {
+          height = Math.round((height * maxWidth) / width);
+          width = maxWidth;
+        } else {
+          width = Math.round((width * maxHeight) / height);
+          height = maxHeight;
+        }
+      }
+
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) {
+        resolve(file);
+        return;
+      }
+      ctx.drawImage(img, 0, 0, width, height);
+      canvas.toBlob(
+        (blob) => {
+          if (!blob) {
+            resolve(file);
+            return;
+          }
+          const baseName = file.name.replace(/\.[^/.]+$/, '');
+          const optimizedFile = new File([blob], `${baseName}.webp`, {
+            type: 'image/webp',
+          });
+          resolve(optimizedFile);
+        },
+        'image/webp',
+        0.85
+      );
+    };
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      resolve(file);
+    };
+    img.src = url;
+  });
+}
+
 export const MediaPickerModal: React.FC<MediaPickerModalProps> = ({
   isOpen,
   onClose,
@@ -34,6 +98,7 @@ export const MediaPickerModal: React.FC<MediaPickerModalProps> = ({
   const [assets, setAssets] = useState<MediaAsset[]>([]);
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const [search, setSearch] = useState('');
   const [selectedAsset, setSelectedAsset] = useState<MediaAsset | null>(null);
   const [errorMessage, setErrorMessage] = useState('');
@@ -112,9 +177,33 @@ export const MediaPickerModal: React.FC<MediaPickerModalProps> = ({
     }
   };
 
+  const handleDeleteAsset = async (assetId: string) => {
+    setDeletingId(assetId);
+    setErrorMessage('');
+    try {
+      const res = await fetch(`/api/v1/media/${assetId}`, { method: 'DELETE' });
+      const json = await res.json().catch(() => null);
+      if (res.ok && json?.success) {
+        setAssets((prev) => prev.filter((a) => a.id !== assetId));
+        if (selectedAsset?.id === assetId) {
+          setSelectedAsset(null);
+        }
+      } else {
+        setErrorMessage(json?.error?.message || json?.error || 'Failed to delete media asset');
+      }
+    } catch {
+      setErrorMessage('Network connection error while deleting asset');
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
   const handleUrlAdd = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!urlInput.trim()) return;
+    if (!urlInput.trim()) {
+      setErrorMessage('Please enter an image URL');
+      return;
+    }
 
     setUploading(true);
     setErrorMessage('');
@@ -126,8 +215,8 @@ export const MediaPickerModal: React.FC<MediaPickerModalProps> = ({
         body: JSON.stringify({ url: urlInput.trim() }),
       });
 
-      const json = await res.json();
-      if (json.success && json.data) {
+      const json = await res.json().catch(() => null);
+      if (res.ok && json?.success && json.data) {
         const added = normalizeAsset(json.data);
         setAssets((prev) => [added, ...prev]);
         setSelectedAsset(added);
@@ -135,18 +224,18 @@ export const MediaPickerModal: React.FC<MediaPickerModalProps> = ({
         setShowUrlInput(false);
       } else {
         const errorMsg =
-          json.error?.message || (typeof json.error === 'string' ? json.error : 'Failed to import image from URL');
+          json?.error?.message || (typeof json?.error === 'string' ? json.error : 'Failed to import image from URL');
         setErrorMessage(errorMsg);
       }
     } catch {
-      setErrorMessage('Network error importing image from URL');
+      setErrorMessage('Connection error while importing image');
     } finally {
       setUploading(false);
     }
   };
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+    let file = e.target.files?.[0];
     if (!file) return;
 
     if (!storageStatus.uploadsEnabled) {
@@ -157,35 +246,61 @@ export const MediaPickerModal: React.FC<MediaPickerModalProps> = ({
       return;
     }
 
-    if (file.size > 10 * 1024 * 1024) {
-      setErrorMessage('File exceeds maximum allowable size of 10MB');
-      return;
-    }
-
     setUploading(true);
     setErrorMessage('');
 
     try {
+      // Optimize image if needed (e.g. camera photo > 1.5MB) to prevent 413 Vercel payload limit
+      file = await optimizeImageForUpload(file);
+
+      if (file.size > 10 * 1024 * 1024) {
+        setErrorMessage('File exceeds maximum allowable size of 10MB');
+        setUploading(false);
+        return;
+      }
+
       const formData = new FormData();
       formData.append('file', file);
 
-      const res = await fetch('/api/v1/media/upload', {
-        method: 'POST',
-        body: formData,
-      });
+      let res: Response;
+      try {
+        res = await fetch('/api/v1/media/upload', {
+          method: 'POST',
+          body: formData,
+        });
+      } catch {
+        setErrorMessage('Connection failed. Please check your internet connection.');
+        return;
+      }
 
-      const json = await res.json();
-      if (json.success && json.data) {
+      if (!res.ok) {
+        if (res.status === 413) {
+          setErrorMessage('File exceeds server payload limit. Please choose an image under 4.5MB.');
+          return;
+        }
+        let serverError = '';
+        try {
+          const errJson = await res.json();
+          serverError = errJson?.error?.message || errJson?.error || '';
+        } catch {
+          serverError = await res.text().catch(() => '');
+        }
+        setErrorMessage(serverError || `Upload failed (Status ${res.status})`);
+        return;
+      }
+
+      const json = await res.json().catch(() => null);
+      if (json?.success && json.data) {
         const uploaded = normalizeAsset(json.data);
         setAssets((prev) => [uploaded, ...prev]);
         setSelectedAsset(uploaded);
       } else {
         const errorMsg =
-          json.error?.message || (typeof json.error === 'string' ? json.error : 'Upload failed');
+          json?.error?.message || (typeof json?.error === 'string' ? json.error : 'Upload failed');
         setErrorMessage(errorMsg);
       }
-    } catch {
-      setErrorMessage('Network error during file upload');
+    } catch (err: any) {
+      setErrorMessage(err?.message || 'Error during file upload');
     } finally {
       setUploading(false);
       if (e.target) e.target.value = '';
@@ -286,14 +401,13 @@ export const MediaPickerModal: React.FC<MediaPickerModalProps> = ({
 
         {/* URL Input Bar */}
         {showUrlInput && (
-          <form onSubmit={handleUrlAdd} className="flex items-center gap-2 p-3 bg-[#05070B] border border-white/10 rounded-xl animate-in fade-in">
+          <form onSubmit={handleUrlAdd} noValidate className="flex items-center gap-2 p-3 bg-[#05070B] border border-white/10 rounded-xl animate-in fade-in">
             <input
               type="url"
               placeholder="Paste public image URL (https://... or data:...)"
               value={urlInput}
               onChange={(e) => setUrlInput(e.target.value)}
               className="flex-1 px-3 py-1.5 bg-[#0A0E17] border border-white/10 rounded-lg text-xs text-white placeholder-slate-500 focus:outline-none focus:border-[#00F2FE]"
-              required
               autoFocus
             />
             <Button type="submit" size="sm" variant="primary" isLoading={uploading}>
@@ -327,14 +441,21 @@ export const MediaPickerModal: React.FC<MediaPickerModalProps> = ({
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
               {filteredAssets.map((asset) => {
                 const isSelected = selectedAsset?.id === asset.id;
+                const isDeleting = deletingId === asset.id;
                 const displayUrl = asset.url || asset.storageUrl;
 
                 return (
-                  <button
+                  <div
                     key={asset.id}
-                    type="button"
+                    role="button"
+                    tabIndex={0}
                     onClick={() => setSelectedAsset(asset)}
-                    className={`relative group rounded-xl overflow-hidden border text-left transition-all aspect-video bg-[#05070B] flex flex-col justify-end p-2 cursor-pointer ${
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        setSelectedAsset(asset);
+                      }
+                    }}
+                    className={`relative group rounded-xl overflow-hidden border text-left transition-all aspect-video bg-[#05070B] flex flex-col justify-end p-2 cursor-pointer select-none ${
                       isSelected
                         ? 'border-[#00F2FE] ring-2 ring-[#00F2FE]/30'
                         : 'border-white/10 hover:border-white/30'
@@ -352,12 +473,34 @@ export const MediaPickerModal: React.FC<MediaPickerModalProps> = ({
                     {/* Gradient overlay */}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent pointer-events-none" />
 
-                    {/* Selected badge */}
-                    {isSelected && (
-                      <div className="absolute top-2 right-2 w-5 h-5 rounded-full bg-[#00F2FE] text-[#05070B] flex items-center justify-center shadow-lg">
-                        <Check className="w-3.5 h-3.5 stroke-[3]" />
-                      </div>
-                    )}
+                    {/* Top action row: Delete button & Selected badge */}
+                    <div className="absolute top-2 left-2 right-2 flex items-center justify-between z-20 pointer-events-auto">
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (confirm(`Are you sure you want to delete "${asset.originalName}" from the media library?`)) {
+                            handleDeleteAsset(asset.id);
+                          }
+                        }}
+                        disabled={isDeleting}
+                        className="p-1.5 rounded-lg bg-black/80 hover:bg-[#F43F5E] text-slate-300 hover:text-white transition-all shadow-md opacity-80 group-hover:opacity-100"
+                        title="Delete asset from library"
+                        aria-label={`Delete ${asset.originalName}`}
+                      >
+                        {isDeleting ? (
+                          <Loader2 className="w-3.5 h-3.5 animate-spin text-white" />
+                        ) : (
+                          <Trash2 className="w-3.5 h-3.5" />
+                        )}
+                      </button>
+
+                      {isSelected && (
+                        <div className="w-5 h-5 rounded-full bg-[#00F2FE] text-[#05070B] flex items-center justify-center shadow-lg">
+                          <Check className="w-3.5 h-3.5 stroke-[3]" />
+                        </div>
+                      )}
+                    </div>
 
                     {/* Meta label */}
                     <div className="relative z-10">
@@ -368,7 +511,7 @@ export const MediaPickerModal: React.FC<MediaPickerModalProps> = ({
                         {asset.size ? (asset.size / 1024).toFixed(0) : '0'} KB
                       </span>
                     </div>
-                  </button>
+                  </div>
                 );
               })}
             </div>
@@ -377,11 +520,26 @@ export const MediaPickerModal: React.FC<MediaPickerModalProps> = ({
 
         {/* Footer */}
         <div className="flex items-center justify-between border-t border-white/5 pt-4">
-          <div className="text-xs text-slate-400 truncate max-w-sm">
+          <div className="text-xs text-slate-400 truncate max-w-sm flex items-center gap-3">
             {selectedAsset ? (
-              <span>
-                Selected: <strong className="text-white">{selectedAsset.originalName}</strong>
-              </span>
+              <>
+                <span className="truncate">
+                  Selected: <strong className="text-white">{selectedAsset.originalName}</strong>
+                </span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (confirm(`Delete "${selectedAsset.originalName}" from media library?`)) {
+                      handleDeleteAsset(selectedAsset.id);
+                    }
+                  }}
+                  disabled={deletingId === selectedAsset.id}
+                  className="text-[11px] text-[#F43F5E] hover:underline flex items-center gap-1 shrink-0 font-mono"
+                >
+                  <Trash2 className="w-3 h-3" />
+                  Delete
+                </button>
+              </>
             ) : (
               <span>Select an asset to continue</span>
             )}

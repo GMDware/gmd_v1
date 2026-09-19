@@ -114,7 +114,7 @@ export const NexusContact: React.FC<NexusContactProps> = ({ isStandalone = false
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} noValidate className="space-y-6">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
               <div className="space-y-2">
                 <label className="text-xs font-mono text-cyan-300 uppercase tracking-wider block">

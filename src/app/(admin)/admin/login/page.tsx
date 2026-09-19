@@ -54,7 +54,7 @@ function AdminLoginForm() {
         </div>
       )}
 
-      <form onSubmit={handleLogin} className="space-y-4">
+      <form onSubmit={handleLogin} noValidate className="space-y-4">
         <Input
           label="Administrative Email"
           type="email"

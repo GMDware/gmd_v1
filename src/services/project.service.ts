@@ -336,18 +336,60 @@ export class ProjectService {
       throw new Error(`A project with slug "${data.slug}" already exists`);
     }
 
-    const { technologyIds, caseStudy, userId, uxApproach, uiApproach, ...projectData } = data as any;
-    if (projectData.heroImageId === '') {
-      projectData.heroImageId = null;
+    const { technologyIds, caseStudy, userId, uxApproach, uiApproach, ...rawProjectData } = data as any;
+    
+    // Ensure heroImage exists or set to null
+    let heroImageId = rawProjectData.heroImageId || null;
+    if (heroImageId) {
+      const media = await prisma.mediaAsset.findUnique({ where: { id: heroImageId }, select: { id: true } });
+      if (!media) heroImageId = null;
+    }
+
+    // Ensure category exists
+    let categoryId = data.categoryId;
+    const catExists = await prisma.projectCategory.findUnique({ where: { id: categoryId }, select: { id: true } });
+    if (!catExists) {
+      const firstCat = await prisma.projectCategory.findFirst({ select: { id: true } });
+      if (firstCat) categoryId = firstCat.id;
+    }
+
+    // Filter valid technologies
+    let validTechIds: string[] = [];
+    if (technologyIds?.length) {
+      const existingTechs = await prisma.technology.findMany({
+        where: { id: { in: technologyIds as string[] } },
+        select: { id: true },
+      });
+      validTechIds = existingTechs.map((t) => t.id);
     }
 
     const project = await prisma.project.create({
       data: {
-        ...projectData,
+        title: data.title,
+        slug: data.slug,
+        shortDescription: data.shortDescription,
+        fullDescription: data.fullDescription,
+        categoryId,
+        clientName: data.clientName ?? null,
+        clientVisibility: data.clientVisibility ?? false,
+        projectType: data.projectType || 'Enterprise Web Platform',
+        heroImageId,
+        challenge: data.challenge ?? null,
+        strategy: data.strategy ?? null,
+        designApproach: data.designApproach ?? null,
+        architecture: data.architecture ?? null,
+        development: data.development ?? null,
+        infrastructure: data.infrastructure ?? null,
+        results: data.results ?? null,
+        seoTitle: data.seoTitle ?? null,
+        seoDescription: data.seoDescription ?? null,
+        seoKeywords: data.seoKeywords || [],
+        isFeatured: data.isFeatured ?? false,
+        displayOrder: data.displayOrder ?? 0,
         status: data.status || 'DRAFT',
-        technologies: technologyIds?.length
+        technologies: validTechIds.length
           ? {
-              create: (technologyIds as string[]).map((techId: string) => ({ technologyId: techId })),
+              create: validTechIds.map((techId: string) => ({ technologyId: techId })),
             }
           : undefined,
         caseStudy: caseStudy
@@ -394,7 +436,7 @@ export class ProjectService {
       categoryId: string;
       clientName: string | null;
       clientVisibility: boolean;
-      projectType: string;
+      projectType: string | null;
       heroImageId: string | null;
       challenge: string | null;
       strategy: string | null;
@@ -444,17 +486,22 @@ export class ProjectService {
     }
 
     const { technologyIds, caseStudy, userId, uxApproach, uiApproach, ...updateData } = data as any;
-    if (updateData.heroImageId === '') {
-      updateData.heroImageId = null;
-    }
 
     // Handle technology relation re-linking if technologyIds provided
     if (technologyIds !== undefined) {
       await prisma.projectTechnology.deleteMany({ where: { projectId: id } });
       if (technologyIds.length > 0) {
-        await prisma.projectTechnology.createMany({
-          data: (technologyIds as string[]).map((tId: string) => ({ projectId: id, technologyId: tId })),
+        const existingTechs = await prisma.technology.findMany({
+          where: { id: { in: technologyIds as string[] } },
+          select: { id: true },
         });
+        const validIds = existingTechs.map((t) => t.id);
+        if (validIds.length > 0) {
+          await prisma.projectTechnology.createMany({
+            data: validIds.map((tId: string) => ({ projectId: id, technologyId: tId })),
+            skipDuplicates: true,
+          });
+        }
       }
     }
 
@@ -477,9 +524,62 @@ export class ProjectService {
       });
     }
 
+    // Filter only valid scalar fields on the Project model
+    const allowedScalarFields = [
+      'title',
+      'slug',
+      'shortDescription',
+      'fullDescription',
+      'categoryId',
+      'clientName',
+      'clientVisibility',
+      'projectType',
+      'heroImageId',
+      'challenge',
+      'strategy',
+      'designApproach',
+      'architecture',
+      'development',
+      'infrastructure',
+      'results',
+      'seoTitle',
+      'seoDescription',
+      'seoKeywords',
+      'isFeatured',
+      'status',
+      'displayOrder',
+    ];
+
+    const safeUpdateData: Record<string, any> = {};
+    for (const field of allowedScalarFields) {
+      if (updateData[field] !== undefined) {
+        safeUpdateData[field] = updateData[field];
+      }
+    }
+
+    if (safeUpdateData.heroImageId === '') {
+      safeUpdateData.heroImageId = null;
+    } else if (safeUpdateData.heroImageId) {
+      const media = await prisma.mediaAsset.findUnique({
+        where: { id: safeUpdateData.heroImageId },
+        select: { id: true },
+      });
+      if (!media) safeUpdateData.heroImageId = null;
+    }
+
+    if (safeUpdateData.categoryId) {
+      const cat = await prisma.projectCategory.findUnique({
+        where: { id: safeUpdateData.categoryId },
+        select: { id: true },
+      });
+      if (!cat) {
+        delete safeUpdateData.categoryId;
+      }
+    }
+
     const updated = await prisma.project.update({
       where: { id },
-      data: updateData,
+      data: safeUpdateData,
       include: {
         category: true,
         caseStudy: true,

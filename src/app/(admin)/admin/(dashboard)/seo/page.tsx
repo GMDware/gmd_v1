@@ -159,7 +159,7 @@ export default function AdminSEOPage() {
               Loading metadata for {selectedRoute}...
             </div>
           ) : (
-            <form onSubmit={handleSaveSEO} className="glass-panel p-6 rounded-2xl border border-white/10 bg-[#0A0E17]/40 space-y-6">
+            <form onSubmit={handleSaveSEO} noValidate className="glass-panel p-6 rounded-2xl border border-white/10 bg-[#0A0E17]/40 space-y-6">
               <div className="flex items-center justify-between border-b border-white/5 pb-3">
                 <div className="flex items-center gap-2">
                   <Globe className="w-4 h-4 text-[#00F2FE]" />

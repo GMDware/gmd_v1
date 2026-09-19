@@ -69,6 +69,8 @@ export const viewport: Viewport = {
   colorScheme: 'dark',
 };
 
+import { FormValidationSuppressor } from '@/components/common/FormValidationSuppressor';
+
 export default function RootLayout({
   children,
 }: {
@@ -77,6 +79,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${inter.variable} ${outfit.variable} ${jetbrainsMono.variable} dark`}>
       <body className="bg-[#05080F] text-[#E2E8F0] min-h-screen antialiased selection:bg-[#0066FF] selection:text-white font-sans">
+        <FormValidationSuppressor />
         {children}
       </body>
     </html>

@@ -93,7 +93,7 @@ export default function AdminSettingsPage() {
           Loading site configuration from database...
         </div>
       ) : (
-        <form onSubmit={handleSaveSettings} className="space-y-6">
+        <form onSubmit={handleSaveSettings} noValidate className="space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
             <div className="lg:col-span-8 space-y-6">
               {/* Brand and entity */}

@@ -181,7 +181,7 @@ export default function AdminCompanyPage() {
       ) : (
         <div className="space-y-8">
           {/* Main Identity Form */}
-          <form onSubmit={handleSaveCompanySettings} className="glass-panel p-6 rounded-2xl border border-white/10 bg-[#0A0E17]/40 space-y-6">
+          <form onSubmit={handleSaveCompanySettings} noValidate className="glass-panel p-6 rounded-2xl border border-white/10 bg-[#0A0E17]/40 space-y-6">
             <div className="flex items-center justify-between border-b border-white/5 pb-4">
               <h2 className="text-sm font-bold text-white uppercase tracking-wider font-mono flex items-center gap-2">
                 <Building2 className="w-4 h-4 text-[#00F2FE]" />
@@ -352,7 +352,7 @@ export default function AdminCompanyPage() {
               </button>
             </div>
 
-            <form onSubmit={handleSaveValue} className="space-y-4">
+            <form onSubmit={handleSaveValue} noValidate className="space-y-4">
               <div className="space-y-1.5">
                 <label className="text-xs font-mono text-slate-300">Value Title *</label>
                 <input

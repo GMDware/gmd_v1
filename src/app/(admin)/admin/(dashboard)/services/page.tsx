@@ -377,7 +377,7 @@ export default function AdminServicesPage() {
               </button>
             </div>
 
-            <form onSubmit={handleSaveService} className="flex-1 overflow-y-auto p-6 space-y-5">
+            <form onSubmit={handleSaveService} noValidate className="flex-1 overflow-y-auto p-6 space-y-5">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <label className="text-xs font-mono text-slate-300">

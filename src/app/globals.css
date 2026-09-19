@@ -219,3 +219,10 @@ body {
   }
 }
 
+/* Suppress browser native constraint validation popups */
+::-webkit-validation-bubble,
+::-webkit-validation-bubble-arrow-clipper,
+::-webkit-validation-bubble-arrow,
+::-webkit-validation-bubble-message {
+  display: none !important;
+}

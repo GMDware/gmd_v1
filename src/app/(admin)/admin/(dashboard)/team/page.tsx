@@ -661,7 +661,7 @@ export default function AdminTeamPage() {
             </div>
 
             {/* Form */}
-            <form onSubmit={handleSaveMember} className="flex-1 overflow-y-auto p-6 space-y-4">
+            <form onSubmit={handleSaveMember} noValidate className="flex-1 overflow-y-auto p-6 space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <label className="text-xs font-mono text-slate-300">

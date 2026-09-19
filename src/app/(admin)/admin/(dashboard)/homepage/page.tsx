@@ -120,7 +120,7 @@ export default function AdminHomepagePage() {
           Loading homepage configuration...
         </div>
       ) : (
-        <form onSubmit={handleSaveHomepage} className="space-y-8">
+        <form onSubmit={handleSaveHomepage} noValidate className="space-y-8">
           {/* Hero Section Configuration */}
           <div className="glass-panel p-6 rounded-2xl border border-white/10 bg-[#0A0E17]/40 space-y-5">
             <div className="flex items-center justify-between border-b border-white/5 pb-3">

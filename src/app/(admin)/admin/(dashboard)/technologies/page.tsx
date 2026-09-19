@@ -329,7 +329,7 @@ export default function AdminTechnologiesPage() {
               </button>
             </div>
 
-            <form onSubmit={handleSaveTech} className="space-y-4">
+            <form onSubmit={handleSaveTech} noValidate className="space-y-4">
               <div className="space-y-1.5">
                 <label className="text-xs font-mono text-slate-300">Technology Name *</label>
                 <input

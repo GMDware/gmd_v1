@@ -210,8 +210,12 @@ export class MediaService {
     }
 
     // Remove from storage provider
-    const storage = getStorageProvider();
-    await storage.delete(asset.storageKey);
+    try {
+      const storage = getStorageProvider();
+      await storage.delete(asset.storageKey);
+    } catch (storageErr) {
+      console.warn('Storage provider deletion skipped/failed:', storageErr);
+    }
 
     // Soft delete in database
     const updated = await prisma.mediaAsset.update({
